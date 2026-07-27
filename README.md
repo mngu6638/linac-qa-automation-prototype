@@ -141,9 +141,8 @@ See also [DISCLAIMER.md](DISCLAIMER.md).
 
 ## Contact / Citation
 
-- **Author:** [Author Name]
-- **GitHub:** [github.com/your-username](https://github.com/your-username)
-- **ORCID (optional):** [https://orcid.org/ACCT-000028](https://orcid.org/ACCT-000028)
+- **Author:** Mai Dang Khoa Nguyen
+- **GitHub:** https://github.com/mngu6638
 
 If you reference this prototype in academic work, cite the repository URL and version in `VERSION.txt`, and state clearly that it is a research/educational prototype (not clinically validated).
 

@@ -1,0 +1,164 @@
+{% extends 'QAID_Manager/base.html' %}
+{% load static %}
+
+{% block title %}QA Record Details{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>QA Record Details</h2>
+    
+    <div class="qa-record-info">
+        <h3>Basic Information</h3>
+        <table class="table">
+            <tr>
+                <td><strong>LINAC:</strong></td>
+                <td>{{ qa_record.linac.name }}</td>
+            </tr>
+            <tr>
+                <td><strong>Date Performed:</strong></td>
+                <td>{{ qa_record.date_performed }}</td>
+            </tr>
+            <tr>
+                <td><strong>Performed By:</strong></td>
+                <td>{{ qa_record.performed_by.username }}</td>
+            </tr>
+            <tr>
+                <td><strong>Status:</strong></td>
+                <td>{{ qa_record.status.name|default:"Not set" }}</td>
+            </tr>
+            <tr>
+                <td><strong>Notes:</strong></td>
+                <td>{{ qa_record.notes|linebreaks }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="test-results">
+        <h3>Test Results</h3>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Test #</th>
+                    <th>Value</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for i in "12345678901234567890" %}
+                    {% with test_num=i|add:"0" %}
+                        {% with test_field="test_"|add:i|stringformat:"02d" %}
+                            {% if qa_record|getattr:test_field %}
+                                <tr>
+                                    <td>{{ test_num }}</td>
+                                    <td>{{ qa_record|getattr:test_field }}</td>
+                                    <td>{{ test_notes|getitem:test_num|default:"" }}</td>
+                                </tr>
+                            {% endif %}
+                        {% endwith %}
+                    {% endwith %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if film_analyses %}
+    <div class="film-analyses">
+        <h3>Film Analysis Results</h3>
+        
+        {% if film_analyses.fieldsize %}
+        <div class="analysis-section">
+            <h4>Field Size Analysis</h4>
+            <img src="{{ film_analyses.fieldsize.image_url }}" 
+                 alt="Field Size Analysis Result" 
+                 style="max-width: 100%; height: auto; border: 1px solid #ddd;">
+            <p><small>Created: {{ film_analyses.fieldsize.created_at }}</small></p>
+        </div>
+        {% endif %}
+
+        {% if film_analyses.collimator_isocenter %}
+        <div class="analysis-section">
+            <h4>Collimator Isocenter Analysis</h4>
+            <img src="{{ film_analyses.collimator_isocenter.image_url }}" 
+                 alt="Collimator Isocenter Analysis Result" 
+                 style="max-width: 100%; height: auto; border: 1px solid #ddd;">
+            <p><small>Created: {{ film_analyses.collimator_isocenter.created_at }}</small></p>
+        </div>
+        {% endif %}
+
+        {% if film_analyses.gantry_isocenter %}
+        <div class="analysis-section">
+            <h4>Gantry Isocenter Analysis</h4>
+            <img src="{{ film_analyses.gantry_isocenter.image_url }}" 
+                 alt="Gantry Isocenter Analysis Result" 
+                 style="max-width: 100%; height: auto; border: 1px solid #ddd;">
+            <p><small>Created: {{ film_analyses.gantry_isocenter.created_at }}</small></p>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="actions">
+        <a href="{% url 'qa_list' %}" class="btn btn-secondary">Back to QA List</a>
+        <a href="{% url 'qa_entry' %}" class="btn btn-primary">Create New QA</a>
+    </div>
+</div>
+
+<style>
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.qa-record-info, .test-results, .film-analyses {
+    margin-bottom: 30px;
+}
+
+.analysis-section {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th, .table td {
+    padding: 8px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+.table th {
+    background-color: #f5f5f5;
+    font-weight: bold;
+}
+
+.actions {
+    margin-top: 30px;
+}
+
+.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    margin-right: 10px;
+    text-decoration: none;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+</style>
+{% endblock %} 

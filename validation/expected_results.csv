@@ -1,0 +1,6 @@
+test_id,modality,metric,expected_value,unit,tolerance,source
+FS-001,field_size,shift_left_mm,see expected_geometry.json,mm,0.5,sample_data/films/expected_geometry.json
+FS-002,field_size,shift_right_mm,see expected_geometry.json,mm,0.5,sample_data/films/expected_geometry.json
+SS-COL-001,starshot_collimator,displacement_mm,see expected_geometry.json,mm,0.5,sample_data/films/expected_geometry.json
+SS-GAN-001,starshot_gantry,displacement_mm,see expected_geometry.json,mm,0.5,sample_data/films/expected_geometry.json
+DOSE-KTP-001,dose,ktp,1.0,ratio,1e-6,tests/test_dose_formulas.py

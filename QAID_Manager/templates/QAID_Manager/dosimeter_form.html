@@ -1,0 +1,319 @@
+{% extends 'QAID_Manager/base.html' %}
+
+{% block title %}{{ title }} - QA Manager{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto;">
+    <div style="margin-bottom: 30px;">
+        <h1>{{ title }}</h1>
+        <a href="{% url 'settings_dosimeters' %}" style="
+            color: #6c757d; 
+            text-decoration: none;
+            padding: 5px 10px;
+            border: 1px solid #6c757d;
+            border-radius: 3px;
+            font-size: 14px;
+        ">← Back to Dosimeters</a>
+    </div>
+<form method="post" style="
+        background-color: white; 
+        padding: 30px; 
+        border-radius: 8px; 
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    ">
+        {% csrf_token %}
+        
+        {% if form.errors %}
+            <div style="
+                background-color: #f8d7da; 
+                color: #721c24; 
+                padding: 15px; 
+                margin-bottom: 20px; 
+                border-radius: 5px; 
+                border: 1px solid #f5c6cb;
+            ">
+                <strong>Please correct the following errors:</strong>
+                <ul style="margin: 10px 0 0 20px;">
+                    {% for field, errors in form.errors.items %}
+                        {% for error in errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <!-- Basic Information -->
+            <div>
+                <h3 style="margin-bottom: 15px; color: #495057; border-bottom: 2px solid #007bff; padding-bottom: 5px;">
+                    Basic Information
+                </h3>
+                
+                <div style="margin-bottom: 15px;">
+                    <label for="{{ form.name.id_for_label }}" style="
+                        display: block; 
+                        margin-bottom: 5px; 
+                        font-weight: bold; 
+                        color: #495057;
+                    ">{{ form.name.label }}</label>
+                    {{ form.name }}
+                    {% if form.name.help_text %}
+                        <small style="color: #6c757d; font-size: 12px;">{{ form.name.help_text }}</small>
+                    {% endif %}
+                    {% if form.name.errors %}
+                        <div style="color: #dc3545; font-size: 12px; margin-top: 5px;">
+                            {% for error in form.name.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label for="{{ form.brand.id_for_label }}" style="
+                        display: block; 
+                        margin-bottom: 5px; 
+                        font-weight: bold; 
+                        color: #495057;
+                    ">{{ form.brand.label }}</label>
+                    {{ form.brand }}
+                    {% if form.brand.help_text %}
+                        <small style="color: #6c757d; font-size: 12px;">{{ form.brand.help_text }}</small>
+                    {% endif %}
+                    {% if form.brand.errors %}
+                        <div style="color: #dc3545; font-size: 12px; margin-top: 5px;">
+                            {% for error in form.brand.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label for="{{ form.series_number.id_for_label }}" style="
+                        display: block; 
+                        margin-bottom: 5px; 
+                        font-weight: bold; 
+                        color: #495057;
+                    ">{{ form.series_number.label }}</label>
+                    {{ form.series_number }}
+                    {% if form.series_number.help_text %}
+                        <small style="color: #6c757d; font-size: 12px;">{{ form.series_number.help_text }}</small>
+                    {% endif %}
+                    {% if form.series_number.errors %}
+                        <div style="color: #dc3545; font-size: 12px; margin-top: 5px;">
+                            {% for error in form.series_number.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label for="{{ form.certificate_number.id_for_label }}" style="
+                        display: block; 
+                        margin-bottom: 5px; 
+                        font-weight: bold; 
+                        color: #495057;
+                    ">{{ form.certificate_number.label }}</label>
+                    {{ form.certificate_number }}
+                    {% if form.certificate_number.help_text %}
+                        <small style="color: #6c757d; font-size: 12px;">{{ form.certificate_number.help_text }}</small>
+                    {% endif %}
+                    {% if form.certificate_number.errors %}
+                        <div style="color: #dc3545; font-size: 12px; margin-top: 5px;">
+                            {% for error in form.certificate_number.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Calibration Information -->
+            <div>
+                <h3 style="margin-bottom: 15px; color: #495057; border-bottom: 2px solid #28a745; padding-bottom: 5px;">
+                    Calibration Information
+                </h3>
+                
+                <div style="margin-bottom: 15px;">
+                    <label for="{{ form.calibration_factor.id_for_label }}" style="
+                        display: block; 
+                        margin-bottom: 5px; 
+                        font-weight: bold; 
+                        color: #495057;
+                    ">{{ form.calibration_factor.label }}</label>
+                    {{ form.calibration_factor }}
+                    {% if form.calibration_factor.help_text %}
+                        <small style="color: #6c757d; font-size: 12px;">{{ form.calibration_factor.help_text }}</small>
+                    {% endif %}
+                    {% if form.calibration_factor.errors %}
+                        <div style="color: #dc3545; font-size: 12px; margin-top: 5px;">
+                            {% for error in form.calibration_factor.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label for="{{ form.calibration_date.id_for_label }}" style="
+                        display: block; 
+                        margin-bottom: 5px; 
+                        font-weight: bold; 
+                        color: #495057;
+                    ">{{ form.calibration_date.label }}</label>
+                    {{ form.calibration_date }}
+                    {% if form.calibration_date.help_text %}
+                        <small style="color: #6c757d; font-size: 12px;">{{ form.calibration_date.help_text }}</small>
+                    {% endif %}
+                    {% if form.calibration_date.errors %}
+                        <div style="color: #dc3545; font-size: 12px; margin-top: 5px;">
+                            {% for error in form.calibration_date.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label for="{{ form.calibration_radiation_source.id_for_label }}" style="
+                        display: block; 
+                        margin-bottom: 5px; 
+                        font-weight: bold; 
+                        color: #495057;
+                    ">{{ form.calibration_radiation_source.label }}</label>
+                    {{ form.calibration_radiation_source }}
+                    {% if form.calibration_radiation_source.help_text %}
+                        <small style="color: #6c757d; font-size: 12px;">{{ form.calibration_radiation_source.help_text }}</small>
+                    {% endif %}
+                    {% if form.calibration_radiation_source.errors %}
+                        <div style="color: #dc3545; font-size: 12px; margin-top: 5px;">
+                            {% for error in form.calibration_radiation_source.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label for="{{ form.calibration_temperature.id_for_label }}" style="
+                        display: block; 
+                        margin-bottom: 5px; 
+                        font-weight: bold; 
+                        color: #495057;
+                    ">{{ form.calibration_temperature.label }}</label>
+                    {{ form.calibration_temperature }}
+                    {% if form.calibration_temperature.help_text %}
+                        <small style="color: #6c757d; font-size: 12px;">{{ form.calibration_temperature.help_text }}</small>
+                    {% endif %}
+                    {% if form.calibration_temperature.errors %}
+                        <div style="color: #dc3545; font-size: 12px; margin-top: 5px;">
+                            {% for error in form.calibration_temperature.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label for="{{ form.calibration_pressure.id_for_label }}" style="
+                        display: block; 
+                        margin-bottom: 5px; 
+                        font-weight: bold; 
+                        color: #495057;
+                    ">{{ form.calibration_pressure.label }}</label>
+                    {{ form.calibration_pressure }}
+                    {% if form.calibration_pressure.help_text %}
+                        <small style="color: #6c757d; font-size: 12px;">{{ form.calibration_pressure.help_text }}</small>
+                    {% endif %}
+                    {% if form.calibration_pressure.errors %}
+                        <div style="color: #dc3545; font-size: 12px; margin-top: 5px;">
+                            {% for error in form.calibration_pressure.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label for="{{ form.calibration_lab.id_for_label }}" style="
+                        display: block; 
+                        margin-bottom: 5px; 
+                        font-weight: bold; 
+                        color: #495057;
+                    ">{{ form.calibration_lab.label }}</label>
+                    {{ form.calibration_lab }}
+                    {% if form.calibration_lab.help_text %}
+                        <small style="color: #6c757d; font-size: 12px;">{{ form.calibration_lab.help_text }}</small>
+                    {% endif %}
+                    {% if form.calibration_lab.errors %}
+                        <div style="color: #dc3545; font-size: 12px; margin-top: 5px;">
+                            {% for error in form.calibration_lab.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Status -->
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #dee2e6;">
+            <h3 style="margin-bottom: 15px; color: #495057;">Status</h3>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                {{ form.is_active }}
+                <label for="{{ form.is_active.id_for_label }}" style="
+                    font-weight: bold; 
+                    color: #495057;
+                ">{{ form.is_active.label }}</label>
+            </div>
+        </div>
+
+        <div style="margin-top: 30px; display: flex; gap: 15px;">
+            <button type="submit" style="
+                background-color: #007bff; 
+                color: white; 
+                padding: 12px 30px; 
+                border: none; 
+                border-radius: 5px; 
+                font-weight: bold; 
+                cursor: pointer;
+            ">Save Dosimeter</button>
+            
+            <a href="{% url 'settings_dosimeters' %}" style="
+                background-color: #6c757d; 
+                color: white; 
+                padding: 12px 30px; 
+                text-decoration: none; 
+                border-radius: 5px; 
+                font-weight: bold;
+            ">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<style>
+    .form-control {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        font-size: 14px;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+    
+    .form-control:focus {
+        border-color: #80bdff;
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+    
+    .form-check-input {
+        width: 18px;
+        height: 18px;
+        margin-right: 8px;
+    }
+</style>
+{% endblock %} 

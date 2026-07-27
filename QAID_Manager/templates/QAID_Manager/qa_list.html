@@ -1,0 +1,304 @@
+{% extends 'QAID_Manager/base.html' %}
+{% load static %}
+
+{% block title %}QA Records List{% endblock %}
+
+{% block extra_css %}
+<style>
+    .qa-list-container {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin: 20px 0;
+        padding: 20px;
+    }
+    
+    .qa-list-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e9ecef;
+    }
+    
+    .qa-list-header h2 {
+        color: #333;
+        margin: 0;
+    }
+    
+    .filters-section {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .filters-form {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .filter-group label {
+        font-weight: 600;
+        color: #495057;
+        font-size: 14px;
+    }
+    
+    .filter-group select {
+        padding: 8px 12px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        background: white;
+        min-width: 150px;
+    }
+    
+    .filter-buttons {
+        display: flex;
+        gap: 10px;
+        align-items: end;
+    }
+    
+    .btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+    }
+    
+    .btn-primary {
+        background: #007bff;
+        color: white;
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+    
+    .btn-success {
+        background: #28a745;
+        color: white;
+    }
+    
+    .btn-danger {
+        background: #dc3545;
+        color: white;
+    }
+    
+    .btn:hover {
+        opacity: 0.9;
+    }
+    
+    .qa-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+    
+    .qa-table th,
+    .qa-table td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .qa-table th {
+        background: #f8f9fa;
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .qa-table tr:hover {
+        background: #f8f9fa;
+    }
+    
+    .status-badge {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    
+    .status-passed {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .status-failed {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .status-scheduled {
+        background: #e2e3e5;
+        color: #383d41;
+    }
+    
+    .status-completed {
+        background: #d1ecf1;
+        color: #0c5460;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 5px;
+    }
+    
+    .btn-sm {
+        padding: 4px 8px;
+        font-size: 12px;
+    }
+    
+    .no-records {
+        text-align: center;
+        padding: 40px;
+        color: #6c757d;
+        font-style: italic;
+    }
+    
+    .pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+        gap: 10px;
+    }
+    
+    .pagination a {
+        padding: 8px 12px;
+        border: 1px solid #dee2e6;
+        text-decoration: none;
+        color: #007bff;
+        border-radius: 4px;
+    }
+    
+    .pagination a:hover {
+        background: #e9ecef;
+    }
+    
+    .pagination .current {
+        background: #007bff;
+        color: white;
+        border-color: #007bff;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="qa-list-container">
+    <div class="qa-list-header">
+        <h2>QA Records</h2>
+        <a href="{% url 'qa_entry' %}" class="btn btn-success">Create New QA Record</a>
+    </div>
+    
+    <div class="filters-section">
+        <form method="get" class="filters-form">
+            <div class="filter-group">
+                <label for="linac">Filter by Linac:</label>
+                <select name="linac" id="linac">
+                    <option value="">All Linacs</option>
+                    {% for linac in linacs %}
+                        <option value="{{ linac.id }}" {% if request.GET.linac == linac.id|stringformat:"s" %}selected{% endif %}>
+                            {{ linac.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="status">Filter by Status:</label>
+                <select name="status" id="status">
+                    <option value="">All Statuses</option>
+                    <option value="passed" {% if request.GET.status == 'passed' %}selected{% endif %}>Passed</option>
+                    <option value="failed" {% if request.GET.status == 'failed' %}selected{% endif %}>Failed</option>
+                    <option value="scheduled" {% if request.GET.status == 'scheduled' %}selected{% endif %}>Scheduled</option>
+                    <option value="completed" {% if request.GET.status == 'completed' %}selected{% endif %}>Completed</option>
+                </select>
+            </div>
+            
+            <div class="filter-buttons">
+                <button type="submit" class="btn btn-primary">Apply Filters</button>
+                <a href="{% url 'qa_list' %}" class="btn btn-secondary">Clear Filters</a>
+            </div>
+        </form>
+    </div>
+    
+    {% if qa_records %}
+        <table class="qa-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Linac</th>
+                    <th>Performed By</th>
+                    <th>Status</th>
+                    <th>Notes</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for qa_record in qa_records %}
+                <tr>
+                    <td>{{ qa_record.date_performed|date:"M d, Y" }}</td>
+                    <td>{{ qa_record.linac.name }}</td>
+                    <td>
+                        {% if qa_record.performed_by %}
+                            {% if qa_record.performed_by.first_name or qa_record.performed_by.last_name %}
+                                {{ qa_record.performed_by.last_name }} {{ qa_record.performed_by.first_name }}
+                            {% else %}
+                                {{ qa_record.performed_by.username }}
+                            {% endif %}
+                        {% else %}
+                            <span style="color: #6c757d;">Not specified</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if qa_record.status %}
+                            <span class="status-badge status-{{ qa_record.status.name }}">
+                                {{ qa_record.status.name|title }}
+                            </span>
+                        {% else %}
+                            <span class="status-badge status-scheduled">Scheduled</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if qa_record.notes %}
+                            {{ qa_record.notes|truncatechars:50 }}
+                        {% else %}
+                            <span style="color: #6c757d;">No notes</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <a href="{% url 'qa_detail' qa_record.id %}" class="btn btn-primary btn-sm">View</a>
+                            {% if user.is_staff %}
+                                <a href="{% url 'qa_entry' %}?edit={{ qa_record.id }}" class="btn btn-secondary btn-sm">Edit</a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="no-records">
+            <p>No QA records found.</p>
+            {% if request.GET.linac or request.GET.status %}
+                <p>Try clearing the filters to see all records.</p>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 

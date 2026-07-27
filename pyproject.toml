@@ -1,0 +1,19 @@
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "QA_Manager.settings"
+python_files = ["tests.py", "test_*.py", "*_tests.py"]
+testpaths = ["QAID_Manager", "tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+exclude = [
+  ".venv",
+  "build",
+  "dist",
+  "data",
+  "media",
+  "staticfiles",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]

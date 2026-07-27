@@ -1,0 +1,442 @@
+{% extends 'QAID_Manager/base.html' %}
+
+{% block title %}{{ param.name }} - Physics Parameter Details{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto;">
+    <div style="margin-bottom: 30px;">
+        <h1>Physics Parameter Details</h1>
+        <div style="display: flex; gap: 15px; margin-top: 10px;">
+            <a href="{% url 'settings_physics_parameters' %}" style="
+                color: #6c757d; 
+                text-decoration: none;
+                padding: 5px 10px;
+                border: 1px solid #6c757d;
+                border-radius: 3px;
+                font-size: 14px;
+            ">← Back to Physics Parameters</a>
+            
+            {% if user.is_staff %}
+                <a href="{% url 'physics_parameter_edit' param.pk %}" style="
+                    color: #28a745; 
+                    text-decoration: none;
+                    padding: 5px 10px;
+                    border: 1px solid #28a745;
+                    border-radius: 3px;
+                    font-size: 14px;
+                ">Edit</a>
+                
+                <a href="{% url 'physics_parameter_delete' param.pk %}" style="
+                    color: #dc3545; 
+                    text-decoration: none;
+                    padding: 5px 10px;
+                    border: 1px solid #dc3545;
+                    border-radius: 3px;
+                    font-size: 14px;
+                ">Delete</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div style="
+        background-color: white; 
+        padding: 30px; 
+        border-radius: 8px; 
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    ">
+        <!-- Status Badge -->
+        <div style="margin-bottom: 30px;">
+            <span style="
+                padding: 8px 16px; 
+                border-radius: 20px; 
+                font-size: 14px; 
+                font-weight: bold;
+                {% if param.is_active %}
+                    background-color: #d4edda; 
+                    color: #155724;
+                {% else %}
+                    background-color: #f8d7da; 
+                    color: #721c24;
+                {% endif %}
+            ">
+                {% if param.is_active %}Active{% else %}Inactive{% endif %}
+            </span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+            <div>
+                <h3 style="
+                    margin-bottom: 20px; 
+                    color: #495057; 
+                    border-bottom: 2px solid #007bff; 
+                    padding-bottom: 10px;
+                ">Parameter Information</h3>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="
+                        display: block; 
+                        font-weight: bold; 
+                        color: #495057; 
+                        margin-bottom: 5px;
+                    ">Name</label>
+                    <div style="
+                        padding: 10px; 
+                        background-color: #f8f9fa; 
+                        border-radius: 4px; 
+                        border: 1px solid #dee2e6;
+                    ">{{ param.name }}</div>
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label style="
+                        display: block; 
+                        font-weight: bold; 
+                        color: #495057; 
+                        margin-bottom: 5px;
+                    ">Parameter Type</label>
+                    <div style="
+                        padding: 10px; 
+                        background-color: #f8f9fa; 
+                        border-radius: 4px; 
+                        border: 1px solid #dee2e6;
+                    ">{{ param.get_parameter_type_display|default:"Not specified" }}</div>
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label style="
+                        display: block; 
+                        font-weight: bold; 
+                        color: #495057; 
+                        margin-bottom: 5px;
+                    ">Energy</label>
+                    <div style="
+                        padding: 10px; 
+                        background-color: #f8f9fa; 
+                        border-radius: 4px; 
+                        border: 1px solid #dee2e6;
+                    ">{{ param.energy|default:"Not specified" }}</div>
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label style="
+                        display: block; 
+                        font-weight: bold; 
+                        color: #495057; 
+                        margin-bottom: 5px;
+                    ">Beam Type</label>
+                    <div style="
+                        padding: 10px; 
+                        background-color: #f8f9fa; 
+                        border-radius: 4px; 
+                        border: 1px solid #dee2e6;
+                    ">{{ param.get_beam_type_display|default:"Not specified" }}</div>
+                </div>
+            </div>
+
+            <div>
+                <h3 style="
+                    margin-bottom: 20px; 
+                    color: #495057; 
+                    border-bottom: 2px solid #007bff; 
+                    padding-bottom: 10px;
+                ">Additional Information</h3>
+                
+                {% if param.description %}
+                <div style="margin-bottom: 15px;">
+                    <label style="
+                        display: block; 
+                        font-weight: bold; 
+                        color: #495057; 
+                        margin-bottom: 5px;
+                    ">Description</label>
+                    <div style="
+                        padding: 10px; 
+                        background-color: #f8f9fa; 
+                        border-radius: 4px; 
+                        border: 1px solid #dee2e6;
+                        min-height: 60px;
+                    ">{{ param.description }}</div>
+                </div>
+                {% endif %}
+
+                {% if param.notes %}
+                <div style="margin-bottom: 15px;">
+                    <label style="
+                        display: block; 
+                        font-weight: bold; 
+                        color: #495057; 
+                        margin-bottom: 5px;
+                    ">Notes</label>
+                    <div style="
+                        padding: 10px; 
+                        background-color: #f8f9fa; 
+                        border-radius: 4px; 
+                        border: 1px solid #dee2e6;
+                        min-height: 60px;
+                    ">{{ param.notes }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if param.parameter_type == 'film_analysis' %}
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #dee2e6;">
+                <h3 style="
+                    margin-bottom: 20px;
+                    color: #495057;
+                    border-bottom: 2px solid #17a2b8;
+                    padding-bottom: 10px;
+                ">Film Analysis</h3>
+                {% if film_analysis_threshold_percent is not None %}
+                <div style="margin-bottom: 15px;">
+                    <label style="
+                        display: block;
+                        font-weight: bold;
+                        color: #495057;
+                        margin-bottom: 5px;
+                    ">Field size detection threshold</label>
+                    <div style="
+                        padding: 10px;
+                        background-color: #f8f9fa;
+                        border-radius: 4px;
+                        border: 1px solid #dee2e6;
+                    ">{{ film_analysis_threshold_percent }}%</div>
+                    <p style="color: #6c757d; font-size: 13px; margin-top: 8px; line-height: 1.5;">
+                        Used when locating radiation field edges along brightness profiles during field size film analysis.
+                    </p>
+                </div>
+                {% endif %}
+                {% if film_analysis_band_width_mm is not None %}
+                <div style="margin-bottom: 15px;">
+                    <label style="
+                        display: block;
+                        font-weight: bold;
+                        color: #495057;
+                        margin-bottom: 5px;
+                    ">Field size analysis band width</label>
+                    <div style="
+                        padding: 10px;
+                        background-color: #f8f9fa;
+                        border-radius: 4px;
+                        border: 1px solid #dee2e6;
+                    ">{{ film_analysis_band_width_mm }} mm total — radiation guide line centred (half-width on each side)</div>
+                </div>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <!-- Parameter Values Table -->
+        {% if table_data and table_data|length > 0 %}
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #dee2e6;">
+                <h3 style="
+                    margin-bottom: 20px; 
+                    color: #495057; 
+                    border-bottom: 2px solid #007bff; 
+                    padding-bottom: 10px;
+                ">Parameter Values</h3>
+                
+                {% if filename %}
+                <p style="color: #6c757d; font-size: 14px; margin-bottom: 15px;">
+                    <strong>Source:</strong> {{ filename }}
+                    {% if import_date %}
+                        <br><strong>Imported:</strong> {{ import_date }}
+                    {% endif %}
+                </p>
+                {% endif %}
+                
+                <div style="overflow-x: auto;">
+                    <table style="
+                        width: 100%; 
+                        border-collapse: collapse; 
+                        background-color: white;
+                        border: 1px solid #dee2e6;
+                    ">
+                        <thead>
+                            <tr style="background-color: #f8f9fa;">
+                                {% with first_row=table_data.0 %}
+                                    {% for key in first_row.keys %}
+                                    <th style="
+                                        padding: 12px; 
+                                        text-align: left; 
+                                        border-bottom: 2px solid #dee2e6;
+                                        border-right: 1px solid #dee2e6;
+                                        font-weight: bold;
+                                        color: #495057;
+                                        white-space: nowrap;
+                                    ">{{ key }}</th>
+                                    {% endfor %}
+                                {% endwith %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in table_data %}
+                            <tr style="border-bottom: 1px solid #dee2e6;">
+                                {% for key, value in row.items %}
+                                <td style="
+                                    padding: 12px;
+                                    border-right: 1px solid #dee2e6;
+                                    color: #6c757d;
+                                ">
+                                    {% if value != None and value != '' %}
+                                        {% with value_str=value|stringformat:"s" %}
+                                            {% if value_str|length > 50 %}
+                                                <span title="{{ value }}">{{ value_str|truncatechars:50 }}</span>
+                                            {% else %}
+                                                {{ value }}
+                                            {% endif %}
+                                        {% endwith %}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% elif param.parameter_values %}
+            {# Fallback: try to extract table_data from dict if view didn't extract it #}
+            {% if param.parameter_values.table_data %}
+                {% with table_data=param.parameter_values.table_data %}
+                    {% if table_data|length > 0 %}
+                        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #dee2e6;">
+                            <h3 style="
+                                margin-bottom: 20px; 
+                                color: #495057; 
+                                border-bottom: 2px solid #007bff; 
+                                padding-bottom: 10px;
+                            ">Parameter Values</h3>
+                            
+                            {% if param.parameter_values.filename %}
+                            <p style="color: #6c757d; font-size: 14px; margin-bottom: 15px;">
+                                <strong>Source:</strong> {{ param.parameter_values.filename }}
+                                {% if param.parameter_values.import_date %}
+                                    <br><strong>Imported:</strong> {{ param.parameter_values.import_date }}
+                                {% endif %}
+                            </p>
+                            {% endif %}
+                            
+                            <div style="overflow-x: auto;">
+                                <table style="
+                                    width: 100%; 
+                                    border-collapse: collapse; 
+                                    background-color: white;
+                                    border: 1px solid #dee2e6;
+                                ">
+                                    <thead>
+                                        <tr style="background-color: #f8f9fa;">
+                                            {% with first_row=table_data.0 %}
+                                                {% for key in first_row.keys %}
+                                                <th style="
+                                                    padding: 12px; 
+                                                    text-align: left; 
+                                                    border-bottom: 2px solid #dee2e6;
+                                                    border-right: 1px solid #dee2e6;
+                                                    font-weight: bold;
+                                                    color: #495057;
+                                                    white-space: nowrap;
+                                                ">{{ key }}</th>
+                                                {% endfor %}
+                                            {% endwith %}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for row in table_data %}
+                                        <tr style="border-bottom: 1px solid #dee2e6;">
+                                            {% for key, value in row.items %}
+                                            <td style="
+                                                padding: 12px;
+                                                border-right: 1px solid #dee2e6;
+                                                color: #6c757d;
+                                            ">
+                                                {% if value != None and value != '' %}
+                                                    {% with value_str=value|stringformat:"s" %}
+                                                        {% if value_str|length > 50 %}
+                                                            <span title="{{ value }}">{{ value_str|truncatechars:50 }}</span>
+                                                        {% else %}
+                                                            {{ value }}
+                                                        {% endif %}
+                                                    {% endwith %}
+                                                {% else %}
+                                                    -
+                                                {% endif %}
+                                            </td>
+                                            {% endfor %}
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endwith %}
+            {% endif %}
+        {% elif param.parameter_values|length > 0 %}
+            {# Handle direct list format #}
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #dee2e6;">
+                <h3 style="
+                    margin-bottom: 20px; 
+                    color: #495057; 
+                    border-bottom: 2px solid #007bff; 
+                    padding-bottom: 10px;
+                ">Parameter Values</h3>
+                
+                <div style="overflow-x: auto;">
+                    <table style="
+                        width: 100%; 
+                        border-collapse: collapse; 
+                        background-color: white;
+                        border: 1px solid #dee2e6;
+                    ">
+                        <thead>
+                            <tr style="background-color: #f8f9fa;">
+                                {% with first_row=param.parameter_values.0 %}
+                                    {% for key in first_row.keys %}
+                                    <th style="
+                                        padding: 12px; 
+                                        text-align: left; 
+                                        border-bottom: 2px solid #dee2e6;
+                                        border-right: 1px solid #dee2e6;
+                                        font-weight: bold;
+                                        color: #495057;
+                                        white-space: nowrap;
+                                    ">{{ key }}</th>
+                                    {% endfor %}
+                                {% endwith %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in param.parameter_values %}
+                            <tr style="border-bottom: 1px solid #dee2e6;">
+                                {% for key, value in row.items %}
+                                <td style="
+                                    padding: 12px;
+                                    border-right: 1px solid #dee2e6;
+                                    color: #6c757d;
+                                ">
+                                    {% if value != None and value != '' %}
+                                        {% with value_str=value|stringformat:"s" %}
+                                            {% if value_str|length > 50 %}
+                                                <span title="{{ value }}">{{ value_str|truncatechars:50 }}</span>
+                                            {% else %}
+                                                {{ value }}
+                                            {% endif %}
+                                        {% endwith %}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,829 @@
+{% extends 'QAID_Manager/base.html' %}
+
+{% block title %}{{ title }} - QA Manager{% endblock %}
+
+{% block content %}
+<div style="max-width: 1200px; margin: 0 auto;">
+    <div style="margin-bottom: 30px;">
+        <h1>{{ title }}</h1>
+        <a href="{% url 'settings_linacs' %}" style="
+            color: #6c757d; 
+            text-decoration: none;
+            padding: 5px 10px;
+            border: 1px solid #6c757d;
+            border-radius: 3px;
+            font-size: 14px;
+        ">← Back to LINACs</a>
+    </div>
+<form method="post" style="
+        background-color: white; 
+        padding: 30px; 
+        border-radius: 8px; 
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    ">
+        {% csrf_token %}
+        
+        {% if form.errors %}
+            <div style="
+                background-color: #f8d7da; 
+                color: #721c24; 
+                padding: 15px; 
+                margin-bottom: 20px; 
+                border-radius: 5px; 
+                border: 1px solid #f5c6cb;
+            ">
+                <strong>Please correct the following errors:</strong>
+                <ul style="margin: 10px 0 0 20px;">
+                    {% for field, errors in form.errors.items %}
+                        {% for error in errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <!-- Basic Information Section -->
+        <div class="form-section">
+            <div class="section-header" onclick="toggleSection('basic-info')">
+                <h3>Basic Information</h3>
+                <span class="toggle-icon" id="basic-info-icon">▼</span>
+            </div>
+            <div class="section-content" id="basic-info-content">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <label for="{{ form.name.id_for_label }}" class="form-label">{{ form.name.label }}</label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                            <div class="error-message">{{ form.name.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label for="{{ form.series_number.id_for_label }}" class="form-label">{{ form.series_number.label }}</label>
+                        {{ form.series_number }}
+                        {% if form.series_number.errors %}
+                            <div class="error-message">{{ form.series_number.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label for="{{ form.installation_date.id_for_label }}" class="form-label">{{ form.installation_date.label }}</label>
+                        {{ form.installation_date }}
+                        {% if form.installation_date.errors %}
+                            <div class="error-message">{{ form.installation_date.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label for="{{ form.certification_due_date.id_for_label }}" class="form-label">{{ form.certification_due_date.label }}</label>
+                        {{ form.certification_due_date }}
+                        {% if form.certification_due_date.errors %}
+                            <div class="error-message">{{ form.certification_due_date.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label for="{{ form.energy.id_for_label }}" class="form-label">{{ form.energy.label }}</label>
+                        <div class="checkbox-group">
+                            {% for choice in form.energy %}
+                                <div>{{ choice.tag }} {{ choice.choice_label }}</div>
+                            {% endfor %}
+                        </div>
+                        {% if form.energy.errors %}
+                            <div class="error-message">{{ form.energy.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label for="{{ form.dosimetry_method.id_for_label }}" class="form-label">{{ form.dosimetry_method.label }}</label>
+                        {{ form.dosimetry_method }}
+                        {% if form.dosimetry_method.errors %}
+                            <div class="error-message">{{ form.dosimetry_method.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label for="{{ form.is_active.id_for_label }}" class="form-label">
+                            {{ form.is_active }} {{ form.is_active.label }}
+                        </label>
+                        {% if form.is_active.errors %}
+                            <div class="error-message">{{ form.is_active.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CAT Information Section -->
+        <div class="form-section">
+            <div class="section-header" onclick="toggleSection('cat-info')">
+                <h3>CAT Information</h3>
+                <span class="toggle-icon" id="cat-info-icon">▼</span>
+            </div>
+            <div class="section-content" id="cat-info-content" style="display: none;">
+                <div style="margin-bottom: 20px;">
+                    <label for="{{ form.cat_info.id_for_label }}" class="form-label">CAT Information (General Notes)</label>
+                    {{ form.cat_info }}
+                    {% if form.cat_info.errors %}
+                        <div class="error-message">{{ form.cat_info.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                
+                <h4 style="margin-top: 20px; margin-bottom: 15px; color: #495057; border-bottom: 1px solid #dee2e6; padding-bottom: 5px;">Mechanical Tests</h4>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                    {% with field=form.cat_gantry_isocenter %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    {% with field=form.cat_collimator_isocenter %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    {% with field=form.cat_field_size_12x12 %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    {% with field=form.cat_table_isocenter %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    {% with field=form.cat_table_rotation %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    {% with field=form.cat_table_height_isocenter %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    {% with field=form.cat_table_height %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    {% with field=form.cat_table_long %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    {% with field=form.cat_table_lateral %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                </div>
+
+                <!-- 6 MV -->
+                <div class="energy-group" data-energy="6MV">
+                    <h4 class="energy-header">6 MV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% with field=form.cat_d10_6mv %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_symmetry_6mv_inline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_symmetry_6mv_crossline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_flatness_6mv_inline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_flatness_6mv_crossline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_output_factor_6mv %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_wedge_factor_6mv %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_tmr_6mv %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_pdd_20_10_6mv %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    </div>
+                </div>
+
+                <!-- 10 MV -->
+                <div class="energy-group" data-energy="10MV">
+                    <h4 class="energy-header">10 MV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% with field=form.cat_d10_10mv %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_symmetry_10mv_inline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_symmetry_10mv_crossline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_flatness_10mv_inline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_flatness_10mv_crossline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_output_factor_10mv %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_wedge_factor_10mv %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_tmr_10mv %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_pdd_20_10_10mv %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    </div>
+                </div>
+
+                <!-- 6 MV FFF -->
+                <div class="energy-group" data-energy="6MV_FFF">
+                    <h4 class="energy-header">6 MV FFF</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% with field=form.cat_output_factor_6mv_fff %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_tmr_6mv_fff %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_pdd_20_10_6mv_fff %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    </div>
+                </div>
+
+                <!-- 10 MV FFF -->
+                <div class="energy-group" data-energy="10MV_FFF">
+                    <h4 class="energy-header">10 MV FFF</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% with field=form.cat_output_factor_10mv_fff %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_tmr_10mv_fff %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_pdd_20_10_10mv_fff %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    </div>
+                </div>
+
+                <!-- 15 MV -->
+                <div class="energy-group" data-energy="15MV">
+                    <h4 class="energy-header">15 MV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% with field=form.cat_d10_15mv %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_symmetry_15mv_inline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_symmetry_15mv_crossline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_flatness_15mv_inline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_flatness_15mv_crossline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_output_factor_15mv %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_wedge_factor_15mv %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_tmr_15mv %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_pdd_20_10_15mv %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    </div>
+                </div>
+
+                <!-- 15 MV FFF -->
+                <div class="energy-group" data-energy="15MV_FFF">
+                    <h4 class="energy-header">15 MV FFF</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% with field=form.cat_output_factor_15mv_fff %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_tmr_15mv_fff %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_pdd_20_10_15mv_fff %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    </div>
+                </div>
+
+                <!-- 4 MeV -->
+                <div class="energy-group" data-energy="4MeV">
+                    <h4 class="energy-header">4 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% with field=form.cat_r80_4mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_symmetry_4mev_inline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_symmetry_4mev_crossline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_flatness_4mev_inline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_flatness_4mev_crossline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_output_factor_4mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    </div>
+                </div>
+
+                <!-- 5 MeV -->
+                <div class="energy-group" data-energy="5MeV">
+                    <h4 class="energy-header">5 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% with field=form.cat_r80_5mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_symmetry_5mev_inline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_symmetry_5mev_crossline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_flatness_5mev_inline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_flatness_5mev_crossline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_output_factor_5mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    </div>
+                </div>
+
+                <!-- 6 MeV -->
+                <div class="energy-group" data-energy="6MeV">
+                    <h4 class="energy-header">6 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% with field=form.cat_r80_6mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_symmetry_6mev_inline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_symmetry_6mev_crossline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_flatness_6mev_inline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_flatness_6mev_crossline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_output_factor_6mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    </div>
+                </div>
+
+                <!-- 7 MeV -->
+                <div class="energy-group" data-energy="7MeV">
+                    <h4 class="energy-header">7 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% with field=form.cat_r80_7mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_symmetry_7mev_inline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_symmetry_7mev_crossline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_flatness_7mev_inline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_flatness_7mev_crossline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_output_factor_7mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    </div>
+                </div>
+
+                <!-- 8 MeV -->
+                <div class="energy-group" data-energy="8MeV">
+                    <h4 class="energy-header">8 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% with field=form.cat_r80_8mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_symmetry_8mev_inline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_symmetry_8mev_crossline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_flatness_8mev_inline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_flatness_8mev_crossline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_output_factor_8mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    </div>
+                </div>
+
+                <!-- 9 MeV -->
+                <div class="energy-group" data-energy="9MeV">
+                    <h4 class="energy-header">9 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% with field=form.cat_r80_9mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_symmetry_9mev_inline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_symmetry_9mev_crossline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_flatness_9mev_inline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_flatness_9mev_crossline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_output_factor_9mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    </div>
+                </div>
+
+                <!-- 10 MeV -->
+                <div class="energy-group" data-energy="10MeV">
+                    <h4 class="energy-header">10 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% with field=form.cat_r80_10mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_symmetry_10mev_inline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_symmetry_10mev_crossline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_flatness_10mev_inline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_flatness_10mev_crossline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_output_factor_10mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    </div>
+                </div>
+
+                <!-- 11 MeV -->
+                <div class="energy-group" data-energy="11MeV">
+                    <h4 class="energy-header">11 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% with field=form.cat_r80_11mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_symmetry_11mev_inline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_symmetry_11mev_crossline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_flatness_11mev_inline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_flatness_11mev_crossline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_output_factor_11mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    </div>
+                </div>
+
+                <!-- 12 MeV -->
+                <div class="energy-group" data-energy="12MeV">
+                    <h4 class="energy-header">12 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% with field=form.cat_r80_12mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_symmetry_12mev_inline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_symmetry_12mev_crossline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_flatness_12mev_inline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_flatness_12mev_crossline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_output_factor_12mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    </div>
+                </div>
+
+                <!-- 13 MeV -->
+                <div class="energy-group" data-energy="13MeV">
+                    <h4 class="energy-header">13 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% with field=form.cat_r80_13mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_symmetry_13mev_inline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_symmetry_13mev_crossline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_flatness_13mev_inline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_flatness_13mev_crossline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_output_factor_13mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    </div>
+                </div>
+
+                <!-- 14 MeV -->
+                <div class="energy-group" data-energy="14MeV">
+                    <h4 class="energy-header">14 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% with field=form.cat_r80_14mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_symmetry_14mev_inline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_symmetry_14mev_crossline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_flatness_14mev_inline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_flatness_14mev_crossline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_output_factor_14mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    </div>
+                </div>
+
+                <!-- 15 MeV -->
+                <div class="energy-group" data-energy="15MeV">
+                    <h4 class="energy-header">15 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% with field=form.cat_r80_15mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_symmetry_15mev_inline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_symmetry_15mev_crossline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_flatness_15mev_inline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_flatness_15mev_crossline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_output_factor_15mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    </div>
+                </div>
+
+                <!-- 16 MeV -->
+                <div class="energy-group" data-energy="16MeV">
+                    <h4 class="energy-header">16 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% with field=form.cat_r80_16mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_symmetry_16mev_inline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_symmetry_16mev_crossline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_flatness_16mev_inline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_flatness_16mev_crossline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_output_factor_16mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    </div>
+                </div>
+
+                <!-- 17 MeV -->
+                <div class="energy-group" data-energy="17MeV">
+                    <h4 class="energy-header">17 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% with field=form.cat_r80_17mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_symmetry_17mev_inline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_symmetry_17mev_crossline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_flatness_17mev_inline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_flatness_17mev_crossline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_output_factor_17mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    </div>
+                </div>
+
+                <!-- 18 MeV -->
+                <div class="energy-group" data-energy="18MeV">
+                    <h4 class="energy-header">18 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% with field=form.cat_r80_18mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_symmetry_18mev_inline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_symmetry_18mev_crossline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_flatness_18mev_inline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_flatness_18mev_crossline %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.cat_output_factor_18mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    </div>
+                </div>
+
+                <h4 style="margin-top: 30px; margin-bottom: 15px; color: #495057; border-bottom: 1px solid #dee2e6; padding-bottom: 5px;">Imaging Tests</h4>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                    {% with field=form.cat_uniformity %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    {% with field=form.cat_low_contrast %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    {% with field=form.cat_high_contrast %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    {% with field=form.cat_transverse_vertical_scale %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    {% with field=form.cat_transverse_horizontal_scale %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    {% with field=form.cat_sagittal_geometric_scale %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    {% with field=form.cat_table_movement_accuracy %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Beam Modelling Information Section -->
+        <div class="form-section">
+            <div class="section-header" onclick="toggleSection('beam-modelling')">
+                <h3>Beam Modelling Information</h3>
+                <span class="toggle-icon" id="beam-modelling-icon">▼</span>
+            </div>
+            <div class="section-content" id="beam-modelling-content" style="display: none;">
+                <div style="margin-bottom: 20px;">
+                    <label for="{{ form.beam_modelling_info.id_for_label }}" class="form-label">Beam Modelling Information (General Notes)</label>
+                    {{ form.beam_modelling_info }}
+                    {% if form.beam_modelling_info.errors %}
+                        <div class="error-message">{{ form.beam_modelling_info.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- 6 MV -->
+                <div class="energy-group" data-energy="6MV">
+                    <h4 class="energy-header">6 MV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% with field=form.beam_dose_ref_depth_6mv %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.beam_tpr_zreff_6mv %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.beam_pdd_20_10_6mv %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.beam_tpr_calculated_6mv %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    </div>
+                </div>
+
+                <!-- 10 MV -->
+                <div class="energy-group" data-energy="10MV">
+                    <h4 class="energy-header">10 MV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% with field=form.beam_dose_ref_depth_10mv %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.beam_tpr_zreff_10mv %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.beam_pdd_20_10_10mv %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.beam_tpr_calculated_10mv %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    </div>
+                </div>
+
+                <!-- 6 MV FFF -->
+                <div class="energy-group" data-energy="6MV_FFF">
+                    <h4 class="energy-header">6 MV FFF</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% with field=form.beam_dose_ref_depth_6mv_fff %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.beam_tpr_zreff_6mv_fff %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.beam_pdd_20_10_6mv_fff %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.beam_tpr_calculated_6mv_fff %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    </div>
+                </div>
+
+                <!-- 10 MV FFF -->
+                <div class="energy-group" data-energy="10MV_FFF">
+                    <h4 class="energy-header">10 MV FFF</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% with field=form.beam_dose_ref_depth_10mv_fff %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.beam_tpr_zreff_10mv_fff %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.beam_pdd_20_10_10mv_fff %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.beam_tpr_calculated_10mv_fff %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    </div>
+                </div>
+
+                <!-- 15 MV -->
+                <div class="energy-group" data-energy="15MV">
+                    <h4 class="energy-header">15 MV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% with field=form.beam_dose_ref_depth_15mv %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.beam_tpr_zreff_15mv %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.beam_pdd_20_10_15mv %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.beam_tpr_calculated_15mv %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    </div>
+                </div>
+
+                <!-- 15 MV FFF -->
+                <div class="energy-group" data-energy="15MV_FFF">
+                    <h4 class="energy-header">15 MV FFF</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% with field=form.beam_dose_ref_depth_15mv_fff %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.beam_tpr_zreff_15mv_fff %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.beam_pdd_20_10_15mv_fff %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.beam_tpr_calculated_15mv_fff %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    </div>
+                </div>
+
+                <!-- 4 MeV -->
+                <div class="energy-group" data-energy="4MeV">
+                    <h4 class="energy-header">4 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% with field=form.beam_dose_ref_depth_4mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.beam_r50_4mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    </div>
+                </div>
+
+                <!-- 5 MeV -->
+                <div class="energy-group" data-energy="5MeV">
+                    <h4 class="energy-header">5 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% with field=form.beam_dose_ref_depth_5mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.beam_r50_5mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    </div>
+                </div>
+
+                <!-- 6 MeV -->
+                <div class="energy-group" data-energy="6MeV">
+                    <h4 class="energy-header">6 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% with field=form.beam_dose_ref_depth_6mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.beam_r50_6mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    </div>
+                </div>
+
+                <!-- 7 MeV -->
+                <div class="energy-group" data-energy="7MeV">
+                    <h4 class="energy-header">7 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% with field=form.beam_dose_ref_depth_7mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.beam_r50_7mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    </div>
+                </div>
+
+                <!-- 8 MeV -->
+                <div class="energy-group" data-energy="8MeV">
+                    <h4 class="energy-header">8 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% with field=form.beam_dose_ref_depth_8mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.beam_r50_8mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    </div>
+                </div>
+
+                <!-- 9 MeV -->
+                <div class="energy-group" data-energy="9MeV">
+                    <h4 class="energy-header">9 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% with field=form.beam_dose_ref_depth_9mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.beam_r50_9mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    </div>
+                </div>
+
+                <!-- 10 MeV -->
+                <div class="energy-group" data-energy="10MeV">
+                    <h4 class="energy-header">10 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% with field=form.beam_dose_ref_depth_10mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.beam_r50_10mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    </div>
+                </div>
+
+                <!-- 11 MeV -->
+                <div class="energy-group" data-energy="11MeV">
+                    <h4 class="energy-header">11 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% with field=form.beam_dose_ref_depth_11mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.beam_r50_11mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    </div>
+                </div>
+
+                <!-- 12 MeV -->
+                <div class="energy-group" data-energy="12MeV">
+                    <h4 class="energy-header">12 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% with field=form.beam_dose_ref_depth_12mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.beam_r50_12mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    </div>
+                </div>
+
+                <!-- 13 MeV -->
+                <div class="energy-group" data-energy="13MeV">
+                    <h4 class="energy-header">13 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% with field=form.beam_dose_ref_depth_13mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.beam_r50_13mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    </div>
+                </div>
+
+                <!-- 14 MeV -->
+                <div class="energy-group" data-energy="14MeV">
+                    <h4 class="energy-header">14 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% with field=form.beam_dose_ref_depth_14mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.beam_r50_14mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    </div>
+                </div>
+
+                <!-- 15 MeV -->
+                <div class="energy-group" data-energy="15MeV">
+                    <h4 class="energy-header">15 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% with field=form.beam_dose_ref_depth_15mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.beam_r50_15mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    </div>
+                </div>
+
+                <!-- 16 MeV -->
+                <div class="energy-group" data-energy="16MeV">
+                    <h4 class="energy-header">16 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% with field=form.beam_dose_ref_depth_16mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.beam_r50_16mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    </div>
+                </div>
+
+                <!-- 17 MeV -->
+                <div class="energy-group" data-energy="17MeV">
+                    <h4 class="energy-header">17 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% with field=form.beam_dose_ref_depth_17mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.beam_r50_17mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    </div>
+                </div>
+
+                <!-- 18 MeV -->
+                <div class="energy-group" data-energy="18MeV">
+                    <h4 class="energy-header">18 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% with field=form.beam_dose_ref_depth_18mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                        {% with field=form.beam_r50_18mev %}{% include 'QAID_Manager/field_snippet.html' %}{% endwith %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 30px; display: flex; gap: 15px;">
+            <button type="submit" style="
+                background-color: #007bff; 
+                color: white; 
+                padding: 12px 30px; 
+                border: none; 
+                border-radius: 5px; 
+                font-weight: bold; 
+                cursor: pointer;
+            ">Save LINAC</button>
+            
+            <a href="{% url 'settings_linacs' %}" style="
+                background-color: #6c757d; 
+                color: white; 
+                padding: 12px 30px; 
+                text-decoration: none; 
+                border-radius: 5px; 
+                font-weight: bold;
+            ">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<style>
+    .form-control {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        font-size: 14px;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        box-sizing: border-box;
+    }
+    
+    .form-control:focus {
+        border-color: #80bdff;
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+    
+    .form-check-input {
+        width: 18px;
+        height: 18px;
+        margin-right: 8px;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+        color: #495057;
+        font-size: 14px;
+    }
+
+    .error-message {
+        color: #dc3545;
+        font-size: 12px;
+        margin-top: 5px;
+    }
+
+    .form-section {
+        margin-bottom: 20px;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        overflow: hidden;
+    }
+
+    .section-header {
+        background-color: #f8f9fa;
+        padding: 15px 20px;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .section-header:hover {
+        background-color: #e9ecef;
+    }
+
+    .section-header h3 {
+        margin: 0;
+        color: #495057;
+        font-size: 18px;
+    }
+
+    .toggle-icon {
+        font-size: 14px;
+        color: #6c757d;
+        transition: transform 0.3s;
+    }
+
+    .section-content {
+        padding: 20px;
+        background-color: white;
+    }
+
+    .checkbox-group {
+        padding: 10px;
+        background-color: #f8f9fa;
+        border-radius: 4px;
+        border: 1px solid #dee2e6;
+    }
+
+    .checkbox-group div {
+        margin-bottom: 5px;
+    }
+
+    .energy-group {
+        margin-top: 25px;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        border: 1px solid #dee2e6;
+    }
+
+    .energy-header {
+        margin-top: 0;
+        margin-bottom: 15px;
+        color: #007bff;
+        font-size: 18px;
+        font-weight: bold;
+        border-bottom: 2px solid #007bff;
+        padding-bottom: 8px;
+    }
+</style>
+
+<script>
+    function toggleSection(sectionId) {
+        const content = document.getElementById(sectionId + '-content');
+        const icon = document.getElementById(sectionId + '-icon');
+        
+        if (content.style.display === 'none') {
+            content.style.display = 'block';
+            icon.textContent = '▼';
+        } else {
+            content.style.display = 'none';
+            icon.textContent = '▶';
+        }
+    }
+    
+    // Function to update energy group visibility based on selected energies
+    function updateEnergyGroupsVisibility() {
+        const selectedEnergies = [];
+        const energyCheckboxes = document.querySelectorAll('input[name="energy"]:checked');
+        energyCheckboxes.forEach(checkbox => {
+            selectedEnergies.push(checkbox.value);
+        });
+        
+        // Show/hide energy groups in CAT section
+        const catEnergyGroups = document.querySelectorAll('#cat-info-content .energy-group');
+        catEnergyGroups.forEach(group => {
+            const energyCode = group.getAttribute('data-energy');
+            if (selectedEnergies.includes(energyCode)) {
+                group.style.display = 'block';
+            } else {
+                group.style.display = 'none';
+            }
+        });
+        
+        // Show/hide energy groups in Beam Modelling section
+        const beamEnergyGroups = document.querySelectorAll('#beam-modelling-content .energy-group');
+        beamEnergyGroups.forEach(group => {
+            const energyCode = group.getAttribute('data-energy');
+            if (selectedEnergies.includes(energyCode)) {
+                group.style.display = 'block';
+            } else {
+                group.style.display = 'none';
+            }
+        });
+    }
+    
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add event listeners to energy checkboxes
+        const energyCheckboxes = document.querySelectorAll('input[name="energy"]');
+        energyCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', updateEnergyGroupsVisibility);
+        });
+        
+        // Initial update
+        updateEnergyGroupsVisibility();
+    });
+</script>
+{% endblock %}

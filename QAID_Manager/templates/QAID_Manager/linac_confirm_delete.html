@@ -1,0 +1,96 @@
+{% extends 'QAID_Manager/base.html' %}
+
+{% block title %}Delete LINAC - {{ linac.name }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto;">
+    <div style="margin-bottom: 30px;">
+        <h1>Delete LINAC</h1>
+        <a href="{% url 'settings_linacs' %}" style="
+            color: #6c757d; 
+            text-decoration: none;
+            padding: 5px 10px;
+            border: 1px solid #6c757d;
+            border-radius: 3px;
+            font-size: 14px;
+        ">← Back to LINACs</a>
+    </div>
+
+    <div style="
+        background-color: white; 
+        padding: 30px; 
+        border-radius: 8px; 
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border-left: 4px solid #dc3545;
+    ">
+        <div style="margin-bottom: 20px;">
+            <h3 style="color: #dc3545; margin-bottom: 10px;">⚠️ Warning</h3>
+            <p style="color: #6c757d; line-height: 1.6;">
+                You are about to delete the LINAC <strong>"{{ linac.name }}"</strong>. 
+                This action cannot be undone.
+            </p>
+        </div>
+
+        <div style="
+            background-color: #f8f9fa; 
+            padding: 20px; 
+            border-radius: 5px; 
+            margin-bottom: 30px;
+            border: 1px solid #dee2e6;
+        ">
+            <h4 style="margin-bottom: 15px; color: #495057;">LINAC Details</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div>
+                    <strong>Name:</strong> {{ linac.name }}
+                </div>
+                <div>
+                    <strong>Series Number:</strong> {{ linac.series_number|default:"Not specified" }}
+                </div>
+                <div>
+                    <strong>Status:</strong> 
+                    <span style="
+                        padding: 2px 6px; 
+                        border-radius: 10px; 
+                        font-size: 12px; 
+                        font-weight: bold;
+                        {% if linac.is_active %}
+                            background-color: #d4edda; 
+                            color: #155724;
+                        {% else %}
+                            background-color: #f8d7da; 
+                            color: #721c24;
+                        {% endif %}
+                    ">
+                        {% if linac.is_active %}Active{% else %}Inactive{% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <form method="post" style="margin-top: 30px;">
+            {% csrf_token %}
+            <div style="display: flex; gap: 15px;">
+                <button type="submit" style="
+                    background-color: #dc3545; 
+                    color: white; 
+                    padding: 12px 30px; 
+                    border: none; 
+                    border-radius: 5px; 
+                    font-weight: bold; 
+                    cursor: pointer;
+                ">Confirm Delete</button>
+                
+                <a href="{% url 'settings_linacs' %}" style="
+                    background-color: #6c757d; 
+                    color: white; 
+                    padding: 12px 30px; 
+                    text-decoration: none; 
+                    border-radius: 5px; 
+                    font-weight: bold;
+                ">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+

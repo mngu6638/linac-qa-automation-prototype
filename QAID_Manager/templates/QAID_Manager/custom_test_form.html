@@ -1,0 +1,94 @@
+{% extends 'QAID_Manager/base.html' %}
+
+{% block title %}{{ title }} - QA Manager{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto;">
+    <div style="margin-bottom: 30px;">
+        <h1>{{ title }}</h1>
+        <a href="{% url 'settings_qa_tests' %}" style="
+            color: #6c757d; text-decoration: none; padding: 5px 10px;
+            border: 1px solid #6c757d; border-radius: 3px; font-size: 14px;
+        ">&larr; Back to QA Tests</a>
+    </div>
+    <form method="post" style="
+        background-color: white; padding: 30px; border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    ">
+        {% csrf_token %}
+
+        {% if form.errors %}
+        <div style="background-color: #f8d7da; color: #721c24; padding: 15px; margin-bottom: 20px; border-radius: 5px; border: 1px solid #f5c6cb;">
+            <strong>Please correct the following errors:</strong>
+            <ul style="margin: 10px 0 0 20px;">
+                {% for field, errors in form.errors.items %}
+                    {% for error in errors %}<li>{{ error }}</li>{% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <p style="color: #6c757d; margin-bottom: 20px;">Adding test to: <strong style="color: #007bff;">{{ custom_type.name }}</strong></p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div>
+                <h3 style="margin-bottom: 15px; color: #495057; border-bottom: 2px solid #007bff; padding-bottom: 5px;">Test Information</h3>
+
+                <div style="margin-bottom: 15px;">
+                    <label for="{{ form.name.id_for_label }}" style="display: block; margin-bottom: 5px; font-weight: bold; color: #495057;">Name</label>
+                    {{ form.name }}
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label for="{{ form.tolerance_value.id_for_label }}" style="display: block; margin-bottom: 5px; font-weight: bold; color: #495057;">Tolerance Value</label>
+                    {{ form.tolerance_value }}
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label for="{{ form.tolerance_unit.id_for_label }}" style="display: block; margin-bottom: 5px; font-weight: bold; color: #495057;">Tolerance Unit</label>
+                    {{ form.tolerance_unit }}
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label for="{{ form.order_index.id_for_label }}" style="display: block; margin-bottom: 5px; font-weight: bold; color: #495057;">Order Index</label>
+                    {{ form.order_index }}
+                    <small style="color: #6c757d;">Controls display order within this test type.</small>
+                </div>
+            </div>
+
+            <div>
+                <h3 style="margin-bottom: 15px; color: #495057; border-bottom: 2px solid #007bff; padding-bottom: 5px;">Description</h3>
+
+                <div style="margin-bottom: 15px;">
+                    <label for="{{ form.description.id_for_label }}" style="display: block; margin-bottom: 5px; font-weight: bold; color: #495057;">Description</label>
+                    {{ form.description }}
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #dee2e6;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                {{ form.is_active }}
+                <label for="{{ form.is_active.id_for_label }}" style="font-weight: bold; color: #495057;">Active</label>
+            </div>
+        </div>
+
+        <div style="margin-top: 30px; display: flex; gap: 15px;">
+            <button type="submit" style="
+                background-color: #007bff; color: white; padding: 12px 30px;
+                border: none; border-radius: 5px; font-weight: bold; cursor: pointer;
+            ">Save Test</button>
+            <a href="{% url 'settings_qa_tests' %}" style="
+                background-color: #6c757d; color: white; padding: 12px 30px;
+                text-decoration: none; border-radius: 5px; font-weight: bold;
+            ">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<style>
+    .form-control { width: 100%; padding: 8px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 14px; }
+    .form-control:focus { border-color: #80bdff; outline: 0; box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); }
+    .form-check-input { width: 18px; height: 18px; margin-right: 8px; }
+</style>
+{% endblock %}

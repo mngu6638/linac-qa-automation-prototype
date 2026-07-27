@@ -1,0 +1,155 @@
+/* Custom CSS for Linac Admin - CAT Test Fields */
+
+/* Test to see if CSS is loading */
+body {
+    background-color: #f9f9f9 !important;
+}
+
+/* Make form fields wider */
+.form-row input[type="text"],
+.form-row input[type="number"],
+.form-row textarea {
+    width: 100% !important;
+    max-width: 600px !important;
+}
+
+/* Make labels wider for better readability */
+.form-row label {
+    min-width: 300px !important;
+    display: inline-block !important;
+    font-weight: bold !important;
+}
+
+/* Style for CAT test sections */
+.fieldset {
+    margin-bottom: 20px;
+}
+
+/* Make the form more readable */
+.form-row {
+    margin-bottom: 15px;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+/* Highlight important fields */
+.form-row label[for*="cat_"] {
+    color: #2c3e50;
+    font-size: 14px;
+}
+
+/* Make input fields more prominent */
+.form-row input[type="number"] {
+    padding: 4px 8px !important;
+    border: 2px solid #ddd !important;
+    border-radius: 4px !important;
+    font-size: 14px !important;
+    height: 30px !important;
+    box-sizing: border-box !important;
+}
+
+.form-row input[type="number"]:focus {
+    border-color: #007cba !important;
+    box-shadow: 0 0 5px rgba(0, 124, 186, 0.3) !important;
+}
+
+/* Fix alignment for specific fields */
+.form-row label[for="id_cat_high_contrast"],
+.form-row label[for="id_cat_transverse_vertical_scale"] {
+    min-width: 300px !important;
+    display: inline-block !important;
+    font-weight: bold !important;
+    vertical-align: top !important;
+}
+
+/* Additional specific selectors for all CAT fields */
+.form-row input[name*="cat_"] {
+    height: 30px !important;
+    padding: 4px 8px !important;
+    box-sizing: border-box !important;
+}
+
+/* Debug: Add a visible border to see if CSS is loading */
+.form-row {
+    border: 1px solid transparent !important;
+}
+
+/* Style for textarea */
+.form-row textarea {
+    min-height: 100px;
+    padding: 8px;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .form-row label {
+        min-width: 200px !important;
+    }
+    
+    .form-row input[type="text"],
+    .form-row input[type="number"],
+    .form-row textarea {
+        max-width: 100% !important;
+    }
+}
+
+/* CAT Test Group Headings */
+.cat-mechanical-heading {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 8px 12px;
+    margin: 0 0 8px 0;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 14px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: inline-block;
+    width: 100%;
+}
+
+.cat-beam-heading {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    padding: 8px 12px;
+    margin: 0 0 8px 0;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 14px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: inline-block;
+    width: 100%;
+}
+
+.cat-xvi-heading {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    color: white;
+    padding: 8px 12px;
+    margin: 0 0 8px 0;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 14px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: inline-block;
+    width: 100%;
+}
+
+/* Style for field labels that contain headings */
+.form-row label:has(.cat-mechanical-heading),
+.form-row label:has(.cat-beam-heading),
+.form-row label:has(.cat-xvi-heading) {
+    margin-bottom: 15px;
+    display: block;
+}
+
+/* Add spacing after headings */
+.cat-mechanical-heading + br,
+.cat-beam-heading + br,
+.cat-xvi-heading + br {
+    display: none;
+} 

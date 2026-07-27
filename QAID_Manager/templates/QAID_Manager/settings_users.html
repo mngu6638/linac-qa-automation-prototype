@@ -1,0 +1,110 @@
+{% extends 'QAID_Manager/base.html' %}
+
+{% block title %}Settings - Users{% endblock %}
+
+{% block content %}
+<div style="max-width: 1200px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h1>User Accounts</h1>
+        <a href="{% url 'user_create' %}" style="
+            background-color: #007bff; 
+            color: white; 
+            padding: 10px 20px; 
+            text-decoration: none; 
+            border-radius: 5px;
+            font-weight: bold;
+        ">Add New User</a>
+    </div>
+
+    {% if users %}
+        <div style="overflow-x: auto;">
+            <table style="
+                width: 100%; 
+                border-collapse: collapse; 
+                background-color: white; 
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                border-radius: 8px;
+                overflow: hidden;
+            ">
+                <thead>
+                    <tr style="background-color: #f8f9fa;">
+                        <th style="padding: 15px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: bold;">Full Name</th>
+                        <th style="padding: 15px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: bold;">Role</th>
+                        <th style="padding: 15px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: bold;">Email</th>
+                        <th style="padding: 15px; text-align: center; border-bottom: 2px solid #dee2e6; font-weight: bold;">Admin</th>
+                        <th style="padding: 15px; text-align: center; border-bottom: 2px solid #dee2e6; font-weight: bold;">Active</th>
+                        <th style="padding: 15px; text-align: center; border-bottom: 2px solid #dee2e6; font-weight: bold;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                        <tr style="border-bottom: 1px solid #dee2e6;">
+                            <td style="padding: 15px;">
+                                <a href="{% url 'user_detail' user.pk %}" style="
+                                    color: #007bff; 
+                                    text-decoration: none; 
+                                    font-weight: bold;
+                                ">
+                                    {% if user.first_name or user.last_name %}
+                                        {{ user.last_name }} {{ user.first_name }}
+                                    {% else %}
+                                        {{ user.username }}
+                                    {% endif %}
+                                </a>
+                            </td>
+                            <td style="padding: 15px;">
+                                {% if user.profile and user.profile.role %}
+                                    {{ user.profile.get_role_display }}
+                                {% else %}
+                                    <span style="color: #6c757d;">-</span>
+                                {% endif %}
+                            </td>
+                            <td style="padding: 15px;">{{ user.email|default:"-" }}</td>
+                            <td style="padding: 15px; text-align: center;">
+                                {% if user.is_staff %}
+                                    <span style="color: #28a745; font-weight: bold;">✓</span>
+                                {% else %}
+                                    <span style="color: #6c757d;">-</span>
+                                {% endif %}
+                            </td>
+                            <td style="padding: 15px; text-align: center;">
+                                {% if user.is_active %}
+                                    <span style="color: #28a745; font-weight: bold;">✓</span>
+                                {% else %}
+                                    <span style="color: #dc3545; font-weight: bold;">✗</span>
+                                {% endif %}
+                            </td>
+                            <td style="padding: 15px; text-align: center;">
+                                <a href="{% url 'user_edit' user.pk %}" style="
+                                    color: #007bff; 
+                                    text-decoration: none; 
+                                    margin-right: 10px;
+                                    padding: 5px 10px;
+                                    border: 1px solid #007bff;
+                                    border-radius: 3px;
+                                    font-size: 12px;
+                                ">Edit</a>
+                                {% if user != request.user %}
+                                    <a href="{% url 'user_delete' user.pk %}" style="
+                                        color: #dc3545; 
+                                        text-decoration: none;
+                                        padding: 5px 10px;
+                                        border: 1px solid #dc3545;
+                                        border-radius: 3px;
+                                        font-size: 12px;
+                                    ">Delete</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 40px; background-color: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <p style="color: #6c757d; font-size: 18px;">No users found.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+

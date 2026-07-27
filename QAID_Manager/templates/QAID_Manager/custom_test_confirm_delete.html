@@ -1,0 +1,31 @@
+{% extends 'QAID_Manager/base.html' %}
+
+{% block title %}Delete Custom Test - QA Manager{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto;">
+    <h1 style="color: #dc3545;">Delete Test</h1>
+
+    <div style="
+        background-color: white; padding: 30px; border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-top: 20px;
+    ">
+        <p>Are you sure you want to delete the test <strong>"{{ custom_test.name }}"</strong>
+        from <strong>{{ custom_test.test_type.name }}</strong>?</p>
+
+        <form method="post">
+            {% csrf_token %}
+            <div style="display: flex; gap: 15px;">
+                <button type="submit" style="
+                    background-color: #dc3545; color: white; padding: 12px 30px;
+                    border: none; border-radius: 5px; font-weight: bold; cursor: pointer;
+                ">Delete</button>
+                <a href="{% url 'settings_qa_tests' %}" style="
+                    background-color: #6c757d; color: white; padding: 12px 30px;
+                    text-decoration: none; border-radius: 5px; font-weight: bold;
+                ">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

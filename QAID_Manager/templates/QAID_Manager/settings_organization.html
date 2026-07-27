@@ -1,0 +1,735 @@
+{% extends 'QAID_Manager/base.html' %}
+
+{% block title %}Organization Settings - QA Manager{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto;">
+    <h1>Organization Settings</h1>
+    <p style="color: #6c757d; margin-bottom: 30px;">Customize your organization's logo, name, homepage images, QA report template, and service report template.</p>
+    
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <div style="margin-bottom: 20px;">
+            <label for="{{ form.logo.id_for_label }}" style="display: block; margin-bottom: 8px; font-weight: bold;">
+                {{ form.logo.label }}
+            </label>
+            {% if settings.logo %}
+                <div style="margin-bottom: 15px;">
+                    <p style="color: #6c757d; margin-bottom: 8px;">Current logo:</p>
+                    <img src="{{ settings.logo.url }}" alt="Current Logo" style="max-height: 150px; border: 1px solid #dee2e6; padding: 10px; background-color: #f8f9fa;">
+                </div>
+            {% endif %}
+            {{ form.logo }}
+            {% if form.logo.help_text %}
+                <small style="display: block; margin-top: 5px; color: #6c757d;">{{ form.logo.help_text }}</small>
+            {% endif %}
+            {% if form.logo.errors %}
+                <div style="color: red; margin-top: 5px;">{{ form.logo.errors }}</div>
+            {% endif %}
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <label for="{{ form.organization_name.id_for_label }}" style="display: block; margin-bottom: 8px; font-weight: bold;">
+                {{ form.organization_name.label }}
+            </label>
+            {{ form.organization_name }}
+            {% if form.organization_name.help_text %}
+                <small style="display: block; margin-top: 5px; color: #6c757d;">{{ form.organization_name.help_text }}</small>
+            {% endif %}
+            {% if form.organization_name.errors %}
+                <div style="color: red; margin-top: 5px;">{{ form.organization_name.errors }}</div>
+            {% endif %}
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <label for="{{ form.left_side_image.id_for_label }}" style="display: block; margin-bottom: 8px; font-weight: bold;">
+                {{ form.left_side_image.label }}
+            </label>
+            {% if settings.left_side_image %}
+                <div style="margin-bottom: 15px;">
+                    <p style="color: #6c757d; margin-bottom: 8px;">Current left side image:</p>
+                    <img src="{{ settings.left_side_image.url }}" alt="Current Left Side Image" style="max-height: 180px; border: 1px solid #dee2e6; padding: 10px; background-color: #f8f9fa;">
+                </div>
+            {% endif %}
+            {{ form.left_side_image }}
+            {% if form.left_side_image.help_text %}
+                <small style="display: block; margin-top: 5px; color: #6c757d;">{{ form.left_side_image.help_text }}</small>
+            {% endif %}
+            {% if form.left_side_image.errors %}
+                <div style="color: red; margin-top: 5px;">{{ form.left_side_image.errors }}</div>
+            {% endif %}
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <label for="{{ form.bottom_image.id_for_label }}" style="display: block; margin-bottom: 8px; font-weight: bold;">
+                {{ form.bottom_image.label }}
+            </label>
+            {% if settings.bottom_image %}
+                <div style="margin-bottom: 15px;">
+                    <p style="color: #6c757d; margin-bottom: 8px;">Current bottom image:</p>
+                    <img src="{{ settings.bottom_image.url }}" alt="Current Bottom Image" style="max-width: 100%; max-height: 300px; border: 1px solid #dee2e6; padding: 10px; background-color: #f8f9fa;">
+                </div>
+            {% endif %}
+            {{ form.bottom_image }}
+            {% if form.bottom_image.help_text %}
+                <small style="display: block; margin-top: 5px; color: #6c757d;">{{ form.bottom_image.help_text }}</small>
+            {% endif %}
+            {% if form.bottom_image.errors %}
+                <div style="color: red; margin-top: 5px;">{{ form.bottom_image.errors }}</div>
+            {% endif %}
+        </div>
+        
+        <hr style="margin: 30px 0; border: none; border-top: 2px solid #dee2e6;">
+        
+        <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #dee2e6; border-radius: 6px; background: #fcfcfc;">
+            <h3 style="margin: 0 0 12px 0; color:#495057;">Report Templates</h3>
+
+            <div style="font-weight: bold; color:#495057; margin-bottom: 6px;">QA Report</div>
+            <div style="margin-bottom: 12px;">
+                <a href="{% url 'download_report_template' 'qa' %}" style="
+                    color: #17a2b8;
+                    text-decoration: none;
+                    padding: 6px 12px;
+                    border: 1px solid #17a2b8;
+                    border-radius: 4px;
+                    display: inline-block;
+                    font-size: 13px;
+                ">Download QA Report Templates</a>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+                <label for="{{ form.report_template.id_for_label }}" style="font-size: 12px; color:#495057; margin: 0; min-width: 220px;">
+                    Upload QA report template:
+                </label>
+                {{ form.report_template }}
+                <button type="button" onclick="openPlaceholdersModal()" style="
+                    background-color: #17a2b8;
+                    color: white;
+                    border: none;
+                    border-radius: 50%;
+                    width: 24px;
+                    height: 24px;
+                    cursor: pointer;
+                    font-size: 14px;
+                    font-weight: bold;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 0;
+                    line-height: 1;
+                " title="View Available Placeholders">?</button>
+            </div>
+            {% if form.report_template.errors %}
+                <div style="color: red; margin-top: 5px;">{{ form.report_template.errors }}</div>
+            {% endif %}
+
+            <div style="font-weight: bold; color:#495057; margin: 14px 0 6px 0;">Service Report</div>
+            <div style="margin: 14px 0 12px 0;">
+                <a href="{% url 'download_report_template' 'service' %}" style="
+                    color: #17a2b8;
+                    text-decoration: none;
+                    padding: 6px 12px;
+                    border: 1px solid #17a2b8;
+                    border-radius: 4px;
+                    display: inline-block;
+                    font-size: 13px;
+                ">Download Service Report Templates</a>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+                <label for="{{ form.service_report_template.id_for_label }}" style="font-size: 12px; color:#495057; margin: 0; min-width: 220px;">
+                    Upload Service report template:
+                </label>
+                {{ form.service_report_template }}
+            </div>
+            {% if form.service_report_template.errors %}
+                <div style="color: red; margin-top: 5px;">{{ form.service_report_template.errors }}</div>
+            {% endif %}
+        </div>
+        
+        <div style="margin-top: 30px;">
+            <button type="submit" style="
+                background-color: #007bff;
+                color: white;
+                padding: 10px 20px;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 16px;
+            " onmouseover="this.style.backgroundColor='#0056b3'" 
+               onmouseout="this.style.backgroundColor='#007bff'">
+                Save Settings
+            </button>
+            <a href="{% url 'settings' %}" style="
+                margin-left: 10px;
+                padding: 10px 20px;
+                background-color: #6c757d;
+                color: white;
+                text-decoration: none;
+                border-radius: 4px;
+                display: inline-block;
+            " onmouseover="this.style.backgroundColor='#5a6268'" 
+               onmouseout="this.style.backgroundColor='#6c757d'">
+                Cancel
+            </a>
+        </div>
+    </form>
+    
+    <!-- Modal for Placeholders Help -->
+    <div id="placeholdersModal" style="
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.5);
+    ">
+        <div style="
+            background-color: #fefefe;
+            margin: 2% auto;
+            padding: 0;
+            border: 1px solid #888;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 1200px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        ">
+            <!-- Modal Header -->
+            <div style="
+                background-color: #007bff;
+                color: white;
+                padding: 20px;
+                border-radius: 8px 8px 0 0;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            ">
+                <h2 style="margin: 0; font-size: 24px;">📋 Report Template Placeholders Reference</h2>
+                <button onclick="closePlaceholdersModal()" style="
+                    background: none;
+                    border: none;
+                    color: white;
+                    font-size: 28px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    padding: 0;
+                    width: 30px;
+                    height: 30px;
+                    line-height: 1;
+                ">&times;</button>
+            </div>
+            
+            <!-- Modal Content -->
+            <div style="
+                padding: 25px;
+                overflow-y: auto;
+                flex: 1;
+            ">
+                <p style="color: #6c757d; margin-bottom: 25px; font-size: 16px;">
+                    Use these placeholders in your DOCX template file. They will be automatically replaced with actual data when generating reports.
+                </p>
+                
+                <!-- Tabs Navigation -->
+                <div style="
+                    display: flex;
+                    gap: 10px;
+                    margin-bottom: 20px;
+                    border-bottom: 2px solid #dee2e6;
+                ">
+                    <button onclick="showTab('basic')" id="tab-basic" class="placeholder-tab active" style="
+                        padding: 12px 20px;
+                        border: none;
+                        background: none;
+                        cursor: pointer;
+                        font-size: 16px;
+                        font-weight: bold;
+                        color: #007bff;
+                        border-bottom: 3px solid #007bff;
+                        margin-bottom: -2px;
+                    ">Basic Info</button>
+                    <button onclick="showTab('datetime')" id="tab-datetime" class="placeholder-tab" style="
+                        padding: 12px 20px;
+                        border: none;
+                        background: none;
+                        cursor: pointer;
+                        font-size: 16px;
+                        font-weight: bold;
+                        color: #6c757d;
+                        border-bottom: 3px solid transparent;
+                        margin-bottom: -2px;
+                    ">Date/Time</button>
+                    <button onclick="showTab('tests')" id="tab-tests" class="placeholder-tab" style="
+                        padding: 12px 20px;
+                        border: none;
+                        background: none;
+                        cursor: pointer;
+                        font-size: 16px;
+                        font-weight: bold;
+                        color: #6c757d;
+                        border-bottom: 3px solid transparent;
+                        margin-bottom: -2px;
+                    ">Tests (01-20)</button>
+                </div>
+                
+                <!-- Tab Content: Basic Info -->
+                <div id="content-basic" class="tab-content" style="display: block;">
+                    <h3 style="color: #495057; margin-bottom: 20px; font-size: 20px;">Basic Information Placeholders</h3>
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse; background-color: white; border: 1px solid #dee2e6; margin-bottom: 20px;">
+                            <thead>
+                                <tr style="background-color: #e9ecef;">
+                                    <th style="padding: 15px; text-align: left; border: 1px solid #dee2e6; font-weight: bold; width: 30%;">Placeholder</th>
+                                    <th style="padding: 15px; text-align: left; border: 1px solid #dee2e6; font-weight: bold; width: 40%;">Description</th>
+                                    <th style="padding: 15px; text-align: left; border: 1px solid #dee2e6; font-weight: bold; width: 30%;">Example Output</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="placeholder-text" data-placeholder="&#123;&#123;LINAC_NAME&#125;&#125;" style="padding: 12px; border: 1px solid #dee2e6; font-family: 'Courier New', monospace; color: #007bff; font-weight: bold; cursor: pointer;" onclick="copyToClipboard('{{LINAC_NAME}}', this)" title="Click to copy">&#123;&#123;LINAC_NAME&#125;&#125;</td>
+                                    <td style="padding: 12px; border: 1px solid #dee2e6;">The LINAC name</td>
+                                    <td style="padding: 12px; border: 1px solid #dee2e6; color: #6c757d;">Demo Linac A</td>
+                                </tr>
+                                <tr>
+                                    <td class="placeholder-text" data-placeholder="&#123;&#123;LINAC_SERIES_NUMBER&#125;&#125;" style="padding: 12px; border: 1px solid #dee2e6; font-family: 'Courier New', monospace; color: #007bff; font-weight: bold; cursor: pointer;" onclick="copyToClipboard('{{LINAC_SERIES_NUMBER}}', this)" title="Click to copy">&#123;&#123;LINAC_SERIES_NUMBER&#125;&#125;</td>
+                                    <td style="padding: 12px; border: 1px solid #dee2e6;">The LINAC series number</td>
+                                    <td style="padding: 12px; border: 1px solid #dee2e6; color: #6c757d;">SN123456</td>
+                                </tr>
+                                <tr>
+                                    <td class="placeholder-text" data-placeholder="&#123;&#123;DATE_PERFORMED&#125;&#125;" style="padding: 12px; border: 1px solid #dee2e6; font-family: 'Courier New', monospace; color: #007bff; font-weight: bold; cursor: pointer;" onclick="copyToClipboard('{{DATE_PERFORMED}}', this)" title="Click to copy">&#123;&#123;DATE_PERFORMED&#125;&#125;</td>
+                                    <td style="padding: 12px; border: 1px solid #dee2e6;">The QA date (YYYY-MM-DD format)</td>
+                                    <td style="padding: 12px; border: 1px solid #dee2e6; color: #6c757d;">2025-07-30</td>
+                                </tr>
+                                <tr>
+                                    <td class="placeholder-text" data-placeholder="&#123;&#123;PERFORMED_BY&#125;&#125;" style="padding: 12px; border: 1px solid #dee2e6; font-family: 'Courier New', monospace; color: #007bff; font-weight: bold; cursor: pointer;" onclick="copyToClipboard('{{PERFORMED_BY}}', this)" title="Click to copy">&#123;&#123;PERFORMED_BY&#125;&#125;</td>
+                                    <td style="padding: 12px; border: 1px solid #dee2e6;">The person who performed the QA</td>
+                                    <td style="padding: 12px; border: 1px solid #dee2e6; color: #6c757d;">John Doe</td>
+                                </tr>
+                                <tr>
+                                    <td class="placeholder-text" data-placeholder="&#123;&#123;STATUS&#125;&#125;" style="padding: 12px; border: 1px solid #dee2e6; font-family: 'Courier New', monospace; color: #007bff; font-weight: bold; cursor: pointer;" onclick="copyToClipboard('{{STATUS}}', this)" title="Click to copy">&#123;&#123;STATUS&#125;&#125;</td>
+                                    <td style="padding: 12px; border: 1px solid #dee2e6;">The QA status</td>
+                                    <td style="padding: 12px; border: 1px solid #dee2e6; color: #6c757d;">Completed</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Tab Content: Date/Time -->
+                <div id="content-datetime" class="tab-content" style="display: none;">
+                    <h3 style="color: #495057; margin-bottom: 20px; font-size: 20px;">Detailed Date/Time Placeholders</h3>
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse; background-color: white; border: 1px solid #dee2e6; margin-bottom: 20px;">
+                            <thead>
+                                <tr style="background-color: #e9ecef;">
+                                    <th style="padding: 15px; text-align: left; border: 1px solid #dee2e6; font-weight: bold; width: 30%;">Placeholder</th>
+                                    <th style="padding: 15px; text-align: left; border: 1px solid #dee2e6; font-weight: bold; width: 40%;">Description</th>
+                                    <th style="padding: 15px; text-align: left; border: 1px solid #dee2e6; font-weight: bold; width: 30%;">Example Output</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="placeholder-text" data-placeholder="&#123;&#123;QA_PERFORMED_DATE_DD&#125;&#125;" style="padding: 12px; border: 1px solid #dee2e6; font-family: 'Courier New', monospace; color: #007bff; font-weight: bold; cursor: pointer;" onclick="copyToClipboard('{{QA_PERFORMED_DATE_DD}}', this)" title="Click to copy">&#123;&#123;QA_PERFORMED_DATE_DD&#125;&#125;</td>
+                                    <td style="padding: 12px; border: 1px solid #dee2e6;">Day of the month (01-31)</td>
+                                    <td style="padding: 12px; border: 1px solid #dee2e6; color: #6c757d;">30</td>
+                                </tr>
+                                <tr>
+                                    <td class="placeholder-text" data-placeholder="&#123;&#123;QA_PERFORMED_DATE_MM&#125;&#125;" style="padding: 12px; border: 1px solid #dee2e6; font-family: 'Courier New', monospace; color: #007bff; font-weight: bold; cursor: pointer;" onclick="copyToClipboard('{{QA_PERFORMED_DATE_MM}}', this)" title="Click to copy">&#123;&#123;QA_PERFORMED_DATE_MM&#125;&#125;</td>
+                                    <td style="padding: 12px; border: 1px solid #dee2e6;">Month (01-12)</td>
+                                    <td style="padding: 12px; border: 1px solid #dee2e6; color: #6c757d;">07</td>
+                                </tr>
+                                <tr>
+                                    <td class="placeholder-text" data-placeholder="&#123;&#123;QA_PERFORMED_DATE_YYYY&#125;&#125;" style="padding: 12px; border: 1px solid #dee2e6; font-family: 'Courier New', monospace; color: #007bff; font-weight: bold; cursor: pointer;" onclick="copyToClipboard('{{QA_PERFORMED_DATE_YYYY}}', this)" title="Click to copy">&#123;&#123;QA_PERFORMED_DATE_YYYY&#125;&#125;</td>
+                                    <td style="padding: 12px; border: 1px solid #dee2e6;">Year (YYYY)</td>
+                                    <td style="padding: 12px; border: 1px solid #dee2e6; color: #6c757d;">2025</td>
+                                </tr>
+                                <tr>
+                                    <td class="placeholder-text" data-placeholder="&#123;&#123;QA_PERFORMED_DATE_HHMM&#125;&#125;" style="padding: 12px; border: 1px solid #dee2e6; font-family: 'Courier New', monospace; color: #007bff; font-weight: bold; cursor: pointer;" onclick="copyToClipboard('{{QA_PERFORMED_DATE_HHMM}}', this)" title="Click to copy">&#123;&#123;QA_PERFORMED_DATE_HHMM&#125;&#125;</td>
+                                    <td style="padding: 12px; border: 1px solid #dee2e6;">Time in HH:MM format</td>
+                                    <td style="padding: 12px; border: 1px solid #dee2e6; color: #6c757d;">14:30</td>
+                                </tr>
+                                <tr>
+                                    <td class="placeholder-text" data-placeholder="&#123;&#123;QA_PERFORMED_BY_USER&#125;&#125;" style="padding: 12px; border: 1px solid #dee2e6; font-family: 'Courier New', monospace; color: #007bff; font-weight: bold; cursor: pointer;" onclick="copyToClipboard('{{QA_PERFORMED_BY_USER}}', this)" title="Click to copy">&#123;&#123;QA_PERFORMED_BY_USER&#125;&#125;</td>
+                                    <td style="padding: 12px; border: 1px solid #dee2e6;">The user who performed the QA</td>
+                                    <td style="padding: 12px; border: 1px solid #dee2e6; color: #6c757d;">John Doe</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Tab Content: Tests -->
+                <div id="content-tests" class="tab-content" style="display: none;">
+                    <h3 style="color: #495057; margin-bottom: 20px; font-size: 20px;">Individual Test Placeholders (All 20 Tests)</h3>
+                    <p style="color: #6c757d; margin-bottom: 20px;">
+                        Each test has 4 placeholders: <strong>VALUE</strong>, <strong>NAME</strong>, <strong>STATUS</strong>, and <strong>TOLERANCE</strong>
+                    </p>
+                    
+                    <div style="background-color: #f8f9fa; padding: 15px; border-radius: 6px; margin-bottom: 20px; border-left: 4px solid #007bff;">
+                        <p style="margin: 0; font-weight: bold; color: #495057; margin-bottom: 10px;">Format Pattern:</p>
+                        <ul style="margin: 0; padding-left: 20px; color: #6c757d;">
+                            <li><code class="placeholder-text" data-placeholder="&#123;&#123;TEST_XX_VALUE&#125;&#125;" style="color: #007bff; background: white; padding: 2px 6px; border-radius: 3px;">&#123;&#123;TEST_XX_VALUE&#125;&#125;</code> - Test value (e.g., 1.25)</li>
+                            <li><code class="placeholder-text" data-placeholder="&#123;&#123;TEST_XX_NAME&#125;&#125;" style="color: #007bff; background: white; padding: 2px 6px; border-radius: 3px;">&#123;&#123;TEST_XX_NAME&#125;&#125;</code> - Test name</li>
+                            <li><code class="placeholder-text" data-placeholder="&#123;&#123;TEST_XX_STATUS&#125;&#125;" style="color: #007bff; background: white; padding: 2px 6px; border-radius: 3px;">&#123;&#123;TEST_XX_STATUS&#125;&#125;</code> - Pass/Fail status (Đạt/Không đạt)</li>
+                            <li><code class="placeholder-text" data-placeholder="&#123;&#123;TEST_XX_TOLERANCE&#125;&#125;" style="color: #007bff; background: white; padding: 2px 6px; border-radius: 3px;">&#123;&#123;TEST_XX_TOLERANCE&#125;&#125;</code> - Tolerance value (e.g., ±1.0)</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="overflow-x: auto; margin-bottom: 20px;">
+                        <table style="width: 100%; border-collapse: collapse; background-color: white; border: 1px solid #dee2e6;">
+                            <thead>
+                                <tr style="background-color: #e9ecef;">
+                                    <th style="padding: 12px; text-align: left; border: 1px solid #dee2e6; font-weight: bold; width: 8%;">Test</th>
+                                    <th style="padding: 12px; text-align: left; border: 1px solid #dee2e6; font-weight: bold; width: 35%;">Description</th>
+                                    <th style="padding: 12px; text-align: left; border: 1px solid #dee2e6; font-weight: bold; width: 57%;">Placeholders (Click to copy)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold;">01</td>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6;">Kích thước trường ánh sáng (đối xứng và bất đối xứng)</td>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-family: 'Courier New', monospace; font-size: 12px;">
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_01_VALUE&#125;&#125;" onclick="copyToClipboard('{{TEST_01_VALUE}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_01_VALUE&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_01_NAME&#125;&#125;" onclick="copyToClipboard('{{TEST_01_NAME}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_01_NAME&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_01_STATUS&#125;&#125;" onclick="copyToClipboard('{{TEST_01_STATUS}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_01_STATUS&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_01_TOLERANCE&#125;&#125;" onclick="copyToClipboard('{{TEST_01_TOLERANCE}}', this)" style="color: #007bff; cursor: pointer;" title="Click to copy">&#123;&#123;TEST_01_TOLERANCE&#125;&#125;</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold;">02</td>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6;">Góc quay bộ chuẩn trực (collimator)</td>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-family: 'Courier New', monospace; font-size: 12px;">
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_02_VALUE&#125;&#125;" onclick="copyToClipboard('{{TEST_02_VALUE}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_02_VALUE&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_02_NAME&#125;&#125;" onclick="copyToClipboard('{{TEST_02_NAME}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_02_NAME&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_02_STATUS&#125;&#125;" onclick="copyToClipboard('{{TEST_02_STATUS}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_02_STATUS&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_02_TOLERANCE&#125;&#125;" onclick="copyToClipboard('{{TEST_02_TOLERANCE}}', this)" style="color: #007bff; cursor: pointer;" title="Click to copy">&#123;&#123;TEST_02_TOLERANCE&#125;&#125;</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold;">03</td>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6;">Góc quay bàn điều trị</td>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-family: 'Courier New', monospace; font-size: 12px;">
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_03_VALUE&#125;&#125;" onclick="copyToClipboard('{{TEST_03_VALUE}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_03_VALUE&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_03_NAME&#125;&#125;" onclick="copyToClipboard('{{TEST_03_NAME}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_03_NAME&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_03_STATUS&#125;&#125;" onclick="copyToClipboard('{{TEST_03_STATUS}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_03_STATUS&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_03_TOLERANCE&#125;&#125;" onclick="copyToClipboard('{{TEST_03_TOLERANCE}}', this)" style="color: #007bff; cursor: pointer;" title="Click to copy">&#123;&#123;TEST_03_TOLERANCE&#125;&#125;</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold;">04</td>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6;">Độ chính xác trong chuyển động của Bàn điều trị</td>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-family: 'Courier New', monospace; font-size: 12px;">
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_04_VALUE&#125;&#125;" onclick="copyToClipboard('{{TEST_04_VALUE}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_04_VALUE&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_04_NAME&#125;&#125;" onclick="copyToClipboard('{{TEST_04_NAME}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_04_NAME&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_04_STATUS&#125;&#125;" onclick="copyToClipboard('{{TEST_04_STATUS}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_04_STATUS&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_04_TOLERANCE&#125;&#125;" onclick="copyToClipboard('{{TEST_04_TOLERANCE}}', this)" style="color: #007bff; cursor: pointer;" title="Click to copy">&#123;&#123;TEST_04_TOLERANCE&#125;&#125;</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold;">05</td>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6;">Góc quay thân máy (gantry)</td>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-family: 'Courier New', monospace; font-size: 12px;">
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_05_VALUE&#125;&#125;" onclick="copyToClipboard('{{TEST_05_VALUE}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_05_VALUE&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_05_NAME&#125;&#125;" onclick="copyToClipboard('{{TEST_05_NAME}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_05_NAME&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_05_STATUS&#125;&#125;" onclick="copyToClipboard('{{TEST_05_STATUS}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_05_STATUS&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_05_TOLERANCE&#125;&#125;" onclick="copyToClipboard('{{TEST_05_TOLERANCE}}', this)" style="color: #007bff; cursor: pointer;" title="Click to copy">&#123;&#123;TEST_05_TOLERANCE&#125;&#125;</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold;">06</td>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6;">Độ chính xác của chùm laser tại điểm đồng tâm</td>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-family: 'Courier New', monospace; font-size: 12px;">
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_06_VALUE&#125;&#125;" onclick="copyToClipboard('{{TEST_06_VALUE}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_06_VALUE&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_06_NAME&#125;&#125;" onclick="copyToClipboard('{{TEST_06_NAME}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_06_NAME&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_06_STATUS&#125;&#125;" onclick="copyToClipboard('{{TEST_06_STATUS}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_06_STATUS&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_06_TOLERANCE&#125;&#125;" onclick="copyToClipboard('{{TEST_06_TOLERANCE}}', this)" style="color: #007bff; cursor: pointer;" title="Click to copy">&#123;&#123;TEST_06_TOLERANCE&#125;&#125;</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold;">07</td>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6;">Độ chính xác của ODI</td>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-family: 'Courier New', monospace; font-size: 12px;">
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_07_VALUE&#125;&#125;" onclick="copyToClipboard('{{TEST_07_VALUE}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_07_VALUE&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_07_NAME&#125;&#125;" onclick="copyToClipboard('{{TEST_07_NAME}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_07_NAME&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_07_STATUS&#125;&#125;" onclick="copyToClipboard('{{TEST_07_STATUS}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_07_STATUS&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_07_TOLERANCE&#125;&#125;" onclick="copyToClipboard('{{TEST_07_TOLERANCE}}', this)" style="color: #007bff; cursor: pointer;" title="Click to copy">&#123;&#123;TEST_07_TOLERANCE&#125;&#125;</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold;">08</td>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6;">Tâm dây chữ thập</td>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-family: 'Courier New', monospace; font-size: 12px;">
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_08_VALUE&#125;&#125;" onclick="copyToClipboard('{{TEST_08_VALUE}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_08_VALUE&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_08_NAME&#125;&#125;" onclick="copyToClipboard('{{TEST_08_NAME}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_08_NAME&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_08_STATUS&#125;&#125;" onclick="copyToClipboard('{{TEST_08_STATUS}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_08_STATUS&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_08_TOLERANCE&#125;&#125;" onclick="copyToClipboard('{{TEST_08_TOLERANCE}}', this)" style="color: #007bff; cursor: pointer;" title="Click to copy">&#123;&#123;TEST_08_TOLERANCE&#125;&#125;</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold;">09</td>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6;">Đồng tâm quay collimator</td>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-family: 'Courier New', monospace; font-size: 12px;">
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_09_VALUE&#125;&#125;" onclick="copyToClipboard('{{TEST_09_VALUE}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_09_VALUE&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_09_NAME&#125;&#125;" onclick="copyToClipboard('{{TEST_09_NAME}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_09_NAME&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_09_STATUS&#125;&#125;" onclick="copyToClipboard('{{TEST_09_STATUS}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_09_STATUS&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_09_TOLERANCE&#125;&#125;" onclick="copyToClipboard('{{TEST_09_TOLERANCE}}', this)" style="color: #007bff; cursor: pointer;" title="Click to copy">&#123;&#123;TEST_09_TOLERANCE&#125;&#125;</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold;">10</td>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6;">Đồng tâm quay bàn điều trị</td>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-family: 'Courier New', monospace; font-size: 12px;">
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_10_VALUE&#125;&#125;" onclick="copyToClipboard('{{TEST_10_VALUE}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_10_VALUE&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_10_NAME&#125;&#125;" onclick="copyToClipboard('{{TEST_10_NAME}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_10_NAME&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_10_STATUS&#125;&#125;" onclick="copyToClipboard('{{TEST_10_STATUS}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_10_STATUS&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_10_TOLERANCE&#125;&#125;" onclick="copyToClipboard('{{TEST_10_TOLERANCE}}', this)" style="color: #007bff; cursor: pointer;" title="Click to copy">&#123;&#123;TEST_10_TOLERANCE&#125;&#125;</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold;">11</td>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6;">Đồng tâm quay gantry</td>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-family: 'Courier New', monospace; font-size: 12px;">
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_11_VALUE&#125;&#125;" onclick="copyToClipboard('{{TEST_11_VALUE}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_11_VALUE&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_11_NAME&#125;&#125;" onclick="copyToClipboard('{{TEST_11_NAME}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_11_NAME&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_11_STATUS&#125;&#125;" onclick="copyToClipboard('{{TEST_11_STATUS}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_11_STATUS&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_11_TOLERANCE&#125;&#125;" onclick="copyToClipboard('{{TEST_11_TOLERANCE}}', this)" style="color: #007bff; cursor: pointer;" title="Click to copy">&#123;&#123;TEST_11_TOLERANCE&#125;&#125;</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold;">12</td>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6;">Field Size Analysis</td>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-family: 'Courier New', monospace; font-size: 12px;">
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_12_VALUE&#125;&#125;" onclick="copyToClipboard('{{TEST_12_VALUE}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_12_VALUE&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_12_NAME&#125;&#125;" onclick="copyToClipboard('{{TEST_12_NAME}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_12_NAME&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_12_STATUS&#125;&#125;" onclick="copyToClipboard('{{TEST_12_STATUS}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_12_STATUS&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_12_TOLERANCE&#125;&#125;" onclick="copyToClipboard('{{TEST_12_TOLERANCE}}', this)" style="color: #007bff; cursor: pointer;" title="Click to copy">&#123;&#123;TEST_12_TOLERANCE&#125;&#125;</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold;">13</td>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6;">Collimator Isocenter Circle Diameter</td>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-family: 'Courier New', monospace; font-size: 12px;">
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_13_VALUE&#125;&#125;" onclick="copyToClipboard('{{TEST_13_VALUE}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_13_VALUE&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_13_NAME&#125;&#125;" onclick="copyToClipboard('{{TEST_13_NAME}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_13_NAME&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_13_STATUS&#125;&#125;" onclick="copyToClipboard('{{TEST_13_STATUS}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_13_STATUS&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_13_TOLERANCE&#125;&#125;" onclick="copyToClipboard('{{TEST_13_TOLERANCE}}', this)" style="color: #007bff; cursor: pointer;" title="Click to copy">&#123;&#123;TEST_13_TOLERANCE&#125;&#125;</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold;">14</td>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6;">Gantry Isocenter Circle Diameter</td>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-family: 'Courier New', monospace; font-size: 12px;">
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_14_VALUE&#125;&#125;" onclick="copyToClipboard('{{TEST_14_VALUE}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_14_VALUE&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_14_NAME&#125;&#125;" onclick="copyToClipboard('{{TEST_14_NAME}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_14_NAME&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_14_STATUS&#125;&#125;" onclick="copyToClipboard('{{TEST_14_STATUS}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_14_STATUS&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_14_TOLERANCE&#125;&#125;" onclick="copyToClipboard('{{TEST_14_TOLERANCE}}', this)" style="color: #007bff; cursor: pointer;" title="Click to copy">&#123;&#123;TEST_14_TOLERANCE&#125;&#125;</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold;">15</td>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6;">Liều tuyệt đối</td>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-family: 'Courier New', monospace; font-size: 12px;">
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_15_VALUE&#125;&#125;" onclick="copyToClipboard('{{TEST_15_VALUE}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_15_VALUE&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_15_NAME&#125;&#125;" onclick="copyToClipboard('{{TEST_15_NAME}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_15_NAME&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_15_STATUS&#125;&#125;" onclick="copyToClipboard('{{TEST_15_STATUS}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_15_STATUS&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_15_TOLERANCE&#125;&#125;" onclick="copyToClipboard('{{TEST_15_TOLERANCE}}', this)" style="color: #007bff; cursor: pointer;" title="Click to copy">&#123;&#123;TEST_15_TOLERANCE&#125;&#125;</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold;">16</td>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6;">Sự ổn định của năng lượng (D10)</td>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-family: 'Courier New', monospace; font-size: 12px;">
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_16_VALUE&#125;&#125;" onclick="copyToClipboard('{{TEST_16_VALUE}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_16_VALUE&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_16_NAME&#125;&#125;" onclick="copyToClipboard('{{TEST_16_NAME}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_16_NAME&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_16_STATUS&#125;&#125;" onclick="copyToClipboard('{{TEST_16_STATUS}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_16_STATUS&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_16_TOLERANCE&#125;&#125;" onclick="copyToClipboard('{{TEST_16_TOLERANCE}}', this)" style="color: #007bff; cursor: pointer;" title="Click to copy">&#123;&#123;TEST_16_TOLERANCE&#125;&#125;</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold;">17</td>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6;">Tính đối xứng so với giá trị tại thời điểm commissioning</td>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-family: 'Courier New', monospace; font-size: 12px;">
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_17_VALUE&#125;&#125;" onclick="copyToClipboard('{{TEST_17_VALUE}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_17_VALUE&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_17_NAME&#125;&#125;" onclick="copyToClipboard('{{TEST_17_NAME}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_17_NAME&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_17_STATUS&#125;&#125;" onclick="copyToClipboard('{{TEST_17_STATUS}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_17_STATUS&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_17_TOLERANCE&#125;&#125;" onclick="copyToClipboard('{{TEST_17_TOLERANCE}}', this)" style="color: #007bff; cursor: pointer;" title="Click to copy">&#123;&#123;TEST_17_TOLERANCE&#125;&#125;</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold;">18</td>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6;">Tính phẳng so với giá trị tại thời điểm commissioning</td>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-family: 'Courier New', monospace; font-size: 12px;">
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_18_VALUE&#125;&#125;" onclick="copyToClipboard('{{TEST_18_VALUE}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_18_VALUE&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_18_NAME&#125;&#125;" onclick="copyToClipboard('{{TEST_18_NAME}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_18_NAME&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_18_STATUS&#125;&#125;" onclick="copyToClipboard('{{TEST_18_STATUS}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_18_STATUS&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_18_TOLERANCE&#125;&#125;" onclick="copyToClipboard('{{TEST_18_TOLERANCE}}', this)" style="color: #007bff; cursor: pointer;" title="Click to copy">&#123;&#123;TEST_18_TOLERANCE&#125;&#125;</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold;">19</td>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6;">Tính tuyến tính của liều và số MU</td>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-family: 'Courier New', monospace; font-size: 12px;">
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_19_VALUE&#125;&#125;" onclick="copyToClipboard('{{TEST_19_VALUE}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_19_VALUE&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_19_NAME&#125;&#125;" onclick="copyToClipboard('{{TEST_19_NAME}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_19_NAME&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_19_STATUS&#125;&#125;" onclick="copyToClipboard('{{TEST_19_STATUS}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_19_STATUS&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_19_TOLERANCE&#125;&#125;" onclick="copyToClipboard('{{TEST_19_TOLERANCE}}', this)" style="color: #007bff; cursor: pointer;" title="Click to copy">&#123;&#123;TEST_19_TOLERANCE&#125;&#125;</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold;">20</td>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6;">Hệ số liều lối ra theo kích thước trường chiếu</td>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-family: 'Courier New', monospace; font-size: 12px;">
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_20_VALUE&#125;&#125;" onclick="copyToClipboard('{{TEST_20_VALUE}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_20_VALUE&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_20_NAME&#125;&#125;" onclick="copyToClipboard('{{TEST_20_NAME}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_20_NAME&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_20_STATUS&#125;&#125;" onclick="copyToClipboard('{{TEST_20_STATUS}}', this)" style="color: #007bff; cursor: pointer; margin-right: 10px;" title="Click to copy">&#123;&#123;TEST_20_STATUS&#125;&#125;</span>
+                                        <span class="placeholder-text" data-placeholder="&#123;&#123;TEST_20_TOLERANCE&#125;&#125;" onclick="copyToClipboard('{{TEST_20_TOLERANCE}}', this)" style="color: #007bff; cursor: pointer;" title="Click to copy">&#123;&#123;TEST_20_TOLERANCE&#125;&#125;</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div style="background-color: #fff3cd; padding: 15px; border-radius: 6px; border-left: 4px solid #ffc107;">
+                        <p style="margin: 0; color: #856404;"><strong>💡 Example:</strong> For Test 01, you can use <code class="placeholder-text" data-placeholder="&#123;&#123;TEST_01_VALUE&#125;&#125;" style="background: white; padding: 2px 6px; border-radius: 3px;">&#123;&#123;TEST_01_VALUE&#125;&#125;</code> to display the test value (e.g., 1.00 mm), <code class="placeholder-text" data-placeholder="&#123;&#123;TEST_01_NAME&#125;&#125;" style="background: white; padding: 2px 6px; border-radius: 3px;">&#123;&#123;TEST_01_NAME&#125;&#125;</code> for the test name, <code class="placeholder-text" data-placeholder="&#123;&#123;TEST_01_STATUS&#125;&#125;" style="background: white; padding: 2px 6px; border-radius: 3px;">&#123;&#123;TEST_01_STATUS&#125;&#125;</code> for pass/fail status, and <code class="placeholder-text" data-placeholder="&#123;&#123;TEST_01_TOLERANCE&#125;&#125;" style="background: white; padding: 2px 6px; border-radius: 3px;">&#123;&#123;TEST_01_TOLERANCE&#125;&#125;</code> for tolerance (e.g., ±1.0).</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Modal Footer -->
+            <div style="
+                background-color: #f8f9fa;
+                padding: 15px;
+                border-radius: 0 0 8px 8px;
+                border-top: 1px solid #dee2e6;
+                text-align: right;
+            ">
+                <button onclick="closePlaceholdersModal()" style="
+                    background-color: #6c757d;
+                    color: white;
+                    border: none;
+                    padding: 10px 20px;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-size: 16px;
+                ">Close</button>
+            </div>
+        </div>
+    </div>
+    
+</div>
+
+<script>
+    // Modal functions
+    function openPlaceholdersModal() {
+        document.getElementById('placeholdersModal').style.display = 'block';
+        // Reset to first tab
+        showTab('basic');
+    }
+    
+    function closePlaceholdersModal() {
+        document.getElementById('placeholdersModal').style.display = 'none';
+    }
+    
+    // Close modal when clicking outside of it
+    window.onclick = function(event) {
+        const modal = document.getElementById('placeholdersModal');
+        if (event.target == modal) {
+            closePlaceholdersModal();
+        }
+    }
+    
+    // Tab switching function
+    function showTab(tabName) {
+        // Hide all tab contents
+        const contents = document.querySelectorAll('.tab-content');
+        contents.forEach(content => {
+            content.style.display = 'none';
+        });
+        
+        // Remove active class from all tabs
+        const tabs = document.querySelectorAll('.placeholder-tab');
+        tabs.forEach(tab => {
+            tab.style.color = '#6c757d';
+            tab.style.borderBottom = '3px solid transparent';
+        });
+        
+        // Show selected tab content
+        document.getElementById('content-' + tabName).style.display = 'block';
+        
+        // Add active class to selected tab
+        const activeTab = document.getElementById('tab-' + tabName);
+        activeTab.style.color = '#007bff';
+        activeTab.style.borderBottom = '3px solid #007bff';
+    }
+    
+    // Populate placeholder text on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const placeholderElements = document.querySelectorAll('.placeholder-text');
+        placeholderElements.forEach(function(element) {
+            const placeholder = element.getAttribute('data-placeholder');
+            if (placeholder) {
+                element.textContent = placeholder;
+            }
+        });
+    });
+    
+    // Copy to clipboard function
+    function copyToClipboard(text, element) {
+        // Create a temporary textarea element
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        
+        try {
+            // Copy the text
+            const successful = document.execCommand('copy');
+            
+            if (successful && element) {
+                // Show feedback
+                const originalText = element.textContent || element.innerText;
+                const originalBg = element.style.backgroundColor;
+                const originalColor = element.style.color;
+                element.style.backgroundColor = '#28a745';
+                element.style.color = 'white';
+                element.textContent = '✓ Copied!';
+                
+                setTimeout(() => {
+                    element.textContent = originalText;
+                    element.style.backgroundColor = originalBg;
+                    element.style.color = originalColor;
+                }, 1000);
+            }
+        } catch (err) {
+            console.error('Failed to copy text: ', err);
+            // Fallback: use modern Clipboard API if available
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    if (element) {
+                        element.style.backgroundColor = '#28a745';
+                        element.style.color = 'white';
+                        setTimeout(() => {
+                            element.style.backgroundColor = '';
+                            element.style.color = '';
+                        }, 1000);
+                    }
+                }).catch(() => {
+                    alert('Failed to copy. Please copy manually: ' + text);
+                });
+            } else {
+                alert('Failed to copy. Please copy manually: ' + text);
+            }
+        } finally {
+            // Remove the temporary element
+            document.body.removeChild(textarea);
+        }
+    }
+</script>
+{% endblock %}
+

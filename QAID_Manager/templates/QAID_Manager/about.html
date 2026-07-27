@@ -1,0 +1,275 @@
+{% extends 'QAID_Manager/base.html' %}
+{% load static %}
+
+{% block title %}About - QAID Manager{% endblock %}
+
+{% block content %}
+{% load qa_filters %}
+{% with settings=org_settings|default:None %}
+<div style="padding: 20px; max-width: 1200px; margin: 0 auto;">
+    <h1 style="text-align: center; color: #2c3e50; margin-bottom: 30px;">About QAID Manager</h1>
+    <p style="text-align: center; color: #b00020; font-size: 16px; margin-bottom: 20px; font-weight: 600;">
+        Research / educational prototype — not a medical device, not clinically validated,
+        and must not be used for clinical QA release decisions.
+    </p>
+    <p style="text-align: center; color: #6c757d; font-size: 18px; margin-bottom: 30px;">Version {{ app_version|default:"1.4.2" }}</p>
+    
+    <!-- 1. Application Overview -->
+    <section style="margin-bottom: 40px;">
+        <h2 style="color: #34495e; border-bottom: 2px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">
+            1. Application Overview
+        </h2>
+        <p style="line-height: 1.8; font-size: 16px; text-align: justify;">
+            QAID Manager is a research/educational web-based Quality Assurance (QA) management
+            prototype for Linear Accelerators (LINACs) used in radiation oncology education and
+            workflow design. It explores how to streamline QA documentation, film-based geometric
+            analysis helpers, and TRS-398-oriented dose calculation worksheets. It is not clinically
+            approved software.
+        </p>
+        <p style="line-height: 1.8; font-size: 16px; margin-top: 15px;">
+            <strong>QAID Manager was developed to address the need for:</strong>
+        </p>
+        <ul style="line-height: 1.8; font-size: 16px; margin-left: 30px;">
+            <li>Centralized storage and tracking of QA data</li>
+            <li>Automated film analysis and dose calculation</li>
+            <li>Standardized reporting and documentation</li>
+            <li>Efficient scheduling and assignment of QA tasks</li>
+        </ul>
+    </section>
+
+    <!-- 2. Purpose & Scope -->
+    <section style="margin-bottom: 40px;">
+        <h2 style="color: #34495e; border-bottom: 2px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">
+            2. Purpose & Scope
+        </h2>
+        <p style="line-height: 1.8; font-size: 16px; text-align: justify;">
+            QAID Manager is designed to support the full monthly QA process for LINACs. Its key functions include:
+        </p>
+        
+        <div style="margin-top: 20px;">
+            <h3 style="color: #2c3e50; margin-bottom: 10px;">Monthly QA Workflows and Analysis</h3>
+            <p style="line-height: 1.8; font-size: 16px; text-align: justify;">
+                The system manages monthly QA schedules by assigning performers, tracking completion status, and handling extra or ad-hoc QA sessions. It automatically calculates due dates, takes holidays into account, and provides calendar-based views to simplify planning.
+            </p>
+        </div>
+
+        <div style="margin-top: 20px;">
+            <h3 style="color: #2c3e50; margin-bottom: 10px;">Managing and Reporting QA Data</h3>
+            <p style="line-height: 1.8; font-size: 16px; text-align: justify;">
+                QAID Manager organizes all QA test results, including:
+            </p>
+            <ul style="line-height: 1.8; font-size: 16px; margin-left: 30px;">
+                <li>Mechanical tests (field size, isocenter accuracy, table movements)</li>
+                <li>Beam quality tests (absolute dose, energy checks, symmetry, flatness)</li>
+                <li>Film-based measurements and analysis</li>
+            </ul>
+            <p style="line-height: 1.8; font-size: 16px; margin-top: 10px; text-align: justify;">
+                The system can generate professional QA reports in DOCX/PDF format using customizable templates.
+                The Statistics module provides department-wide trend review, LINAC comparison, and CSV export for ongoing QA oversight.
+            </p>
+        </div>
+
+        <div style="margin-top: 20px;">
+            <h3 style="color: #2c3e50; margin-bottom: 10px;">Compliance Tracking</h3>
+            <p style="line-height: 1.8; font-size: 16px; text-align: justify;">
+                Users can follow the status of each QA task (scheduled, in progress, completed, passed, failed, or requiring service). The system also maintains audit trails and supports workflow management for tests that do not meet acceptance criteria, including documentation and approval steps.
+            </p>
+        </div>
+    </section>
+
+    <!-- 3. Key Features -->
+    <section style="margin-bottom: 40px;">
+        <h2 style="color: #34495e; border-bottom: 2px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">
+            3. Key Features
+        </h2>
+        <ul style="line-height: 1.8; font-size: 16px; margin-left: 30px;">
+            <li>QA scheduling with monthly calendar view and draft resume workflow</li>
+            <li>Task assignment for up to two performers</li>
+            <li>Guided film analysis wizard (field size, collimator, gantry) on the QA Entry form</li>
+            <li>Automated dose calculation for dosimetric QA (TRS-398 based)</li>
+            <li>Statistics module for trend review, LINAC comparison, and CSV export</li>
+            <li>Equipment service report tracking, filtering, and periodic printing</li>
+            <li>Status tracking with pass/fail indicators and failed-QA acceptance workflow</li>
+            <li>Report generation using user-defined DOCX templates (QA and service reports)</li>
+            <li>Database management for LINACs, dosimeters, physics parameters, QA tests, devices, and user accounts</li>
+        </ul>
+        <p style="line-height: 1.8; font-size: 16px; margin-top: 15px;">
+            For step-by-step instructions, open <a href="{% url 'help' %}" style="color: #3498db;">Help</a> from the home page or navigation bar.
+        </p>
+    </section>
+
+    <!-- 4. Intended Users -->
+    <section style="margin-bottom: 40px;">
+        <h2 style="color: #34495e; border-bottom: 2px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">
+            4. Intended Users
+        </h2>
+        
+        <div style="margin-bottom: 20px;">
+            <h3 style="color: #2c3e50; margin-bottom: 10px;">Medical Physicists</h3>
+            <p style="line-height: 1.8; font-size: 16px; text-align: justify;">
+                The primary users who perform QA tests, analyze results, and ensure compliance with regulations. They use the system for dose calculations, film analysis, and generating reports.
+            </p>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <h3 style="color: #2c3e50; margin-bottom: 10px;">Dosimetrists</h3>
+            <p style="line-height: 1.8; font-size: 16px; text-align: justify;">
+                Support personnel who assist with QA measurements, film handling, and data entry. They may also help manage schedules and record results.
+            </p>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <h3 style="color: #2c3e50; margin-bottom: 10px;">QA/QC Staff</h3>
+            <p style="line-height: 1.8; font-size: 16px; text-align: justify;">
+                Users responsible for overseeing quality assurance activities, monitoring QA progress, and reviewing documentation. They use the system to track compliance, manage schedules, and evaluate failed tests.
+            </p>
+        </div>
+    </section>
+
+    <!-- 5. Acknowledgements / References -->
+    <section style="margin-bottom: 40px;">
+        <h2 style="color: #34495e; border-bottom: 2px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">
+            5. Acknowledgements / References
+        </h2>
+        <p style="line-height: 1.8; font-size: 16px; text-align: justify;">
+            The QA procedures, tolerances, and workflows implemented in QAID Manager follow established international guidelines, including:
+        </p>
+        <ul style="line-height: 1.8; font-size: 16px; margin-left: 30px; margin-top: 10px;">
+            <li><strong>AAPM TG-142:</strong> Quality Assurance of Medical Accelerators</li>
+            <li><strong>IAEA TRS-398:</strong> Absorbed Dose Determination in External Beam Radiotherapy</li>
+            <li><strong>QCVN 13:2017/BKHCN:</strong> Vietnamese National Technical Regulation on Radiation Safety in Medical Facilities</li>
+        </ul>
+        <p style="line-height: 1.8; font-size: 16px; margin-top: 15px; text-align: justify;">
+            Dose calculation algorithms are based on the IAEA TRS-398 protocol for absolute dosimetry, applying correction factors for temperature, pressure, polarity, and ion recombination.
+        </p>
+    </section>
+
+    <!-- 6. Version History -->
+    <section style="margin-bottom: 40px;">
+        <h2 style="color: #34495e; border-bottom: 2px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">
+            6. Version History
+        </h2>
+        <ul style="line-height: 1.8; font-size: 16px; margin-left: 30px; padding-left: 20px;">
+            <li style="margin-bottom: 16px;">
+                <strong>v1.4.2</strong>
+                <ul style="margin-top: 8px; margin-bottom: 0; list-style: disc;">
+                    <li><strong>Custom Test Types</strong> — users can create additional test categories (e.g. CBCT, Imaging) via Settings → QA Tests → Add New Test Type; each type appears as a titled section on the QA entry form with its own tests, tolerances, and pass/fail indicators</li>
+                    <li><strong>SSD Dose Calculation</strong> — Dose Calculator now supports SAD/SSD setup selection; SSD mode adds PDD(z<sub>ref</sub>) input (auto-loaded from CAT D10, manually overridable) and uses D<sub>w,Q</sub>(z<sub>max</sub>) = 100 × D<sub>w,Q</sub>(z<sub>ref</sub>) / PDD(z<sub>ref</sub>)</li>
+                    <li><strong>MU Linearity persistence</strong> — MU linearity values and graph are now saved with dose calculations and displayed in View Records</li>
+                    <li><strong>Energy ordering fix</strong> — electron energies in LINAC settings (CAT and Beam Modelling) now display in correct numerical order (4, 5, 6, … 18 MeV)</li>
+                    <li>Dose Calculator input values are fully preserved and displayed in View Records (readonly mode)</li>
+                    <li>General version: configurable port (default 17890), fallback ports, visible startup error messages, desktop binds to 127.0.0.1 only</li>
+                </ul>
+            </li>
+            <li style="margin-bottom: 16px;">
+                <strong>v1.4.1</strong>
+                <ul style="margin-top: 8px; margin-bottom: 0; list-style: disc;">
+                    <li><strong>Film Analysis Parameters</strong> added to Settings → Physics Parameters (edge detection threshold and sampling band width in mm)</li>
+                    <li>Field size edge sampling uses parallel profiles perpendicular to each radiation guide, confined to the configured band width (default 8&nbsp;mm)</li>
+                    <li>Help page search bar for quick topic lookup; QA form note links users to Film Analysis Parameters for department tuning</li>
+                    <li>Database migrations 0051–0054 apply automatically on first startup after update (seeds parameters, deduplicates rows, sets band width defaults)</li>
+                </ul>
+            </li>
+            <li style="margin-bottom: 16px;">
+                <strong>v1.4.0</strong>
+                <ul style="margin-top: 8px; margin-bottom: 0; list-style: disc;">
+                    <li>Film analysis on the QA form now uses a guided <strong>Run Analysis</strong> wizard for Field size, Collimator, and Gantry</li>
+                    <li>Wizard chains upload, crop/rotate, and center/line steps, then runs analysis automatically</li>
+                    <li>Fix for gantry/collimator crop failing after AJAX upload when no film existed at page load</li>
+                    <li>Staff users retain individual step controls under <strong>Advanced (dev)</strong></li>
+                </ul>
+            </li>
+            <li style="margin-bottom: 16px;">
+                <strong>v1.3.4</strong>
+                <ul style="margin-top: 8px; margin-bottom: 0; list-style: disc;">
+                    <li>New <strong>Statistics</strong> module with five view modes: Overview, Single Test Trend, All Tests for LINAC, Category Trends, and Beam Energy Trends</li>
+                    <li>Department overview with summary cards, traffic-light matrix, and recent results needing review</li>
+                    <li>Trend graphs now use Warning and Action thresholds, with Action set 0.5 units above the configured warning threshold</li>
+                    <li>Mini-trend cards and summary tables for multi-test review; CSV export per view mode</li>
+                    <li>Single Test Trend reference lines update in real time as the user edits graph thresholds</li>
+                    <li>Packaged app sessions are now bound to the current app runtime so users re-authenticate after restarting the application</li>
+                </ul>
+            </li>
+            <li style="margin-bottom: 16px;">
+                <strong>v1.2.1</strong>
+                <ul style="margin-top: 8px; margin-bottom: 0; list-style: disc;">
+                    <li>QA Entry adds <strong>Save &amp; Resume Later</strong> for temporary draft progress</li>
+                    <li>QA Schedule shows <strong>Resume QA</strong> when a draft record exists</li>
+                    <li>Resumed draft loads previously saved values and notes for editing</li>
+                    <li>Draft QA records are excluded from final schedule/report paths until final submit</li>
+                    <li>Resume flow hardened with draft/schedule/LINAC consistency checks</li>
+                    <li>Field-size film analysis auto-rotates to a best-fit axis-aligned frame from light-field guides</li>
+                    <li>Field-size radiation edges use parallel displacement relative to light edges for physically consistent comparison</li>
+                    <li>Field-size edge sampling uses robust 20-line profile bands with out-of-bounds rejection</li>
+                    <li>Field-size result overlay adds <strong>Angle correction</strong> display in degrees</li>
+                    <li>Updater supports SHA256 manifest verification and prints package/manifest integrity summary at update completion</li>
+                    <li>Internal hardening: startup no longer force-resets existing admin credentials</li>
+                    <li>Code maintainability upgrades: QA form request helpers, centralized film constants, and schedule mutation service extraction</li>
+                </ul>
+            </li>
+            <li style="margin-bottom: 16px;">
+                <strong>v1.2.0</strong>
+                <ul style="margin-top: 8px; margin-bottom: 0; list-style: disc;">
+                    <li>Service reports support LINAC, Device, and Other equipment categories</li>
+                    <li>Downtime tracked as numeric hours and shown in summary/printing</li>
+                    <li>Organization Settings adds dedicated Service Report Template upload</li>
+                    <li>New placeholder <code>{% templatetag openvariable %}SERVICE_TABLE{% templatetag closevariable %}</code> injects full service table (header + rows)</li>
+                    <li>Equipment Management adds selected and periodic report printing (PDF/DOCX, preview/download)</li>
+                    <li>Periodic service reports include date-range errors plus all pending/temporary items</li>
+                    <li>Periodic report rows are ordered per equipment: in-range, pending, then temporary</li>
+                    <li>Equipment dashboards include LINAC, Device, and Others views</li>
+                </ul>
+            </li>
+            <li style="margin-bottom: 16px;">
+                <strong>v1.1.2</strong>
+                <ul style="margin-top: 8px; margin-bottom: 0; list-style: disc;">
+                    <li>Isocenter tests: all-zero inputs now store and display as 0 mm (no longer N/A)</li>
+                    <li>Isocenter and film: manual edits overwrite analysis; database stores what is displayed on submit</li>
+                    <li>Beam tests: manual input or overwrite is saved; database stores displayed values on submit</li>
+                    <li>Film checks: results shown to 1 decimal place in QA entry form and on schedule tab</li>
+                </ul>
+            </li>
+            <li style="margin-bottom: 16px;">
+                <strong>v1.1.1</strong>
+                <ul style="margin-top: 8px; margin-bottom: 0; list-style: disc;">
+                    <li>QA form: Enter key has no effect; submit only when clicking Save button (no popup)</li>
+                    <li>About page: version history displayed as bullet list for clarity</li>
+                </ul>
+            </li>
+            <li style="margin-bottom: 16px;">
+                <strong>v1.1.0</strong>
+                <ul style="margin-top: 8px; margin-bottom: 0; list-style: disc;">
+                    <li>Schedule tab: correct test names for failed film tests (field size, collimator, gantry)</li>
+                    <li>Dose calculator: energy list loads correctly (including 6MV_FFF)</li>
+                    <li>Film workflow: field size crop/center shows cropped image after first crop; Colli/Gantry crop loads image reliably</li>
+                    <li>QA form: Enter key no longer submits accidentally (submit only via Save button)</li>
+                    <li>Test 14 records collimator isocenter circle diameter</li>
+                    <li>Beam test results (15–20) stored for reports</li>
+                    <li>Update mechanism: update package preserves user data; PowerShell updater when Python is not installed</li>
+                </ul>
+            </li>
+            <li style="margin-bottom: 12px;"><strong>v1.0.0</strong> — Initial release: QA scheduling, LINAC management, film analysis, dose calculation, reporting, settings.</li>
+        </ul>
+    </section>
+
+    <!-- 7. Authors -->
+    <section style="margin-bottom: 40px;">
+        <h2 style="color: #34495e; border-bottom: 2px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">
+            7. Authors
+        </h2>
+        <p style="line-height: 1.8; font-size: 16px;">
+            <strong>Medphys Guys, ROMP</strong>
+        </p>
+        <p style="line-height: 1.8; font-size: 16px; margin-top: 10px;">
+            Email: <a href="mailto:bot2b1710@yahoo.com" style="color: #3498db; text-decoration: none;">bot2b1710@yahoo.com</a>
+        </p>
+    </section>
+
+    <!-- Back to Home Link -->
+    <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #dee2e6;">
+        <a href="{% url 'home' %}" style="color: #3498db; text-decoration: none; font-size: 16px;">← Back to Home</a>
+    </div>
+</div>
+{% endwith %}
+{% endblock %}
+

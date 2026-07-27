@@ -1,0 +1,86 @@
+{% extends "QAID_Manager/base.html" %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ title }}</h2>
+    <p class="text-muted">Create a non-scheduled QA session for unexpected QA (e.g., machine breakdown, maintenance).</p>
+    
+    <form method="post" class="mt-4">
+        {% csrf_token %}
+        
+        <div class="form-group mb-3">
+            <label for="{{ form.linac.id_for_label }}" style="display: inline-block; min-width: 200px;">{{ form.linac.label }}</label>
+            {{ form.linac }}
+            {% if form.linac.errors %}
+                <div class="text-danger">{{ form.linac.errors }}</div>
+            {% endif %}
+        </div>
+        
+        <div class="form-group mb-3">
+            <label for="{{ form.expected_qa_date.id_for_label }}" style="display: inline-block; min-width: 200px;">{{ form.expected_qa_date.label }}</label>
+            {{ form.expected_qa_date }}
+            {% if form.expected_qa_date.errors %}
+                <div class="text-danger">{{ form.expected_qa_date.errors }}</div>
+            {% endif %}
+        </div>
+        
+        <div class="form-group mb-3">
+            <label for="{{ form.performer1.id_for_label }}" style="display: inline-block; min-width: 200px;">{{ form.performer1.label }}</label>
+            {{ form.performer1 }}
+            {% if form.performer1.errors %}
+                <div class="text-danger">{{ form.performer1.errors }}</div>
+            {% endif %}
+        </div>
+        
+        <div class="form-group mb-3">
+            <label for="{{ form.performer2.id_for_label }}" style="display: inline-block; min-width: 200px;">{{ form.performer2.label }}</label>
+            {{ form.performer2 }}
+            {% if form.performer2.errors %}
+                <div class="text-danger">{{ form.performer2.errors }}</div>
+            {% endif %}
+        </div>
+        
+        <div class="form-group mb-3">
+            <label for="{{ form.qa_reason.id_for_label }}" style="display: inline-block; min-width: 200px; vertical-align: top; padding-top: 8px;">{{ form.qa_reason.label }}</label>
+            <div style="display: inline-block; width: calc(100% - 220px);">
+                {{ form.qa_reason }}
+            </div>
+            {% if form.qa_reason.errors %}
+                <div class="text-danger">{{ form.qa_reason.errors }}</div>
+            {% endif %}
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Create Non-scheduled QA</button>
+            <a href="{% url 'qa_schedule_monthly' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<style>
+.form-group label {
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+.form-group select,
+.form-group input[type="date"] {
+    width: 300px;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.form-group textarea {
+    width: 100%;
+    max-width: 500px;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+</style>
+{% endblock %}
+

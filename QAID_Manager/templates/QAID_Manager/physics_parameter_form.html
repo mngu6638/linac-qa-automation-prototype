@@ -1,0 +1,1226 @@
+{% extends 'QAID_Manager/base.html' %}
+
+{% block title %}{{ title }} - QA Manager{% endblock %}
+
+{% block content %}
+<div style="max-width: 1000px; margin: 0 auto;">
+    <div style="margin-bottom: 30px;">
+        <h1>{{ title }}</h1>
+        <a href="{% url 'settings_physics_parameters' %}" style="
+            color: #6c757d; 
+            text-decoration: none;
+            padding: 5px 10px;
+            border: 1px solid #6c757d;
+            border-radius: 3px;
+            font-size: 14px;
+        ">← Back to Physics Parameters</a>
+    </div>
+<form method="post" enctype="multipart/form-data" style="
+        background-color: white; 
+        padding: 30px; 
+        border-radius: 8px; 
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    ">
+        {% csrf_token %}
+        
+        {% if form.errors %}
+            <div style="
+                background-color: #f8d7da; 
+                color: #721c24; 
+                padding: 15px; 
+                margin-bottom: 20px; 
+                border-radius: 5px; 
+                border: 1px solid #f5c6cb;
+            ">
+                <strong>Please correct the following errors:</strong>
+                <ul style="margin: 10px 0 0 20px;">
+                    {% for field, errors in form.errors.items %}
+                        {% for error in errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <!-- Basic Information -->
+            <div>
+                <h3 style="margin-bottom: 15px; color: #495057; border-bottom: 2px solid #007bff; padding-bottom: 5px;">
+                    Basic Information
+                </h3>
+                
+                <div style="margin-bottom: 15px;">
+                    <label for="{{ form.name.id_for_label }}" style="
+                        display: block; 
+                        margin-bottom: 5px; 
+                        font-weight: bold; 
+                        color: #495057;
+                    ">Name</label>
+                    {{ form.name }}
+                    {% if form.name.errors %}
+                        <div style="color: #dc3545; font-size: 12px; margin-top: 5px;">
+                            {% for error in form.name.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label for="{{ form.parameter_type.id_for_label }}" style="
+                        display: block; 
+                        margin-bottom: 5px; 
+                        font-weight: bold; 
+                        color: #495057;
+                    ">Parameter Type</label>
+                    {{ form.parameter_type }}
+                    {% if form.parameter_type.errors %}
+                        <div style="color: #dc3545; font-size: 12px; margin-top: 5px;">
+                            {% for error in form.parameter_type.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label for="{{ form.energy.id_for_label }}" style="
+                        display: block; 
+                        margin-bottom: 5px; 
+                        font-weight: bold; 
+                        color: #495057;
+                    ">Energy</label>
+                    {{ form.energy }}
+                    {% if form.energy.errors %}
+                        <div style="color: #dc3545; font-size: 12px; margin-top: 5px;">
+                            {% for error in form.energy.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label for="{{ form.beam_type.id_for_label }}" style="
+                        display: block; 
+                        margin-bottom: 5px; 
+                        font-weight: bold; 
+                        color: #495057;
+                    ">Beam Type</label>
+                    {{ form.beam_type }}
+                    {% if form.beam_type.errors %}
+                        <div style="color: #dc3545; font-size: 12px; margin-top: 5px;">
+                            {% for error in form.beam_type.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Film analysis fields -->
+            <div id="film-analysis-section" style="display: none;">
+                <h3 style="margin-bottom: 15px; color: #495057; border-bottom: 2px solid #17a2b8; padding-bottom: 5px;">
+                    Film Analysis
+                </h3>
+                <div style="margin-bottom: 15px;">
+                    <label for="id_field_size_detection_threshold_percent" style="
+                        display: block;
+                        margin-bottom: 5px;
+                        font-weight: bold;
+                        color: #495057;
+                    ">Field size detection threshold (%)</label>
+                    {{ form.field_size_detection_threshold_percent }}
+                    {% if form.field_size_detection_threshold_percent.errors %}
+                        <div style="color: #dc3545; font-size: 12px; margin-top: 5px;">
+                            {% for error in form.field_size_detection_threshold_percent.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <p style="color: #6c757d; font-size: 13px; margin-top: 8px; line-height: 1.5;">
+                        Percentage of the brightness range (darkest to brightest) along each scan profile
+                        used to locate the radiation field edge during field size film analysis. Default is 30%.
+                    </p>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label for="id_field_size_band_width_mm" style="
+                        display: block;
+                        margin-bottom: 5px;
+                        font-weight: bold;
+                        color: #495057;
+                    ">Field size analysis band width (mm)</label>
+                    {{ form.field_size_band_width_mm }}
+                    {% if form.field_size_band_width_mm.errors %}
+                        <div style="color: #dc3545; font-size: 12px; margin-top: 5px;">
+                            {% for error in form.field_size_band_width_mm.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <p style="color: #6c757d; font-size: 13px; margin-top: 8px; line-height: 1.5;">
+                        Total width of the sampling band centred on each radiation guide line.
+                        For example, 8&nbsp;mm means 4&nbsp;mm on each side of the guide line.
+                        Yellow edge markers are found on parallel lines offset perpendicular to the guide, only within this width (not beyond it).
+                        Default is 8&nbsp;mm.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Coefficients (if applicable) -->
+            <div id="coefficients-section">
+                <h3 style="margin-bottom: 15px; color: #495057; border-bottom: 2px solid #007bff; padding-bottom: 5px;">
+                    Coefficients
+                </h3>
+                
+                <div style="margin-bottom: 15px;">
+                    <label for="{{ form.voltage_ratio.id_for_label }}" style="
+                        display: block; 
+                        margin-bottom: 5px; 
+                        font-weight: bold; 
+                        color: #495057;
+                    ">Voltage Ratio</label>
+                    {{ form.voltage_ratio }}
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label for="{{ form.a0_coefficient.id_for_label }}" style="
+                        display: block; 
+                        margin-bottom: 5px; 
+                        font-weight: bold; 
+                        color: #495057;
+                    ">a0 Coefficient</label>
+                    {{ form.a0_coefficient }}
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label for="{{ form.a1_coefficient.id_for_label }}" style="
+                        display: block; 
+                        margin-bottom: 5px; 
+                        font-weight: bold; 
+                        color: #495057;
+                    ">a1 Coefficient</label>
+                    {{ form.a1_coefficient }}
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label for="{{ form.a2_coefficient.id_for_label }}" style="
+                        display: block; 
+                        margin-bottom: 5px; 
+                        font-weight: bold; 
+                        color: #495057;
+                    ">a2 Coefficient</label>
+                    {{ form.a2_coefficient }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Parameter Values Table -->
+        <div id="parameter-values-section" style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #dee2e6;">
+            <h3 style="margin-bottom: 15px; color: #495057;">Parameter Values</h3>
+            <p style="color: #6c757d; font-size: 14px; margin-bottom: 15px;">
+                Edit parameter values in table format. Each row represents a data entry with multiple columns.
+            </p>
+            
+            <!-- CSV Upload Section -->
+            <div style="
+                margin-bottom: 20px; 
+                padding: 15px; 
+                background-color: #f8f9fa; 
+                border: 1px solid #dee2e6; 
+                border-radius: 5px;
+            ">
+                <label for="csv-upload" style="
+                    display: block; 
+                    margin-bottom: 10px; 
+                    font-weight: bold; 
+                    color: #495057;
+                ">Upload CSV File:</label>
+                <input type="file" id="csv-upload" accept=".csv,.tsv" style="
+                    padding: 8px;
+                    border: 1px solid #ced4da;
+                    border-radius: 4px;
+                    background-color: white;
+                    cursor: pointer;
+                    width: 100%;
+                    max-width: 400px;
+                ">
+                <div style="margin-top: 10px;">
+                    <label style="
+                        display: flex; 
+                        align-items: center; 
+                        gap: 8px; 
+                        font-size: 14px; 
+                        color: #495057;
+                        cursor: pointer;
+                    ">
+                        <input type="checkbox" id="skip-first-row" style="cursor: pointer;">
+                        <span>Skip first row (if first row is not headers)</span>
+                    </label>
+                </div>
+                <p style="
+                    color: #6c757d; 
+                    font-size: 12px; 
+                    margin-top: 8px; 
+                    margin-bottom: 0;
+                ">
+                    Select a CSV or TSV file to import data. The first row (or second if skipping first row) should contain column headers. Tab-separated files (TSV) are automatically detected.
+                </p>
+            </div>
+            
+            {{ form.parameter_values }}
+            
+            <!-- Pass data directly from template to avoid form encoding issues -->
+            <script type="application/json" id="parameter-values-data">{{ parameter_values_json|safe }}</script>
+            
+            <div style="overflow-x: auto; overflow-y: visible; margin-bottom: 15px;">
+                <table id="parameter-values-table" style="
+                    width: 100%; 
+                    border-collapse: collapse; 
+                    background-color: white;
+                    border: 1px solid #dee2e6;
+                    table-layout: auto;
+                ">
+                    <thead id="parameter-values-thead">
+                        <!-- Headers will be added dynamically by JavaScript -->
+                    </thead>
+                    <tbody id="parameter-values-tbody">
+                        <!-- Rows will be added dynamically by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+                <button type="button" id="add-parameter-row" style="
+                    background-color: #28a745; 
+                    color: white; 
+                    padding: 8px 16px; 
+                    border: none; 
+                    border-radius: 4px; 
+                    font-size: 14px; 
+                    cursor: pointer;
+                    margin-right: 10px;
+                ">+ Add Row</button>
+                <button type="button" id="add-parameter-column" style="
+                    background-color: #007bff; 
+                    color: white; 
+                    padding: 8px 16px; 
+                    border: none; 
+                    border-radius: 4px; 
+                    font-size: 14px; 
+                    cursor: pointer;
+                ">+ Add Column</button>
+            </div>
+        </div>
+
+        <!-- Description and Notes -->
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #dee2e6;">
+            <h3 style="margin-bottom: 15px; color: #495057;">Description & Notes</h3>
+            
+            <div style="margin-bottom: 15px;">
+                <label for="{{ form.description.id_for_label }}" style="
+                    display: block; 
+                    margin-bottom: 5px; 
+                    font-weight: bold; 
+                    color: #495057;
+                ">Description</label>
+                {{ form.description }}
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label for="{{ form.notes.id_for_label }}" style="
+                    display: block; 
+                    margin-bottom: 5px; 
+                    font-weight: bold; 
+                    color: #495057;
+                ">Notes</label>
+                {{ form.notes }}
+            </div>
+        </div>
+
+        <!-- Status -->
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #dee2e6;">
+            <h3 style="margin-bottom: 15px; color: #495057;">Status</h3>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                {{ form.is_active }}
+                <label for="{{ form.is_active.id_for_label }}" style="
+                    font-weight: bold; 
+                    color: #495057;
+                ">Active</label>
+            </div>
+        </div>
+
+        <div style="margin-top: 30px; display: flex; gap: 15px;">
+            <button type="submit" style="
+                background-color: #007bff; 
+                color: white; 
+                padding: 12px 30px; 
+                border: none; 
+                border-radius: 5px; 
+                font-weight: bold; 
+                cursor: pointer;
+            ">Save Parameter</button>
+            
+            <a href="{% url 'settings_physics_parameters' %}" style="
+                background-color: #6c757d; 
+                color: white; 
+                padding: 12px 30px; 
+                text-decoration: none; 
+                border-radius: 5px; 
+                font-weight: bold;
+            ">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<style>
+    .form-control {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        font-size: 14px;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+    
+    .form-control:focus {
+        border-color: #80bdff;
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+    
+    .form-check-input {
+        width: 18px;
+        height: 18px;
+        margin-right: 8px;
+    }
+    
+    .param-value-input {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        font-size: 14px;
+        box-sizing: border-box;
+        min-width: 0;
+    }
+    
+    .param-value-input:focus {
+        border-color: #80bdff;
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+    
+    #parameter-values-table td {
+        overflow: visible;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+    
+    #parameter-values-table th {
+        overflow: visible;
+    }
+    
+    .delete-row-btn {
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+    }
+    
+    .delete-row-btn:hover {
+        background-color: #c82333;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const typeSelect = document.getElementById('id_parameter_type');
+    const filmSection = document.getElementById('film-analysis-section');
+    const coefficientsSection = document.getElementById('coefficients-section');
+    const parameterValuesSection = document.getElementById('parameter-values-section');
+
+    function toggleParameterTypeSections() {
+        const isFilmAnalysis = typeSelect && typeSelect.value === 'film_analysis';
+        if (filmSection) {
+            filmSection.style.display = isFilmAnalysis ? 'block' : 'none';
+        }
+        if (coefficientsSection) {
+            coefficientsSection.style.display = isFilmAnalysis ? 'none' : 'block';
+        }
+        if (parameterValuesSection) {
+            parameterValuesSection.style.display = isFilmAnalysis ? 'none' : 'block';
+        }
+    }
+
+    if (typeSelect) {
+        typeSelect.addEventListener('change', toggleParameterTypeSections);
+        toggleParameterTypeSections();
+    }
+
+    const thead = document.getElementById('parameter-values-thead');
+    const tbody = document.getElementById('parameter-values-tbody');
+    const addRowBtn = document.getElementById('add-parameter-row');
+    const addColBtn = document.getElementById('add-parameter-column');
+    const hiddenInput = document.getElementById('id_parameter_values');
+    
+    if (!hiddenInput) {
+        return;
+    }
+    
+    // Initialize with existing data - expect list of dictionaries
+    let tableData = [];
+    let columnHeaders = []; // Internal keys (may have prefixes to prevent reordering)
+    let columnHeadersDisplay = []; // Display names (original names without prefixes)
+    let originalMetadata = {}; // Store filename, import_date if they exist
+    
+    // Get the value - try from JSON script tag first, then hidden input
+    let inputValue = '';
+    const jsonScript = document.getElementById('parameter-values-data');
+    if (jsonScript && jsonScript.textContent) {
+        inputValue = jsonScript.textContent.trim();
+    } else if (hiddenInput && hiddenInput.value) {
+        inputValue = hiddenInput.value;
+    }
+    
+    // Try to parse the JSON data
+    if (inputValue) {
+        try {
+            let parsed = JSON.parse(inputValue);
+            
+            if (Array.isArray(parsed)) {
+                tableData = parsed;
+                // Extract column headers from first row
+                if (tableData.length > 0) {
+                    // Use column_order from metadata if available
+                    // If not available, we need to reconstruct from the first row
+                    // but we'll preserve the order by using the keys in the order they appear
+                    if (originalMetadata.column_order && Array.isArray(originalMetadata.column_order)) {
+                        columnHeaders = originalMetadata.column_order.slice();
+                        columnHeadersDisplay = originalMetadata.column_order.slice(); // Use same for display
+                    } else {
+                        // For old data without column_order, try to preserve order
+                        // by using Object.keys (which preserves insertion order in modern JS)
+                        // but we'll save this as column_order for future use
+                        columnHeaders = Object.keys(tableData[0]);
+                        columnHeadersDisplay = columnHeaders.slice(); // Use same for display
+                        originalMetadata.column_order = columnHeaders.slice();
+                    }
+                }
+            } else if (typeof parsed === 'object' && parsed !== null) {
+                // Check if it has table_data key (wrapped format)
+                if (parsed.table_data && Array.isArray(parsed.table_data)) {
+                    // CRITICAL: Always reconstruct rows in the correct column_order
+                    if (parsed.column_order && Array.isArray(parsed.column_order)) {
+                        // We have saved column_order - use it and reconstruct rows in this exact order
+                        let savedHeaders = parsed.column_order.slice(); // Create copy to preserve order
+                        
+                        // CRITICAL: Use saved headers as-is (no prefixes)
+                        // We'll always iterate using columnHeaders array order, never Object.keys()
+                        columnHeaders = savedHeaders.slice();
+                        columnHeadersDisplay = savedHeaders.slice(); // Same as internal keys
+                        
+                        // CRITICAL: Reconstruct all rows in the exact columnHeaders order
+                        // This ensures that even if the saved data has keys in wrong order,
+                        // we read them in the correct order
+                        tableData = parsed.table_data.map(function(row, rowIdx) {
+                            const orderedRow = {};
+                            // Use columnHeaders array order, not row object keys
+                            columnHeaders.forEach(function(header, colIdx) {
+                                // Get value from original row using header as key
+                                // CRITICAL: Access by exact key name from columnHeaders array
+                                const value = (row[header] !== undefined && row[header] !== null) ? row[header] : '';
+                                orderedRow[header] = value;
+                            });
+                            
+                            return orderedRow;
+                        });
+                        
+                        // FINAL SAFEGUARD: One more reconstruction to be absolutely sure
+                        tableData = tableData.map(function(row) {
+                            const finalOrderedRow = {};
+                            columnHeaders.forEach(function(header) {
+                                finalOrderedRow[header] = (row[header] !== undefined && row[header] !== null) ? row[header] : '';
+                            });
+                            return finalOrderedRow;
+                        });
+                    } else {
+                        // Old data without column_order - try to preserve order but it may be wrong
+                        tableData = parsed.table_data;
+                        if (tableData.length > 0) {
+                            // Use Object.keys but this may reorder numeric keys
+                            columnHeaders = Object.keys(tableData[0]);
+                            columnHeadersDisplay = columnHeaders.slice(); // Use same for display
+                            // Save this order for future use (even though it might be wrong)
+                            originalMetadata.column_order = columnHeaders.slice();
+                            
+                            // Reconstruct rows in this order to be consistent
+                            tableData = tableData.map(function(row) {
+                                const orderedRow = {};
+                                columnHeaders.forEach(function(header) {
+                                    orderedRow[header] = (row[header] !== undefined && row[header] !== null) ? row[header] : '';
+                                });
+                                return orderedRow;
+                            });
+                            
+                        }
+                    }
+                    // Preserve metadata
+                    if (parsed.filename) originalMetadata.filename = parsed.filename;
+                    if (parsed.import_date) originalMetadata.import_date = parsed.import_date;
+                    if (parsed.column_order) originalMetadata.column_order = parsed.column_order.slice();
+                } else {
+                    // Convert old format (dict) to new format (list of dicts)
+                    tableData = [parsed];
+                    // For single dict, preserve key order (may be wrong for numeric keys)
+                    columnHeaders = Object.keys(parsed);
+                    columnHeadersDisplay = columnHeaders.slice(); // Use same for display
+                }
+            }
+        } catch (e) {
+            tableData = [];
+            columnHeaders = [];
+        }
+    }
+    
+    // If no data but we have metadata, initialize empty table
+    if (tableData.length === 0 && columnHeaders.length === 0) {
+        columnHeaders = ['Column 1'];
+        columnHeadersDisplay = ['Column 1'];
+    }
+    
+    // Ensure columnHeadersDisplay is set if it's not already (same as columnHeaders)
+    if (columnHeadersDisplay.length === 0 && columnHeaders.length > 0) {
+        columnHeadersDisplay = columnHeaders.slice();
+    }
+    
+    // CSV File Upload Handler
+    const csvUpload = document.getElementById('csv-upload');
+    if (csvUpload) {
+        csvUpload.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            // Check if it's a CSV or TSV file
+            if (!file.name.toLowerCase().endsWith('.csv') && !file.name.toLowerCase().endsWith('.tsv')) {
+                alert('Please select a CSV or TSV file.');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const text = e.target.result;
+                    // Handle different line endings (Windows \r\n, Unix \n, old Mac \r)
+                    const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n')
+                        .split('\n')
+                        .map(line => line.trim())
+                        .filter(line => line.length > 0);
+                    
+                    if (lines.length === 0) {
+                        alert('CSV file is empty.');
+                        return;
+                    }
+                    
+                    // Check if user wants to skip first row
+                    const skipFirstRow = document.getElementById('skip-first-row').checked;
+                    let headerRowIndex = skipFirstRow ? 1 : 0;
+                    let dataStartIndex = skipFirstRow ? 1 : 1; // Start from row 1 if skipping, to include the skipped row as data
+                    
+                    if (headerRowIndex >= lines.length) {
+                        alert('CSV file does not have enough rows. Please check "Skip first row" option.');
+                        return;
+                    }
+                    
+                    if (skipFirstRow && lines.length < 2) {
+                        alert('CSV file does not have enough rows. Need at least 2 rows when "Skip first row" is checked.');
+                        return;
+                    }
+                    
+                    // Detect delimiter (comma or tab)
+                    function detectDelimiter(firstLine) {
+                        const commaCount = (firstLine.match(/,/g) || []).length;
+                        const tabCount = (firstLine.match(/\t/g) || []).length;
+                        return tabCount > commaCount ? '\t' : ',';
+                    }
+                    
+                    const delimiter = detectDelimiter(lines[headerRowIndex]);
+                    
+                    // Parse CSV/TSV line (handle quoted fields, commas/tabs, and escaped quotes)
+                    // CRITICAL: This function MUST preserve the exact order of fields as they appear in the line
+                    function parseCSVLine(line, delim) {
+                        const result = [];
+                        let current = '';
+                        let inQuotes = false;
+                        
+                        // Handle empty line
+                        if (!line || line.trim() === '') {
+                            return [''];
+                        }
+                        
+                        for (let i = 0; i < line.length; i++) {
+                            const char = line[i];
+                            const nextChar = i < line.length - 1 ? line[i + 1] : null;
+                            
+                            if (char === '"') {
+                                if (inQuotes && nextChar === '"') {
+                                    // Escaped quote inside quoted field
+                                    current += '"';
+                                    i++; // Skip next quote
+                                } else {
+                                    // Toggle quote state
+                                    inQuotes = !inQuotes;
+                                }
+                            } else if (char === delim && !inQuotes) {
+                                // Field separator (comma or tab) - preserve order by pushing in sequence
+                                result.push(current); // Don't trim yet, preserve exact content
+                                current = '';
+                            } else {
+                                current += char;
+                            }
+                        }
+                        // Add the last field - preserve order
+                        result.push(current); // Don't trim yet
+                        
+                        // Trim each field but preserve order
+                        return result.map(function(field) {
+                            return field.trim();
+                        });
+                    }
+                    
+                    // Get headers from the appropriate row - preserve exact order from CSV
+                    // CRITICAL: The order of headers MUST match the order in the CSV file exactly
+                    let headers = parseCSVLine(lines[headerRowIndex], delimiter);
+                    if (headers.length === 0) {
+                        alert('CSV file has no headers.');
+                        return;
+                    }
+                    
+                    // Store original headers for display
+                    const originalHeaders = headers.slice();
+                    
+                    // Handle empty headers - replace empty strings with meaningful names
+                    // BUT preserve the exact position/index
+                    // CRITICAL: Keep original names - we'll use array order, not object key order
+                    headers = headers.map(function(header, index) {
+                        if (!header || header.trim() === '') {
+                            // Default name for empty header columns - but preserve position
+                            return 'Column ' + (index + 1);
+                        }
+                        return header.trim();
+                    });
+                    
+                    // Parse data rows - preserve exact row order and column order from CSV
+                    // CRITICAL: Store rows as arrays of values, not objects, to preserve order
+                    // We'll convert to objects only when needed, using columnHeaders array order
+                    const newTableData = [];
+                    for (let i = dataStartIndex; i < lines.length; i++) {
+                        const values = parseCSVLine(lines[i], delimiter);
+                        // Skip completely empty rows
+                        if (values.every(function(v) { return !v || v.trim() === ''; })) {
+                            continue;
+                        }
+                        // Store as array of values in exact order
+                        const rowValues = headers.map((header, index) => {
+                            return (values[index] !== undefined && values[index] !== null) ? values[index].trim() : '';
+                        });
+                        newTableData.push(rowValues);
+                    }
+                    
+                    // If we skipped the first row, also include it as a data row
+                    if (skipFirstRow && lines.length > 0) {
+                        const firstRowValues = parseCSVLine(lines[0], delimiter);
+                        // Only add if it's not completely empty
+                        if (!firstRowValues.every(function(v) { return !v || v.trim() === ''; })) {
+                            const firstRowArray = headers.map((header, index) => {
+                                return (firstRowValues[index] !== undefined && firstRowValues[index] !== null) ? firstRowValues[index].trim() : '';
+                            });
+                            // Insert at the beginning to preserve the original row order
+                            newTableData.unshift(firstRowArray);
+                        }
+                    }
+                    
+                    // Convert array format to object format using headers array
+                    // This ensures order is preserved by always using headers array
+                    const newTableDataAsObjects = newTableData.map(function(rowArray) {
+                        const rowObj = {};
+                        headers.forEach(function(header, index) {
+                            rowObj[header] = rowArray[index] || '';
+                        });
+                        return rowObj;
+                    });
+                    
+                    // Update table data and headers - preserve exact order
+                    // CRITICAL: Create a deep copy of headers array to preserve order
+                    columnHeaders = headers.slice();
+                    columnHeadersDisplay = originalHeaders.slice();
+                    
+                    // Use the already-ordered object data
+                    tableData = newTableDataAsObjects;
+                    
+                    // Store filename, import date, and column order in metadata
+                    originalMetadata.filename = file.name;
+                    originalMetadata.import_date = new Date().toISOString().split('T')[0];
+                    originalMetadata.column_order = columnHeaders.slice(); // Preserve column order as array copy
+                    
+                    // CRITICAL: Force re-render to ensure table displays in correct order
+                    renderTable();
+                    updateHiddenInput();
+                    
+                    // Show confirmation with column order
+                    const columnOrderMsg = columnHeaders.join(', ');
+                    alert(`Successfully imported ${newTableDataAsObjects.length} rows from CSV file.\n\nColumn order (as in CSV):\n${columnOrderMsg}`);
+                } catch (error) {
+                    alert('Error parsing CSV file. Please check the file format.');
+                }
+            };
+            
+            reader.onerror = function() {
+                alert('Error reading file.');
+            };
+            
+            reader.readAsText(file);
+        });
+    }
+    
+    // Render table headers
+    // CRITICAL: This function MUST use columnHeaders array in exact order, never Object.keys()
+    function renderHeaders() {
+        thead.innerHTML = '';
+        const headerRow = document.createElement('tr');
+        headerRow.style.backgroundColor = '#f8f9fa';
+        
+        // CRITICAL: Create an array to store headers in the exact columnHeaders order
+        // This ensures we append them in the correct order
+        const headersInOrder = [];
+        
+        // Iterate columnHeaders array in EXACT order - never use Object.keys() or for...in
+        columnHeaders.forEach(function(header, index) {
+            const th = document.createElement('th');
+            th.style.padding = '12px';
+            th.style.textAlign = 'left';
+            th.style.borderBottom = '2px solid #dee2e6';
+            th.style.borderRight = '1px solid #dee2e6';
+            th.style.fontWeight = 'bold';
+            th.style.color = '#495057';
+            th.style.position = 'relative';
+            th.style.minWidth = '120px';
+            // Add data attribute to track header order
+            th.setAttribute('data-column-index', index);
+            th.setAttribute('data-column-header', header);
+            
+            // Container for header content
+            const headerContainer = document.createElement('div');
+            headerContainer.style.display = 'flex';
+            headerContainer.style.alignItems = 'center';
+            headerContainer.style.gap = '8px';
+            headerContainer.style.width = '100%';
+            
+            const headerInput = document.createElement('input');
+            headerInput.type = 'text';
+            headerInput.className = 'param-value-input';
+            // Display the header name (same as internal key - no prefixes)
+            headerInput.value = header;
+            headerInput.style.fontWeight = 'bold';
+            headerInput.style.border = '1px solid #ced4da';
+            headerInput.style.background = '#f8f9fa';
+            headerInput.style.flex = '1';
+            headerInput.style.minWidth = '80px';
+            headerInput.style.padding = '4px 8px';
+            headerInput.style.borderRadius = '4px';
+            headerInput.title = header; // Show full header name on hover
+            headerInput.addEventListener('change', function() {
+                const oldHeader = header;
+                let newHeader = this.value.trim();
+                
+                // Handle empty header
+                if (!newHeader || newHeader === '') {
+                    newHeader = 'Column ' + (index + 1);
+                }
+                
+                if (oldHeader !== newHeader && newHeader) {
+                    // Update all rows with new header
+                    columnHeaders[index] = newHeader;
+                    if (columnHeadersDisplay && columnHeadersDisplay.length > index) {
+                        columnHeadersDisplay[index] = newHeader;
+                    }
+                    tableData.forEach(function(row) {
+                        if (row[oldHeader] !== undefined) {
+                            row[newHeader] = row[oldHeader];
+                            delete row[oldHeader];
+                        }
+                    });
+                    updateHiddenInput();
+                }
+            });
+            headerContainer.appendChild(headerInput);
+            
+            // Delete column button
+            if (columnHeaders.length > 1) {
+                const deleteColBtn = document.createElement('button');
+                deleteColBtn.type = 'button';
+                deleteColBtn.className = 'delete-row-btn';
+                deleteColBtn.textContent = '×';
+                deleteColBtn.style.padding = '4px 8px';
+                deleteColBtn.style.fontSize = '18px';
+                deleteColBtn.style.lineHeight = '1';
+                deleteColBtn.style.flexShrink = '0';
+                deleteColBtn.style.cursor = 'pointer';
+                deleteColBtn.title = 'Delete column';
+                deleteColBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (confirm('Are you sure you want to delete this column? This will remove the column from all rows.')) {
+                        // Remove column from all rows
+                        columnHeaders.splice(index, 1);
+                        if (columnHeadersDisplay && columnHeadersDisplay.length > index) {
+                            columnHeadersDisplay.splice(index, 1);
+                        }
+                        tableData.forEach(function(row) {
+                            delete row[header];
+                        });
+                        renderTable();
+                        updateHiddenInput();
+                    }
+                });
+                headerContainer.appendChild(deleteColBtn);
+            }
+            
+            th.appendChild(headerContainer);
+            // Store header in array at the correct index to preserve order
+            headersInOrder[index] = th;
+        });
+        
+        // CRITICAL: Append headers to row in the exact order from columnHeaders array
+        // This ensures DOM order matches columnHeaders array order exactly
+        headersInOrder.forEach(function(th, index) {
+            if (th) {
+                headerRow.appendChild(th);
+            }
+        });
+        
+        
+        // Add action column header
+        const actionTh = document.createElement('th');
+        actionTh.style.padding = '12px';
+        actionTh.style.textAlign = 'center';
+        actionTh.style.borderBottom = '2px solid #dee2e6';
+        actionTh.style.fontWeight = 'bold';
+        actionTh.style.color = '#495057';
+        actionTh.style.minWidth = '100px';
+        actionTh.textContent = 'Action';
+        headerRow.appendChild(actionTh);
+        
+        thead.appendChild(headerRow);
+        
+        // CRITICAL: Force browser to recognize the correct order by accessing DOM
+        // Sometimes browsers cache table layout, so we force a reflow
+        const forceReflow = headerRow.offsetHeight;
+    }
+    
+    // Render table body
+    function renderTable() {
+        // Clear existing content first
+        thead.innerHTML = '';
+        tbody.innerHTML = '';
+        
+        renderHeaders();
+        
+        // Ensure all rows have all columns
+        tableData.forEach(function(rowData) {
+            columnHeaders.forEach(function(header) {
+                if (!(header in rowData)) {
+                    rowData[header] = '';
+                }
+            });
+        });
+        
+        tableData.forEach(function(rowData, rowIndex) {
+            addTableRow(rowData, rowIndex);
+        });
+        
+        // If no data, add one empty row for editing
+        if (tableData.length === 0 && columnHeaders.length > 0) {
+            const emptyRow = {};
+            columnHeaders.forEach(function(header) {
+                emptyRow[header] = '';
+            });
+            tableData.push(emptyRow);
+            addTableRow(emptyRow, 0);
+        }
+    }
+    
+    // Add a new table row
+    // CRITICAL: This function MUST use columnHeaders array in exact order, never Object.keys()
+    function addTableRow(rowData = {}, rowIndex = -1) {
+        const row = document.createElement('tr');
+        row.style.borderBottom = '1px solid #dee2e6';
+        
+        // CRITICAL: Create an array to store cells in the exact columnHeaders order
+        // This ensures we append them in the correct order regardless of object key order
+        const cellsInOrder = [];
+        
+        // Create cells for each column in EXACT order from columnHeaders array
+        // Never iterate over rowData keys - always use columnHeaders order
+        columnHeaders.forEach(function(header, colIndex) {
+            
+            const cell = document.createElement('td');
+            cell.style.padding = '12px';
+            cell.style.borderRight = '1px solid #dee2e6';
+            cell.style.minWidth = '120px';
+            cell.style.maxWidth = '400px';
+            cell.style.wordWrap = 'break-word';
+            cell.style.overflowWrap = 'break-word';
+            cell.style.verticalAlign = 'top';
+            
+            // Add data attributes to track which column this is
+            cell.setAttribute('data-column-index', colIndex);
+            cell.setAttribute('data-column-header', header);
+            
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'param-value-input';
+            // CRITICAL: Get value using header as key - this should match columnHeaders order
+            // Double-check: get value directly from rowData using header
+            // IMPORTANT: Access by exact key name, not by iteration
+            const rawValue = rowData[header];
+            const cellValue = (rawValue !== undefined && rawValue !== null) ? String(rawValue) : '';
+            input.value = cellValue;
+            input.placeholder = 'Enter value';
+            input.setAttribute('data-header', header);
+            input.setAttribute('data-column-index', colIndex);
+            input.style.width = '100%';
+            input.style.border = '1px solid #ced4da';
+            input.style.borderRadius = '4px';
+            input.style.padding = '6px 8px';
+            input.style.boxSizing = 'border-box';
+            input.style.minWidth = '0';
+            // Add title for full content visibility on hover
+            if (rowData[header]) {
+                input.title = rowData[header];
+            }
+            
+            // Update data on change
+            input.addEventListener('change', function() {
+                const actualRowIndex = rowIndex >= 0 ? rowIndex : parseInt(row.dataset.rowIndex) || -1;
+                if (actualRowIndex >= 0 && actualRowIndex < tableData.length) {
+                    tableData[actualRowIndex][header] = this.value;
+                } else {
+                    // New row - ensure it exists in tableData
+                    if (actualRowIndex < 0) {
+                        const newRow = {};
+                        columnHeaders.forEach(function(h) {
+                            newRow[h] = '';
+                        });
+                        newRow[header] = this.value;
+                        const newIdx = tableData.push(newRow) - 1;
+                        row.dataset.rowIndex = newIdx;
+                    } else {
+                        if (!tableData[actualRowIndex]) {
+                            tableData[actualRowIndex] = {};
+                        }
+                        tableData[actualRowIndex][header] = this.value;
+                    }
+                }
+                updateHiddenInput();
+            });
+            
+            // Also update on blur for better UX
+            input.addEventListener('blur', function() {
+                const actualRowIndex = rowIndex >= 0 ? rowIndex : parseInt(row.dataset.rowIndex) || -1;
+                if (actualRowIndex >= 0 && actualRowIndex < tableData.length) {
+                    tableData[actualRowIndex][header] = this.value;
+                    updateHiddenInput();
+                }
+            });
+            
+            cell.appendChild(input);
+            // Store cell in array at the correct index to preserve order
+            cellsInOrder[colIndex] = cell;
+        });
+        
+        // CRITICAL: Append cells to row in the exact order from columnHeaders array
+        // This ensures DOM order matches columnHeaders array order exactly
+        cellsInOrder.forEach(function(cell, index) {
+            if (cell) {
+                row.appendChild(cell);
+            }
+        });
+        
+        
+        // Add action cell
+        const actionCell = document.createElement('td');
+        actionCell.style.padding = '12px';
+        actionCell.style.textAlign = 'center';
+        actionCell.style.minWidth = '100px';
+        const deleteBtn = document.createElement('button');
+        deleteBtn.type = 'button';
+        deleteBtn.className = 'delete-row-btn';
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.addEventListener('click', function() {
+            if (confirm('Are you sure you want to delete this row?')) {
+                const idx = rowIndex >= 0 ? rowIndex : parseInt(row.dataset.rowIndex);
+                if (idx >= 0 && idx < tableData.length) {
+                    tableData.splice(idx, 1);
+                }
+                row.remove();
+                // Re-render to fix row indices
+                renderTable();
+                updateHiddenInput();
+            }
+        });
+        actionCell.appendChild(deleteBtn);
+        row.appendChild(actionCell);
+        
+        if (rowIndex >= 0) {
+            row.dataset.rowIndex = rowIndex;
+        }
+        
+        tbody.appendChild(row);
+    }
+    
+    // Add new row
+    addRowBtn.addEventListener('click', function() {
+        const newRow = {};
+        columnHeaders.forEach(function(header) {
+            newRow[header] = '';
+        });
+        const newIndex = tableData.push(newRow) - 1;
+        addTableRow(newRow, newIndex);
+        updateHiddenInput();
+    });
+    
+    // Add new column
+    addColBtn.addEventListener('click', function() {
+        const colName = prompt('Enter column name:');
+        if (colName && colName.trim()) {
+            const trimmedName = colName.trim();
+            // Check if column name already exists
+            if (!columnHeaders.includes(trimmedName)) {
+                columnHeaders.push(trimmedName);
+                columnHeadersDisplay.push(trimmedName);
+                // Add empty value to all existing rows
+                tableData.forEach(function(row) {
+                    row[trimmedName] = '';
+                });
+                renderTable();
+                updateHiddenInput();
+            } else {
+                alert('Column name already exists!');
+            }
+        }
+    });
+    
+    // Update hidden input with current data
+    function updateHiddenInput() {
+        // Clean up empty rows before saving
+        const cleanedData = tableData.filter(function(row) {
+            // Check if row has any non-empty values using columnHeaders order
+            let hasData = false;
+            columnHeaders.forEach(function(header) {
+                const value = row[header];
+                if (value && value.toString().trim() !== '') {
+                    hasData = true;
+                }
+            });
+            return hasData;
+        });
+        
+        // Reconstruct rows in the EXACT column order from columnHeaders array
+        // This ensures the order is preserved exactly as it appears in the CSV
+        const orderedData = cleanedData.map(function(row, rowIdx) {
+            const orderedRow = {};
+            // CRITICAL: Use columnHeaders array order, never Object.keys()
+            columnHeaders.forEach(function(header, colIdx) {
+                // Preserve exact order by iterating columnHeaders array
+                const value = (row[header] !== undefined && row[header] !== null) ? row[header] : '';
+                orderedRow[header] = value;
+            });
+            
+            return orderedRow;
+        });
+        
+        // Always preserve column order in metadata
+        // CRITICAL: Save column headers in column_order to preserve exact order
+        // We always iterate using this array order, never Object.keys()
+        const columnOrderToSave = columnHeaders.slice();
+        
+        if (originalMetadata.filename || originalMetadata.import_date || columnHeaders.length > 0) {
+            const wrappedData = Object.assign({}, originalMetadata);
+            wrappedData.table_data = orderedData;
+            wrappedData.column_order = columnOrderToSave; // Save header names in exact order
+            
+            hiddenInput.value = JSON.stringify(wrappedData);
+        } else {
+            // Otherwise, just save as array
+            hiddenInput.value = JSON.stringify(orderedData);
+        }
+    }
+    
+    // Initial render
+    // CRITICAL: Before rendering, ensure all rows are in the exact columnHeaders order
+    if (tableData.length > 0 && columnHeaders.length > 0) {
+        // Reconstruct all rows in exact columnHeaders order before initial render
+        tableData = tableData.map(function(row) {
+            const orderedRow = {};
+            columnHeaders.forEach(function(header) {
+                orderedRow[header] = (row[header] !== undefined && row[header] !== null) ? row[header] : '';
+            });
+            return orderedRow;
+        });
+    }
+    
+    if (columnHeaders.length === 0) {
+        // No headers yet - add a default one
+        columnHeaders = ['Column 1'];
+        renderTable();
+    } else {
+        renderTable();
+    }
+    
+    // Update hidden input before form submit to ensure latest data
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        // Collect all current values from inputs
+        const rows = tbody.querySelectorAll('tr');
+        const collectedData = [];
+        
+        rows.forEach(function(row) {
+            const inputs = row.querySelectorAll('input[type="text"]');
+            const rowData = {};
+            inputs.forEach(function(input, index) {
+                if (index < columnHeaders.length) {
+                    const header = columnHeaders[index];
+                    rowData[header] = input.value;
+                }
+            });
+            // Only add row if at least one field has a value
+            if (Object.values(rowData).some(function(v) { return v && v.toString().trim() !== ''; })) {
+                collectedData.push(rowData);
+            }
+        });
+        
+        // CRITICAL: Reconstruct collectedData in exact columnHeaders order
+        // This ensures that even if inputs were collected in wrong order, we fix it here
+        const orderedCollectedData = collectedData.map(function(rowData) {
+            const orderedRow = {};
+            // Use columnHeaders array order, never rely on rowData object key order
+            columnHeaders.forEach(function(header) {
+                orderedRow[header] = (rowData[header] !== undefined && rowData[header] !== null) ? rowData[header] : '';
+            });
+            return orderedRow;
+        });
+        
+        // Update tableData with ordered data
+        tableData = orderedCollectedData;
+        
+        // Save with proper format
+        updateHiddenInput();
+    });
+});
+</script>
+{% endblock %}
+

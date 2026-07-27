@@ -1,0 +1,40 @@
+{
+  "note": "Demo seed summary \u2014 synthetic / educational data only.",
+  "organization": "Demo Radiotherapy Physics Department",
+  "linacs": [
+    {
+      "id": 1,
+      "name": "Demo Linac A",
+      "series_number": "DEMO-LINAC-001"
+    },
+    {
+      "id": 2,
+      "name": "Demo Linac B",
+      "series_number": "DEMO-LINAC-002"
+    }
+  ],
+  "chambers": [
+    {
+      "id": 1,
+      "name": "Demo Chamber 001",
+      "series_number": "DEMO-CHAMBER-001"
+    },
+    {
+      "id": 2,
+      "name": "Demo Chamber 002",
+      "series_number": "DEMO-CHAMBER-002"
+    }
+  ],
+  "qa_tests_total": 4,
+  "qa_tests_created_this_run": 4,
+  "admin_username": "demo_admin",
+  "admin_password_hint": "change-me-before-use",
+  "admin_created": true,
+  "schedule": {
+    "id": 1,
+    "linac": "Demo Linac A",
+    "month_year": "2026-07-01",
+    "created": true
+  },
+  "secret_key_note": "If DJANGO_SECRET_KEY was missing, a demo-only insecure key was set via os.environ.setdefault for this process only."
+}

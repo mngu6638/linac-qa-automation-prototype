@@ -1,0 +1,1023 @@
+{% extends 'QAID_Manager/base.html' %}
+
+{% block title %}{{ linac.name }} - LINAC Details{% endblock %}
+
+{% block content %}
+<div style="max-width: 1200px; margin: 0 auto;">
+    <div style="margin-bottom: 30px;">
+        <h1>LINAC Details</h1>
+        <div style="display: flex; gap: 15px; margin-top: 10px;">
+            <a href="{% url 'settings_linacs' %}" style="
+                color: #6c757d; 
+                text-decoration: none;
+                padding: 5px 10px;
+                border: 1px solid #6c757d;
+                border-radius: 3px;
+                font-size: 14px;
+            ">← Back to LINACs</a>
+            
+            {% if user.is_staff %}
+                <a href="{% url 'linac_edit' linac.pk %}" style="
+                    color: #28a745; 
+                    text-decoration: none;
+                    padding: 5px 10px;
+                    border: 1px solid #28a745;
+                    border-radius: 3px;
+                    font-size: 14px;
+                ">Edit</a>
+                
+                <a href="{% url 'linac_delete' linac.pk %}" style="
+                    color: #dc3545; 
+                    text-decoration: none;
+                    padding: 5px 10px;
+                    border: 1px solid #dc3545;
+                    border-radius: 3px;
+                    font-size: 14px;
+                ">Delete</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div style="
+        background-color: white; 
+        padding: 30px; 
+        border-radius: 8px; 
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    ">
+        <!-- Status Badge -->
+        <div style="margin-bottom: 30px;">
+            <span style="
+                padding: 8px 16px; 
+                border-radius: 20px; 
+                font-size: 14px; 
+                font-weight: bold;
+                {% if linac.is_active %}
+                    background-color: #d4edda; 
+                    color: #155724;
+                {% else %}
+                    background-color: #f8d7da; 
+                    color: #721c24;
+                {% endif %}
+            ">
+                {% if linac.is_active %}Active{% else %}Inactive{% endif %}
+            </span>
+        </div>
+
+        <!-- Basic Information Section -->
+        <div class="detail-section">
+            <div class="section-header" onclick="toggleSection('basic-info')">
+                <h3>Basic Information</h3>
+                <span class="toggle-icon" id="basic-info-icon">▼</span>
+            </div>
+            <div class="section-content" id="basic-info-content">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <label class="detail-label">Machine Name</label>
+                        <div class="detail-value">{{ linac.name }}</div>
+                    </div>
+                    <div>
+                        <label class="detail-label">Series Number</label>
+                        <div class="detail-value">{{ linac.series_number|default:"Not specified" }}</div>
+                    </div>
+                    <div>
+                        <label class="detail-label">Energy</label>
+                        <div class="detail-value">
+                            {% if linac.energy %}
+                                {{ linac.energy|join:", " }}
+                            {% else %}
+                                Not specified
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div>
+                        <label class="detail-label">Dosimetry Method</label>
+                        <div class="detail-value">{{ linac.get_dosimetry_method_display|default:"Not specified" }}</div>
+                    </div>
+                    <div>
+                        <label class="detail-label">Installation Date</label>
+                        <div class="detail-value">
+                            {% if linac.installation_date %}
+                                {{ linac.installation_date|date:"F d, Y" }}
+                            {% else %}
+                                Not specified
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div>
+                        <label class="detail-label">Certification Due Date</label>
+                        <div class="detail-value">
+                            {% if linac.certification_due_date %}
+                                {{ linac.certification_due_date|date:"F d, Y" }}
+                            {% else %}
+                                Not specified
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CAT Information Section -->
+        <div class="detail-section">
+            <div class="section-header" onclick="toggleSection('cat-info')">
+                <h3>CAT Information</h3>
+                <span class="toggle-icon" id="cat-info-icon">▼</span>
+            </div>
+            <div class="section-content" id="cat-info-content" style="display: none;">
+                {% if linac.cat_info %}
+                <div style="margin-bottom: 20px;">
+                    <label class="detail-label">CAT Information (General Notes)</label>
+                    <div class="detail-value" style="white-space: pre-wrap;">{{ linac.cat_info }}</div>
+                </div>
+                {% endif %}
+
+                <h4 class="subsection-header">Mechanical Tests</h4>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                    {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Gantry Iso (± 2mm)" value=linac.cat_gantry_isocenter %}
+                    {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Collimator Iso (± 1mm)" value=linac.cat_collimator_isocenter %}
+                    {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Field-size (12x12cm) (± 1mm)" value=linac.cat_field_size_12x12 %}
+                    {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Table Iso" value=linac.cat_table_isocenter %}
+                    {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Table rotation" value=linac.cat_table_rotation %}
+                    {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Table height Iso" value=linac.cat_table_height_isocenter %}
+                    {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Table height" value=linac.cat_table_height %}
+                    {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Table long" value=linac.cat_table_long %}
+                    {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Table lateral" value=linac.cat_table_lateral %}
+                </div>
+
+                <!-- 6 MV -->
+                {% if '6MV' in linac.energy %}
+                <div class="energy-group">
+                    <h4 class="energy-header">6 MV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="D10 (± 1%)" value=linac.cat_d10_6mv %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Symmetry - Inline (≤ 3%)" value=linac.cat_symmetry_6mv_inline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Symmetry - Crossline (≤ 3%)" value=linac.cat_symmetry_6mv_crossline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Flatness - Inline (≤ 5%)" value=linac.cat_flatness_6mv_inline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Flatness - Crossline (≤ 5%)" value=linac.cat_flatness_6mv_crossline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Output Factor (<1%)" value=linac.cat_output_factor_6mv %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Wedge Factor (<1%)" value=linac.cat_wedge_factor_6mv %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="TMR" value=linac.cat_tmr_6mv %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="PDD 20/10" value=linac.cat_pdd_20_10_6mv %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 10 MV -->
+                {% if '10MV' in linac.energy %}
+                <div class="energy-group">
+                    <h4 class="energy-header">10 MV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="D10 (± 1%)" value=linac.cat_d10_10mv %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Symmetry - Inline (≤ 3%)" value=linac.cat_symmetry_10mv_inline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Symmetry - Crossline (≤ 3%)" value=linac.cat_symmetry_10mv_crossline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Flatness - Inline (≤ 5%)" value=linac.cat_flatness_10mv_inline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Flatness - Crossline (≤ 5%)" value=linac.cat_flatness_10mv_crossline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Output Factor (<1%)" value=linac.cat_output_factor_10mv %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Wedge Factor (<1%)" value=linac.cat_wedge_factor_10mv %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="TMR" value=linac.cat_tmr_10mv %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="PDD 20/10" value=linac.cat_pdd_20_10_10mv %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 6 MV FFF -->
+                {% if '6MV_FFF' in linac.energy %}
+                <div class="energy-group">
+                    <h4 class="energy-header">6 MV FFF</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Output Factor (<1%)" value=linac.cat_output_factor_6mv_fff %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="TMR" value=linac.cat_tmr_6mv_fff %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="PDD 20/10" value=linac.cat_pdd_20_10_6mv_fff %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 10 MV FFF -->
+                {% if '10MV_FFF' in linac.energy %}
+                <div class="energy-group">
+                    <h4 class="energy-header">10 MV FFF</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Output Factor (<1%)" value=linac.cat_output_factor_10mv_fff %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="TMR" value=linac.cat_tmr_10mv_fff %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="PDD 20/10" value=linac.cat_pdd_20_10_10mv_fff %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 15 MV -->
+                {% if '15MV' in linac.energy %}
+                <div class="energy-group">
+                    <h4 class="energy-header">15 MV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="D10 (± 1%)" value=linac.cat_d10_15mv %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Symmetry - Inline (≤ 3%)" value=linac.cat_symmetry_15mv_inline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Symmetry - Crossline (≤ 3%)" value=linac.cat_symmetry_15mv_crossline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Flatness - Inline (≤ 5%)" value=linac.cat_flatness_15mv_inline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Flatness - Crossline (≤ 5%)" value=linac.cat_flatness_15mv_crossline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Output Factor (<1%)" value=linac.cat_output_factor_15mv %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Wedge Factor (<1%)" value=linac.cat_wedge_factor_15mv %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="TMR" value=linac.cat_tmr_15mv %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="PDD 20/10" value=linac.cat_pdd_20_10_15mv %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 15 MV FFF -->
+                {% if '15MV_FFF' in linac.energy %}
+                <div class="energy-group">
+                    <h4 class="energy-header">15 MV FFF</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Output Factor (<1%)" value=linac.cat_output_factor_15mv_fff %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="TMR" value=linac.cat_tmr_15mv_fff %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="PDD 20/10" value=linac.cat_pdd_20_10_15mv_fff %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 4 MeV -->
+                {% if '4MeV' in linac.energy %}
+                <div class="energy-group">
+                    <h4 class="energy-header">4 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="R80 (± 1%)" value=linac.cat_r80_4mev %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Symmetry - Inline (≤ 3%)" value=linac.cat_symmetry_4mev_inline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Symmetry - Crossline (≤ 3%)" value=linac.cat_symmetry_4mev_crossline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Flatness - Inline (≤ 5%)" value=linac.cat_flatness_4mev_inline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Flatness - Crossline (≤ 5%)" value=linac.cat_flatness_4mev_crossline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Output Factor (<1%)" value=linac.cat_output_factor_4mev %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 5 MeV -->
+                {% if '5MeV' in linac.energy %}
+                <div class="energy-group">
+                    <h4 class="energy-header">5 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="R80 (± 1%)" value=linac.cat_r80_5mev %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Symmetry - Inline (≤ 3%)" value=linac.cat_symmetry_5mev_inline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Symmetry - Crossline (≤ 3%)" value=linac.cat_symmetry_5mev_crossline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Flatness - Inline (≤ 5%)" value=linac.cat_flatness_5mev_inline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Flatness - Crossline (≤ 5%)" value=linac.cat_flatness_5mev_crossline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Output Factor (<1%)" value=linac.cat_output_factor_5mev %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 6 MeV -->
+                {% if '6MeV' in linac.energy %}
+                <div class="energy-group">
+                    <h4 class="energy-header">6 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="R80 (± 1%)" value=linac.cat_r80_6mev %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Symmetry - Inline (≤ 3%)" value=linac.cat_symmetry_6mev_inline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Symmetry - Crossline (≤ 3%)" value=linac.cat_symmetry_6mev_crossline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Flatness - Inline (≤ 5%)" value=linac.cat_flatness_6mev_inline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Flatness - Crossline (≤ 5%)" value=linac.cat_flatness_6mev_crossline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Output Factor (<1%)" value=linac.cat_output_factor_6mev %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 7 MeV -->
+                {% if '7MeV' in linac.energy %}
+                <div class="energy-group">
+                    <h4 class="energy-header">7 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="R80 (± 1%)" value=linac.cat_r80_7mev %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Symmetry - Inline (≤ 3%)" value=linac.cat_symmetry_7mev_inline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Symmetry - Crossline (≤ 3%)" value=linac.cat_symmetry_7mev_crossline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Flatness - Inline (≤ 5%)" value=linac.cat_flatness_7mev_inline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Flatness - Crossline (≤ 5%)" value=linac.cat_flatness_7mev_crossline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Output Factor (<1%)" value=linac.cat_output_factor_7mev %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 8 MeV -->
+                {% if '8MeV' in linac.energy %}
+                <div class="energy-group">
+                    <h4 class="energy-header">8 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="R80 (± 1%)" value=linac.cat_r80_8mev %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Symmetry - Inline (≤ 3%)" value=linac.cat_symmetry_8mev_inline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Symmetry - Crossline (≤ 3%)" value=linac.cat_symmetry_8mev_crossline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Flatness - Inline (≤ 5%)" value=linac.cat_flatness_8mev_inline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Flatness - Crossline (≤ 5%)" value=linac.cat_flatness_8mev_crossline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Output Factor (<1%)" value=linac.cat_output_factor_8mev %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 9 MeV -->
+                {% if '9MeV' in linac.energy %}
+                <div class="energy-group">
+                    <h4 class="energy-header">9 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="R80 (± 1%)" value=linac.cat_r80_9mev %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Symmetry - Inline (≤ 3%)" value=linac.cat_symmetry_9mev_inline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Symmetry - Crossline (≤ 3%)" value=linac.cat_symmetry_9mev_crossline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Flatness - Inline (≤ 5%)" value=linac.cat_flatness_9mev_inline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Flatness - Crossline (≤ 5%)" value=linac.cat_flatness_9mev_crossline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Output Factor (<1%)" value=linac.cat_output_factor_9mev %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 10 MeV -->
+                {% if '10MeV' in linac.energy %}
+                <div class="energy-group">
+                    <h4 class="energy-header">10 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="R80 (± 1%)" value=linac.cat_r80_10mev %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Symmetry - Inline (≤ 3%)" value=linac.cat_symmetry_10mev_inline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Symmetry - Crossline (≤ 3%)" value=linac.cat_symmetry_10mev_crossline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Flatness - Inline (≤ 5%)" value=linac.cat_flatness_10mev_inline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Flatness - Crossline (≤ 5%)" value=linac.cat_flatness_10mev_crossline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Output Factor (<1%)" value=linac.cat_output_factor_10mev %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 11 MeV -->
+                {% if '11MeV' in linac.energy %}
+                <div class="energy-group">
+                    <h4 class="energy-header">11 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="R80 (± 1%)" value=linac.cat_r80_11mev %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Symmetry - Inline (≤ 3%)" value=linac.cat_symmetry_11mev_inline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Symmetry - Crossline (≤ 3%)" value=linac.cat_symmetry_11mev_crossline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Flatness - Inline (≤ 5%)" value=linac.cat_flatness_11mev_inline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Flatness - Crossline (≤ 5%)" value=linac.cat_flatness_11mev_crossline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Output Factor (<1%)" value=linac.cat_output_factor_11mev %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 12 MeV -->
+                {% if '12MeV' in linac.energy %}
+                <div class="energy-group">
+                    <h4 class="energy-header">12 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="R80 (± 1%)" value=linac.cat_r80_12mev %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Symmetry - Inline (≤ 3%)" value=linac.cat_symmetry_12mev_inline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Symmetry - Crossline (≤ 3%)" value=linac.cat_symmetry_12mev_crossline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Flatness - Inline (≤ 5%)" value=linac.cat_flatness_12mev_inline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Flatness - Crossline (≤ 5%)" value=linac.cat_flatness_12mev_crossline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Output Factor (<1%)" value=linac.cat_output_factor_12mev %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 13 MeV -->
+                {% if '13MeV' in linac.energy %}
+                <div class="energy-group">
+                    <h4 class="energy-header">13 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="R80 (± 1%)" value=linac.cat_r80_13mev %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Symmetry - Inline (≤ 3%)" value=linac.cat_symmetry_13mev_inline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Symmetry - Crossline (≤ 3%)" value=linac.cat_symmetry_13mev_crossline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Flatness - Inline (≤ 5%)" value=linac.cat_flatness_13mev_inline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Flatness - Crossline (≤ 5%)" value=linac.cat_flatness_13mev_crossline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Output Factor (<1%)" value=linac.cat_output_factor_13mev %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 14 MeV -->
+                {% if '14MeV' in linac.energy %}
+                <div class="energy-group">
+                    <h4 class="energy-header">14 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="R80 (± 1%)" value=linac.cat_r80_14mev %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Symmetry - Inline (≤ 3%)" value=linac.cat_symmetry_14mev_inline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Symmetry - Crossline (≤ 3%)" value=linac.cat_symmetry_14mev_crossline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Flatness - Inline (≤ 5%)" value=linac.cat_flatness_14mev_inline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Flatness - Crossline (≤ 5%)" value=linac.cat_flatness_14mev_crossline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Output Factor (<1%)" value=linac.cat_output_factor_14mev %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 15 MeV -->
+                {% if '15MeV' in linac.energy %}
+                <div class="energy-group">
+                    <h4 class="energy-header">15 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="R80 (± 1%)" value=linac.cat_r80_15mev %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Symmetry - Inline (≤ 3%)" value=linac.cat_symmetry_15mev_inline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Symmetry - Crossline (≤ 3%)" value=linac.cat_symmetry_15mev_crossline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Flatness - Inline (≤ 5%)" value=linac.cat_flatness_15mev_inline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Flatness - Crossline (≤ 5%)" value=linac.cat_flatness_15mev_crossline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Output Factor (<1%)" value=linac.cat_output_factor_15mev %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 16 MeV -->
+                {% if '16MeV' in linac.energy %}
+                <div class="energy-group">
+                    <h4 class="energy-header">16 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="R80 (± 1%)" value=linac.cat_r80_16mev %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Symmetry - Inline (≤ 3%)" value=linac.cat_symmetry_16mev_inline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Symmetry - Crossline (≤ 3%)" value=linac.cat_symmetry_16mev_crossline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Flatness - Inline (≤ 5%)" value=linac.cat_flatness_16mev_inline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Flatness - Crossline (≤ 5%)" value=linac.cat_flatness_16mev_crossline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Output Factor (<1%)" value=linac.cat_output_factor_16mev %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 17 MeV -->
+                {% if '17MeV' in linac.energy %}
+                <div class="energy-group">
+                    <h4 class="energy-header">17 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="R80 (± 1%)" value=linac.cat_r80_17mev %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Symmetry - Inline (≤ 3%)" value=linac.cat_symmetry_17mev_inline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Symmetry - Crossline (≤ 3%)" value=linac.cat_symmetry_17mev_crossline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Flatness - Inline (≤ 5%)" value=linac.cat_flatness_17mev_inline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Flatness - Crossline (≤ 5%)" value=linac.cat_flatness_17mev_crossline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Output Factor (<1%)" value=linac.cat_output_factor_17mev %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 18 MeV -->
+                {% if '18MeV' in linac.energy %}
+                <div class="energy-group">
+                    <h4 class="energy-header">18 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="R80 (± 1%)" value=linac.cat_r80_18mev %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Symmetry - Inline (≤ 3%)" value=linac.cat_symmetry_18mev_inline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Symmetry - Crossline (≤ 3%)" value=linac.cat_symmetry_18mev_crossline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Flatness - Inline (≤ 5%)" value=linac.cat_flatness_18mev_inline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Flatness - Crossline (≤ 5%)" value=linac.cat_flatness_18mev_crossline %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Output Factor (<1%)" value=linac.cat_output_factor_18mev %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <h4 class="subsection-header">Imaging Tests</h4>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                    {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Uniformity (< 1.5%)" value=linac.cat_uniformity %}
+                    {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Low Contrast (< 3.0%)" value=linac.cat_low_contrast %}
+                    {% include 'QAID_Manager/detail_field_snippet.html' with field_name="High Contrast (Spatial resolution)" value=linac.cat_high_contrast %}
+                    {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Transverse Vertical Scale (± 1 mm)" value=linac.cat_transverse_vertical_scale %}
+                    {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Transverse Horizontal Scale (± 1 mm)" value=linac.cat_transverse_horizontal_scale %}
+                    {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Sagittal Geometric Scale (± 1 mm)" value=linac.cat_sagittal_geometric_scale %}
+                    {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Table Movement Assisting Accuracy (± 1 mm)" value=linac.cat_table_movement_accuracy %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Beam Modelling Information Section -->
+        <div class="detail-section">
+            <div class="section-header" onclick="toggleSection('beam-modelling')">
+                <h3>Beam Modelling Information</h3>
+                <span class="toggle-icon" id="beam-modelling-icon">▼</span>
+            </div>
+            <div class="section-content" id="beam-modelling-content" style="display: none;">
+                {% if linac.beam_modelling_info %}
+                <div style="margin-bottom: 20px;">
+                    <label class="detail-label">Beam Modelling Information (General Notes)</label>
+                    <div class="detail-value" style="white-space: pre-wrap;">{{ linac.beam_modelling_info }}</div>
+                </div>
+                {% endif %}
+
+                <!-- 6 MV -->
+                {% if '6MV' in linac.energy %}
+                <div class="energy-group">
+                    <h4 class="energy-header">6 MV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Dose Reference Depth" value=linac.beam_dose_ref_depth_6mv %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="TPR or TMR (Zreff)" value=linac.beam_tpr_zreff_6mv %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="PDD20/10" value=linac.beam_pdd_20_10_6mv %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="TPR (calculated)" value=linac.beam_tpr_calculated_6mv %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 10 MV -->
+                {% if '10MV' in linac.energy %}
+                <div class="energy-group">
+                    <h4 class="energy-header">10 MV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Dose Reference Depth" value=linac.beam_dose_ref_depth_10mv %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="TPR or TMR (Zreff)" value=linac.beam_tpr_zreff_10mv %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="PDD20/10" value=linac.beam_pdd_20_10_10mv %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="TPR (calculated)" value=linac.beam_tpr_calculated_10mv %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 6 MV FFF -->
+                {% if '6MV_FFF' in linac.energy %}
+                <div class="energy-group">
+                    <h4 class="energy-header">6 MV FFF</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Dose Reference Depth" value=linac.beam_dose_ref_depth_6mv_fff %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="TPR or TMR (Zreff)" value=linac.beam_tpr_zreff_6mv_fff %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="PDD20/10" value=linac.beam_pdd_20_10_6mv_fff %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="TPR (calculated)" value=linac.beam_tpr_calculated_6mv_fff %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 10 MV FFF -->
+                {% if '10MV_FFF' in linac.energy %}
+                <div class="energy-group">
+                    <h4 class="energy-header">10 MV FFF</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Dose Reference Depth" value=linac.beam_dose_ref_depth_10mv_fff %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="TPR or TMR (Zreff)" value=linac.beam_tpr_zreff_10mv_fff %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="PDD20/10" value=linac.beam_pdd_20_10_10mv_fff %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="TPR (calculated)" value=linac.beam_tpr_calculated_10mv_fff %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 15 MV -->
+                {% if '15MV' in linac.energy %}
+                <div class="energy-group">
+                    <h4 class="energy-header">15 MV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Dose Reference Depth" value=linac.beam_dose_ref_depth_15mv %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="TPR or TMR (Zreff)" value=linac.beam_tpr_zreff_15mv %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="PDD20/10" value=linac.beam_pdd_20_10_15mv %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="TPR (calculated)" value=linac.beam_tpr_calculated_15mv %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 15 MV FFF -->
+                {% if '15MV_FFF' in linac.energy %}
+                <div class="energy-group">
+                    <h4 class="energy-header">15 MV FFF</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Dose Reference Depth" value=linac.beam_dose_ref_depth_15mv_fff %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="TPR or TMR (Zreff)" value=linac.beam_tpr_zreff_15mv_fff %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="PDD20/10" value=linac.beam_pdd_20_10_15mv_fff %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="TPR (calculated)" value=linac.beam_tpr_calculated_15mv_fff %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 4 MeV -->
+                {% if '4MeV' in linac.energy %}
+                <div class="energy-group">
+                    <h4 class="energy-header">4 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Dose Reference Depth" value=linac.beam_dose_ref_depth_4mev %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="R50" value=linac.beam_r50_4mev %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 5 MeV -->
+                {% if '5MeV' in linac.energy %}
+                <div class="energy-group">
+                    <h4 class="energy-header">5 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Dose Reference Depth" value=linac.beam_dose_ref_depth_5mev %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="R50" value=linac.beam_r50_5mev %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 6 MeV -->
+                {% if '6MeV' in linac.energy %}
+                <div class="energy-group">
+                    <h4 class="energy-header">6 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Dose Reference Depth" value=linac.beam_dose_ref_depth_6mev %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="R50" value=linac.beam_r50_6mev %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 7 MeV -->
+                {% if '7MeV' in linac.energy %}
+                <div class="energy-group">
+                    <h4 class="energy-header">7 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Dose Reference Depth" value=linac.beam_dose_ref_depth_7mev %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="R50" value=linac.beam_r50_7mev %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 8 MeV -->
+                {% if '8MeV' in linac.energy %}
+                <div class="energy-group">
+                    <h4 class="energy-header">8 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Dose Reference Depth" value=linac.beam_dose_ref_depth_8mev %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="R50" value=linac.beam_r50_8mev %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 9 MeV -->
+                {% if '9MeV' in linac.energy %}
+                <div class="energy-group">
+                    <h4 class="energy-header">9 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Dose Reference Depth" value=linac.beam_dose_ref_depth_9mev %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="R50" value=linac.beam_r50_9mev %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 10 MeV -->
+                {% if '10MeV' in linac.energy %}
+                <div class="energy-group">
+                    <h4 class="energy-header">10 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Dose Reference Depth" value=linac.beam_dose_ref_depth_10mev %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="R50" value=linac.beam_r50_10mev %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 11 MeV -->
+                {% if '11MeV' in linac.energy %}
+                <div class="energy-group">
+                    <h4 class="energy-header">11 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Dose Reference Depth" value=linac.beam_dose_ref_depth_11mev %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="R50" value=linac.beam_r50_11mev %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 12 MeV -->
+                {% if '12MeV' in linac.energy %}
+                <div class="energy-group">
+                    <h4 class="energy-header">12 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Dose Reference Depth" value=linac.beam_dose_ref_depth_12mev %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="R50" value=linac.beam_r50_12mev %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 13 MeV -->
+                {% if '13MeV' in linac.energy %}
+                <div class="energy-group">
+                    <h4 class="energy-header">13 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Dose Reference Depth" value=linac.beam_dose_ref_depth_13mev %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="R50" value=linac.beam_r50_13mev %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 14 MeV -->
+                {% if '14MeV' in linac.energy %}
+                <div class="energy-group">
+                    <h4 class="energy-header">14 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Dose Reference Depth" value=linac.beam_dose_ref_depth_14mev %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="R50" value=linac.beam_r50_14mev %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 15 MeV -->
+                {% if '15MeV' in linac.energy %}
+                <div class="energy-group">
+                    <h4 class="energy-header">15 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Dose Reference Depth" value=linac.beam_dose_ref_depth_15mev %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="R50" value=linac.beam_r50_15mev %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 16 MeV -->
+                {% if '16MeV' in linac.energy %}
+                <div class="energy-group">
+                    <h4 class="energy-header">16 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Dose Reference Depth" value=linac.beam_dose_ref_depth_16mev %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="R50" value=linac.beam_r50_16mev %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 17 MeV -->
+                {% if '17MeV' in linac.energy %}
+                <div class="energy-group">
+                    <h4 class="energy-header">17 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Dose Reference Depth" value=linac.beam_dose_ref_depth_17mev %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="R50" value=linac.beam_r50_17mev %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 18 MeV -->
+                {% if '18MeV' in linac.energy %}
+                <div class="energy-group">
+                    <h4 class="energy-header">18 MeV</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="Dose Reference Depth" value=linac.beam_dose_ref_depth_18mev %}
+                        {% include 'QAID_Manager/detail_field_snippet.html' with field_name="R50" value=linac.beam_r50_18mev %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Documents Section -->
+        <div class="detail-section">
+            <div class="section-header" onclick="toggleSection('documents')">
+                <h3>Documents & Files</h3>
+                <span class="toggle-icon" id="documents-icon">▼</span>
+            </div>
+            <div class="section-content" id="documents-content">
+                <!-- Documents List -->
+                <div>
+                    {% if documents %}
+                        <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                            <thead>
+                                <tr style="background-color: #e9ecef;">
+                                    <th style="padding: 12px; text-align: left; border: 1px solid #dee2e6;">File Name</th>
+                                    <th style="padding: 12px; text-align: left; border: 1px solid #dee2e6;">Type</th>
+                                    <th style="padding: 12px; text-align: left; border: 1px solid #dee2e6;">Description</th>
+                                    <th style="padding: 12px; text-align: left; border: 1px solid #dee2e6;">Uploaded By</th>
+                                    <th style="padding: 12px; text-align: left; border: 1px solid #dee2e6;">Uploaded At</th>
+                                    <th style="padding: 12px; text-align: center; border: 1px solid #dee2e6;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for doc in documents %}
+                                <tr>
+                                    <td style="padding: 12px; border: 1px solid #dee2e6;">
+                                        <a href="{{ doc.file.url }}" target="_blank" style="color: #007bff; text-decoration: none;">
+                                            📄 {{ doc.file_name }}
+                                        </a>
+                                    </td>
+                                    <td style="padding: 12px; border: 1px solid #dee2e6;">
+                                        <span style="
+                                            padding: 4px 8px; 
+                                            background-color: #e9ecef; 
+                                            border-radius: 4px; 
+                                            font-size: 12px;
+                                        ">{{ doc.get_file_type_display }}</span>
+                                    </td>
+                                    <td style="padding: 12px; border: 1px solid #dee2e6;">
+                                        {{ doc.description|default:"—" }}
+                                    </td>
+                                    <td style="padding: 12px; border: 1px solid #dee2e6;">
+                                        {% if doc.uploaded_by %}
+                                            {{ doc.uploaded_by.get_full_name|default:doc.uploaded_by.username }}
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </td>
+                                    <td style="padding: 12px; border: 1px solid #dee2e6;">
+                                        {{ doc.uploaded_at|date:"M d, Y H:i" }}
+                                    </td>
+                                    <td style="padding: 12px; border: 1px solid #dee2e6; text-align: center;">
+                                        <a href="{{ doc.file.url }}" target="_blank" style="
+                                            color: #007bff; 
+                                            text-decoration: none; 
+                                            margin-right: 10px;
+                                        ">View</a>
+                                        {% if is_admin %}
+                                        <form method="post" action="{% url 'linac_document_delete' linac.pk doc.pk %}" style="display: inline;">
+                                            {% csrf_token %}
+                                            <button type="submit" onclick="return confirm('Are you sure you want to delete this file?');" style="
+                                                color: #dc3545; 
+                                                background: none; 
+                                                border: none; 
+                                                cursor: pointer; 
+                                                text-decoration: underline;
+                                            ">Delete</button>
+                                        </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <p style="color: #6c757d; font-style: italic; margin-top: 20px;">
+                            No documents uploaded yet.
+                        </p>
+                    {% endif %}
+                </div>
+                
+                <!-- Upload Button (Admin only) -->
+                {% if is_admin %}
+                <div style="margin-top: 20px; text-align: center;">
+                    <button type="button" onclick="toggleLinacUploadForm()" id="linacUploadBtn" style="
+                        background-color: #007bff; 
+                        color: white; 
+                        padding: 10px 20px; 
+                        border: none; 
+                        border-radius: 4px; 
+                        cursor: pointer;
+                        font-size: 14px;
+                    ">📤 Upload Document</button>
+                </div>
+                
+                <!-- File Upload Form (Hidden by default) -->
+                <div id="linacUploadFormContainer" style="
+                    display: none;
+                    margin-top: 30px; 
+                    padding: 20px; 
+                    background-color: #f8f9fa; 
+                    border-radius: 8px; 
+                    border: 1px solid #dee2e6;
+                ">
+                    <h4 style="margin-top: 0; margin-bottom: 15px;">Upload New Document</h4>
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div style="margin-bottom: 15px;">
+                            <label for="{{ form.file.id_for_label }}" style="display: block; font-weight: bold; margin-bottom: 5px;">
+                                {{ form.file.label }}
+                            </label>
+                            {{ form.file }}
+                            <small style="color: #6c757d; display: block; margin-top: 5px;">
+                                Accepted formats: PDF, Word (DOC, DOCX), Images (PNG, JPEG, TIFF)
+                            </small>
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <label for="{{ form.file_name.id_for_label }}" style="display: block; font-weight: bold; margin-bottom: 5px;">
+                                {{ form.file_name.label }}
+                            </label>
+                            {{ form.file_name }}
+                            <small style="color: #6c757d; display: block; margin-top: 5px;">
+                                Leave blank to use original filename
+                            </small>
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <label for="{{ form.description.id_for_label }}" style="display: block; font-weight: bold; margin-bottom: 5px;">
+                                {{ form.description.label }}
+                            </label>
+                            {{ form.description }}
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button type="submit" style="
+                                background-color: #28a745; 
+                                color: white; 
+                                padding: 10px 20px; 
+                                border: none; 
+                                border-radius: 4px; 
+                                cursor: pointer;
+                            ">Upload File</button>
+                            <button type="button" onclick="toggleLinacUploadForm()" style="
+                                background-color: #6c757d; 
+                                color: white; 
+                                padding: 10px 20px; 
+                                border: none; 
+                                border-radius: 4px; 
+                                cursor: pointer;
+                            ">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Timestamps Section -->
+        <div class="detail-section">
+            <div class="section-header" onclick="toggleSection('timestamps')">
+                <h3>Timestamps</h3>
+                <span class="toggle-icon" id="timestamps-icon">▼</span>
+            </div>
+            <div class="section-content" id="timestamps-content" style="display: none;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <label class="detail-label">Created At</label>
+                        <div class="detail-value">{{ linac.created_at|date:"F d, Y H:i" }}</div>
+                    </div>
+                    <div>
+                        <label class="detail-label">Updated At</label>
+                        <div class="detail-value">{{ linac.updated_at|date:"F d, Y H:i" }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .detail-section {
+        margin-bottom: 20px;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        overflow: hidden;
+    }
+
+    .section-header {
+        background-color: #f8f9fa;
+        padding: 15px 20px;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .section-header:hover {
+        background-color: #e9ecef;
+    }
+
+    .section-header h3 {
+        margin: 0;
+        color: #495057;
+        font-size: 18px;
+    }
+
+    .toggle-icon {
+        font-size: 14px;
+        color: #6c757d;
+        transition: transform 0.3s;
+    }
+
+    .section-content {
+        padding: 20px;
+        background-color: white;
+    }
+
+    .detail-label {
+        display: block;
+        font-weight: bold;
+        color: #495057;
+        margin-bottom: 5px;
+        font-size: 14px;
+    }
+
+    .detail-value {
+        padding: 10px;
+        background-color: #f8f9fa;
+        border-radius: 4px;
+        border: 1px solid #dee2e6;
+        color: #495057;
+        min-height: 20px;
+    }
+
+    .subsection-header {
+        margin-top: 20px;
+        margin-bottom: 15px;
+        color: #495057;
+        border-bottom: 1px solid #dee2e6;
+        padding-bottom: 5px;
+        font-size: 16px;
+    }
+
+    .energy-group {
+        margin-top: 25px;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        border: 1px solid #dee2e6;
+    }
+
+    .energy-header {
+        margin-top: 0;
+        margin-bottom: 15px;
+        color: #007bff;
+        font-size: 18px;
+        font-weight: bold;
+        border-bottom: 2px solid #007bff;
+        padding-bottom: 8px;
+    }
+</style>
+
+<script>
+    function toggleSection(sectionId) {
+        const content = document.getElementById(sectionId + '-content');
+        const icon = document.getElementById(sectionId + '-icon');
+        
+        if (content.style.display === 'none') {
+            content.style.display = 'block';
+            icon.textContent = '▼';
+        } else {
+            content.style.display = 'none';
+            icon.textContent = '▶';
+        }
+    }
+    
+    function toggleLinacUploadForm() {
+        const formContainer = document.getElementById('linacUploadFormContainer');
+        const uploadBtn = document.getElementById('linacUploadBtn');
+        
+        if (formContainer.style.display === 'none') {
+            formContainer.style.display = 'block';
+            uploadBtn.textContent = '✖ Cancel Upload';
+            uploadBtn.style.backgroundColor = '#6c757d';
+        } else {
+            formContainer.style.display = 'none';
+            uploadBtn.textContent = '📤 Upload Document';
+            uploadBtn.style.backgroundColor = '#007bff';
+        }
+    }
+</script>
+{% endblock %}

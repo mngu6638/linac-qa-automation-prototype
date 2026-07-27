@@ -1,0 +1,11 @@
+<div>
+    <label class="detail-label">{{ field_name }}</label>
+    <div class="detail-value">
+        {% if value != None and value != '' %}
+            {{ value }}
+        {% else %}
+            Not specified
+        {% endif %}
+    </div>
+</div>
+

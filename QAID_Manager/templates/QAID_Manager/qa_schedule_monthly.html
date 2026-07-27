@@ -1,0 +1,779 @@
+{% extends 'QAID_Manager/base.html' %}
+{% load static %}
+
+{% block title %}QA Schedule - {{ month_year|date:"F Y" }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    body { 
+        background-color: #f8f9fa; 
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    .schedule-container {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        margin: 30px auto;
+        padding: 30px;
+        max-width: 1400px;
+    }
+    
+    .schedule-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #e9ecef;
+    }
+    
+    .month-navigation {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+    
+    .month-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    .month-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        text-decoration: none;
+        color: white;
+    }
+    
+    .current-month {
+        font-size: 28px;
+        font-weight: 700;
+        color: #2c3e50;
+        text-align: center;
+        flex-grow: 1;
+    }
+    
+    /* Professional Grid Layout */
+    .linac-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 25px;
+        margin-top: 30px;
+    }
+    
+    .linac-cell {
+        background: white;
+        border: 1px solid #e1e8ed;
+        border-radius: 12px;
+        padding: 25px;
+        min-height: 280px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .linac-cell:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        border-color: #667eea;
+    }
+    
+    .linac-cell.passed {
+        border-left: 4px solid #28a745;
+        background: linear-gradient(135deg, #f8fff9 0%, #ffffff 100%);
+    }
+    
+    .linac-cell.failed {
+        border-left: 4px solid #dc3545;
+        background: linear-gradient(135deg, #fff8f8 0%, #ffffff 100%);
+    }
+    
+    .linac-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding: 15px 20px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 8px;
+        border: 1px solid #e1e8ed;
+    }
+    
+    .linac-name {
+        font-size: 20px;
+        font-weight: 700;
+        color: #2c3e50;
+        margin: 0;
+    }
+    
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: white;
+        letter-spacing: 0.5px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    .status-passed {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    }
+    
+    .status-passed_with_exception {
+        background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
+    }
+    
+    .status-failed {
+        background: linear-gradient(135deg, #dc3545 0%, #e74c3c 100%);
+    }
+    
+    .status-scheduled {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    }
+    
+    .status-minor_service {
+        background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
+    }
+    
+    .status-major_service {
+        background: linear-gradient(135deg, #fd7e14 0%, #e55a00 100%);
+    }
+    
+    .status-completed {
+        background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    }
+    
+    .status-in_progress {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    }
+    
+    .performer-form {
+        margin-bottom: 20px;
+    }
+    
+    .performer-form label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        color: #2c3e50;
+        letter-spacing: 0.3px;
+    }
+    
+    .performer-form select {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid #e1e8ed;
+        border-radius: 8px;
+        background: white;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    
+    .performer-form select:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+    }
+    
+    .activity-actions {
+        margin-top: 25px;
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+    
+    .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        text-decoration: none;
+        color: white;
+    }
+    
+    .btn-secondary {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        color: white;
+    }
+    
+    .btn-secondary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+        text-decoration: none;
+        color: white;
+    }
+    
+    .btn-success {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+    }
+    
+    .btn-danger {
+        background: linear-gradient(135deg, #dc3545 0%, #e74c3c 100%);
+        color: white;
+    }
+    
+    .btn-sm {
+        padding: 8px 16px;
+        font-size: 13px;
+    }
+
+    .print-qa-report-row {
+        margin-top: 10px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    
+    .performer-info {
+        margin-bottom: 15px;
+        padding: 12px 16px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-radius: 8px;
+        border: 1px solid #e1e8ed;
+    }
+    
+    .performer-info strong {
+        color: #2c3e50;
+        font-weight: 600;
+    }
+    
+    .qa-date {
+        font-size: 14px;
+        color: #2c3e50;
+        margin-bottom: 20px;
+        padding: 12px 16px;
+        font-weight: 600;
+    }
+    
+    .qa-notes {
+        background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-size: 14px;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+        border-left: 4px solid #fdcb6e;
+    }
+    
+    .expected-qa-date {
+        font-size: 14px;
+        color: #2c3e50;
+        margin-bottom: 15px;
+        padding: 12px 16px;
+        font-weight: 600;
+    }
+    
+    .failed-tests {
+        font-size: 14px;
+        color: #dc3545;
+        margin-bottom: 15px;
+        padding: 12px 16px;
+        font-weight: 600;
+    }
+    
+    /* Mobile responsive */
+    @media (max-width: 768px) {
+        .linac-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        
+        .schedule-container {
+            margin: 15px;
+            padding: 20px;
+        }
+        
+        .current-month {
+            font-size: 24px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="schedule-container">
+    <div class="schedule-header">
+        <div class="month-navigation">
+            <a href="?month={{ prev_month.month }}&year={{ prev_month.year }}" class="month-btn">← Previous Month</a>
+            <span class="current-month">{{ month_year|date:"F Y" }}</span>
+            <a href="?month={{ next_month.month }}&year={{ next_month.year }}" class="month-btn">Next Month →</a>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <a href="{% url 'create_bulk_schedule' %}" class="btn btn-primary">Create Schedule</a>
+            <a href="{% url 'create_adhoc_qa_schedule' %}" class="btn btn-secondary">Create Non-scheduled QA</a>
+        </div>
+    </div>
+    
+    {% if schedules %}
+    <div class="linac-grid">
+        {% for schedule in schedules %}
+        <div class="linac-cell">
+            <div class="linac-header">
+                <div class="linac-name">{{ schedule.linac.name }}</div>
+                {% if schedule.status %}
+                    <span class="status-badge status-{{ schedule.status.name }}">
+                        {{ schedule.status.get_name_display }}
+                    </span>
+                {% else %}
+                    <span class="status-badge status-scheduled">Scheduled</span>
+                {% endif %}
+            </div>
+            
+            <!-- Expected QA Date -->
+            {% if schedule.expected_qa_date %}
+                <div class="expected-qa-date">
+                    <strong>Expected QA Date:</strong> {{ schedule.expected_qa_date|date:"F j, Y" }}
+                </div>
+            {% endif %}
+            
+                         {% if schedule.status or schedule.qa_record %}
+                 <!-- Completed QA - Show results -->
+                 {% if schedule.qa_date %}
+                     <div class="qa-date">
+                         <strong>Completed Date:</strong> {{ schedule.qa_date|date:"F j, Y" }}
+                     </div>
+                 {% endif %}
+                
+                <div class="performer-info">
+                    <strong>QA Performer:</strong> 
+                    {% if schedule.performer1 %}
+                        {% if schedule.performer1.first_name or schedule.performer1.last_name %}
+                            {{ schedule.performer1.last_name }} {{ schedule.performer1.first_name }}
+                        {% else %}
+                            {{ schedule.performer1.username }}
+                        {% endif %}
+                    {% else %}
+                        Not assigned
+                    {% endif %}
+                </div>
+                
+                {% if schedule.performer2 %}
+                    <div class="performer-info">
+                        <strong>QA Performer 2:</strong> 
+                        {% if schedule.performer2.first_name or schedule.performer2.last_name %}
+                            {{ schedule.performer2.last_name }} {{ schedule.performer2.first_name }}
+                        {% else %}
+                            {{ schedule.performer2.username }}
+                        {% endif %}
+                    </div>
+                {% endif %}
+                
+                {% if schedule.failed_tests or schedule.failed_tests_data %}
+                    <div class="failed-tests">
+                        <strong>Failed Tests:</strong>
+                        <ul style="margin: 5px 0; padding-left: 20px;">
+                            {% for test in schedule.failed_tests|default:schedule.failed_tests_data %}
+                                <li>{{ test.test_name }}: {{ test.value|floatformat:1 }} (Tolerance: {{ test.tolerance }})</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+                
+                {% if schedule.is_accepted and schedule.notes %}
+                    <div class="qa-notes">
+                        <strong>Failed QA Notes:</strong> {{ schedule.notes }}
+                    </div>
+                {% elif schedule.notes %}
+                    <div class="qa-notes">
+                        <strong>User Notes:</strong> {{ schedule.notes }}
+                    </div>
+                {% endif %}
+                
+                <!-- Notes field for completed QA -->
+                <div class="performer-form" style="margin-top: 15px;">
+                    <label for="notes_{{ schedule.id }}">Notes:</label>
+                    <textarea id="notes_{{ schedule.id }}" name="notes_{{ schedule.id }}" 
+                              class="performer-select" rows="3" 
+                              style="width: 100%; padding: 12px 16px; border: 2px solid #e1e8ed; border-radius: 8px; font-size: 14px;">{{ schedule.notes }}</textarea>
+                    <button type="button" class="btn btn-secondary btn-sm update-notes" 
+                            data-schedule-id="{{ schedule.id }}" 
+                            style="margin-top: 8px;">Save Notes</button>
+                    {% if schedule.notes_edit_history %}
+                        <div style="margin-top: 8px; font-size: 12px; color: #6c757d;">
+                            <strong>Edit History:</strong>
+                            <ul style="margin: 5px 0; padding-left: 20px;">
+                                {% for edit in schedule.notes_edit_history|slice:":3" %}
+                                    <li>{{ edit.user_full_name }} - {{ edit.timestamp|slice:":16" }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="activity-actions">
+                    {% if schedule.is_failed and not schedule.is_accepted %}
+                        <form method="post" action="{% url 'accept_failed_qa' schedule.id %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger btn-sm">Accept Failed QA</button>
+                        </form>
+                    {% elif schedule.is_failed and schedule.is_accepted %}
+                        <button type="button" class="btn btn-success btn-sm" disabled>Failed QA Accepted</button>
+                        {% if schedule.accepted_by %}
+                            <span style="font-size: 12px; color: #6c757d; margin-left: 10px;">
+                                Accepted by: {{ schedule.accepted_by.get_full_name|default:schedule.accepted_by.username }}
+                                {% if schedule.accepted_at %}
+                                    on {{ schedule.accepted_at|date:"Y-m-d H:i" }}
+                                {% endif %}
+                            </span>
+                        {% endif %}
+                    {% else %}
+                        <button type="button" class="btn btn-success btn-sm" disabled>QA Completed</button>
+                    {% endif %}
+                    
+                    <a href="{% url 'view_qa_records' schedule.id %}" class="btn btn-secondary btn-sm">View Records</a>
+                </div>
+                {% if schedule.qa_record %}
+                    <div class="print-qa-report-row">
+                        <span style="font-weight:bold; color:#495057;">Print QA Report:</span>
+                        <a href="{% url 'generate_qa_report' schedule.qa_record.id %}?format=pdf"
+                           title="Download QA report (PDF)"
+                           style="background:#17a2b8;color:#fff;border:none;border-radius:4px;padding:8px 12px;cursor:pointer;min-width:88px;font-size:20px;line-height:1;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;">
+                            &#x2B07; <span style="font-size:13px; font-weight:bold;">(PDF)</span>
+                        </a>
+                        <a href="{% url 'generate_qa_report' schedule.qa_record.id %}?format=docx"
+                           title="Download QA report (DOCX)"
+                           style="background:#6f42c1;color:#fff;border:none;border-radius:4px;padding:8px 12px;cursor:pointer;min-width:96px;font-size:20px;line-height:1;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;">
+                            &#x2B07; <span style="font-size:13px; font-weight:bold;">(DOCX)</span>
+                        </a>
+                        <a href="{% url 'generate_qa_report' schedule.qa_record.id %}?format=pdf&preview=1"
+                           target="_blank"
+                           title="Preview QA report (PDF)"
+                           style="background:#20c997;color:#fff;border:none;border-radius:4px;padding:8px 14px;cursor:pointer;min-width:52px;font-size:22px;line-height:1;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;">
+                            &#128065;
+                        </a>
+                    </div>
+                {% endif %}
+                
+            {% elif schedule.qa_record %}
+                <!-- QA records exist but schedule not marked as completed - Show View Records button -->
+                <div class="performer-info">
+                    <strong>QA Performer:</strong> 
+                    {% if schedule.performer1 %}
+                        {% if schedule.performer1.first_name or schedule.performer1.last_name %}
+                            {{ schedule.performer1.last_name }} {{ schedule.performer1.first_name }}
+                        {% else %}
+                            {{ schedule.performer1.username }}
+                        {% endif %}
+                    {% else %}
+                        Not assigned
+                    {% endif %}
+                </div>
+                
+                <div class="activity-actions">
+                    <a href="{% url 'view_qa_records' schedule.id %}" class="btn btn-secondary btn-sm">View Records</a>
+                </div>
+                {% if schedule.qa_record %}
+                    <div class="print-qa-report-row">
+                        <span style="font-weight:bold; color:#495057;">Print QA Report:</span>
+                        <a href="{% url 'generate_qa_report' schedule.qa_record.id %}?format=pdf"
+                           title="Download QA report (PDF)"
+                           style="background:#17a2b8;color:#fff;border:none;border-radius:4px;padding:8px 12px;cursor:pointer;min-width:88px;font-size:20px;line-height:1;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;">
+                            &#x2B07; <span style="font-size:13px; font-weight:bold;">(PDF)</span>
+                        </a>
+                        <a href="{% url 'generate_qa_report' schedule.qa_record.id %}?format=docx"
+                           title="Download QA report (DOCX)"
+                           style="background:#6f42c1;color:#fff;border:none;border-radius:4px;padding:8px 12px;cursor:pointer;min-width:96px;font-size:20px;line-height:1;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;">
+                            &#x2B07; <span style="font-size:13px; font-weight:bold;">(DOCX)</span>
+                        </a>
+                        <a href="{% url 'generate_qa_report' schedule.qa_record.id %}?format=pdf&preview=1"
+                           target="_blank"
+                           title="Preview QA report (PDF)"
+                           style="background:#20c997;color:#fff;border:none;border-radius:4px;padding:8px 14px;cursor:pointer;min-width:52px;font-size:22px;line-height:1;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;">
+                            &#128065;
+                        </a>
+                    </div>
+                {% endif %}
+                
+            {% elif schedule.performer1 %}
+                <!-- Assigned but not completed - Show assignment info and allow editing -->
+                <div class="performer-info">
+                    <strong>QA Performer:</strong> 
+                    {% if schedule.performer1.first_name or schedule.performer1.last_name %}
+                        {{ schedule.performer1.last_name }} {{ schedule.performer1.first_name }}
+                    {% else %}
+                        {{ schedule.performer1.username }}
+                    {% endif %}
+                </div>
+                
+                {% if schedule.performer2 %}
+                    <div class="performer-info">
+                        <strong>QA Performer 2:</strong> 
+                        {% if schedule.performer2.first_name or schedule.performer2.last_name %}
+                            {{ schedule.performer2.last_name }} {{ schedule.performer2.first_name }}
+                        {% else %}
+                            {{ schedule.performer2.username }}
+                        {% endif %}
+                    </div>
+                {% endif %}
+                
+                <div class="activity-actions">
+                    <button type="button" class="btn btn-primary btn-sm edit-assignment" 
+                            data-schedule-id="{{ schedule.id }}">Edit Assignment</button>
+                    {% if schedule.has_draft %}
+                        <a href="{% url 'qa_entry' %}?linac={{ schedule.linac.id }}&schedule={{ schedule.id }}&qa_record={{ schedule.draft_record_id }}" class="btn btn-warning btn-sm">Resume QA</a>
+                    {% else %}
+                        <a href="{% url 'qa_entry' %}?linac={{ schedule.linac.id }}&schedule={{ schedule.id }}" class="btn btn-success btn-sm">Performing QA</a>
+                    {% endif %}
+                </div>
+                
+            {% else %}
+                <!-- Not completed - Show clean assignment form -->
+                <div class="performer-form">
+                    <label for="performer1_{{ schedule.id }}">QA Performer 1:</label>
+                    <select name="performer1_{{ schedule.id }}" id="performer1_{{ schedule.id }}" class="performer-select">
+                        <option value="">Select Performer 1</option>
+                        {% for performer in performers %}
+                            <option value="{{ performer.id }}">
+                                {% if performer.first_name or performer.last_name %}
+                                    {{ performer.last_name }} {{ performer.first_name }}
+                                {% else %}
+                                    {{ performer.username }}
+                                {% endif %}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="performer-form">
+                    <label for="performer2_{{ schedule.id }}">QA Performer 2 (Optional):</label>
+                    <select name="performer2_{{ schedule.id }}" id="performer2_{{ schedule.id }}" class="performer-select">
+                        <option value="">Select Performer 2</option>
+                        {% for performer in performers %}
+                            <option value="{{ performer.id }}">
+                                {% if performer.first_name or performer.last_name %}
+                                    {{ performer.last_name }} {{ performer.first_name }}
+                                {% else %}
+                                    {{ performer.username }}
+                                {% endif %}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="performer-form">
+                    <label for="expected_qa_date_{{ schedule.id }}">Expected QA Date:</label>
+                    <input type="date" id="expected_qa_date_{{ schedule.id }}" name="expected_qa_date_{{ schedule.id }}" 
+                           class="performer-select" value="{{ schedule.expected_qa_date|date:'Y-m-d'|default:'' }}">
+                </div>
+                
+                <div class="activity-actions">
+                    <button type="button" class="btn btn-primary btn-sm assign-performers" 
+                            data-schedule-id="{{ schedule.id }}">Confirm Assignment</button>
+                </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+        <!-- No schedules created for this month -->
+        <div style="text-align: center; padding: 60px 20px; background-color: #f8f9fa; border-radius: 8px; margin-top: 20px;">
+            <h3 style="color: #6c757d; margin-bottom: 15px;">No QA Schedules for {{ month_year|date:"F Y" }}</h3>
+            <p style="color: #6c757d; margin-bottom: 25px;">Create schedules using the "Create Schedule" button above.</p>
+            <a href="{% url 'create_bulk_schedule' %}" class="btn btn-primary">Create Schedule</a>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Use event delegation for all button clicks
+    document.addEventListener('click', function(e) {
+        // Handle assign-performers button (both initial and dynamically created)
+        if (e.target.classList.contains('assign-performers')) {
+            const scheduleId = e.target.getAttribute('data-schedule-id');
+            const performer1Select = document.getElementById(`performer1_${scheduleId}`);
+            const performer2Select = document.getElementById(`performer2_${scheduleId}`);
+            
+            if (!performer1Select || !performer2Select) {
+                console.error('Form elements not found');
+                return;
+            }
+            
+            const performer1Id = performer1Select.value;
+            const performer2Id = performer2Select.value;
+            const expectedDateInput = document.getElementById(`expected_qa_date_${scheduleId}`);
+            const expectedQaDate = expectedDateInput ? expectedDateInput.value : null;
+            
+            // Validate that performer 1 is selected
+            if (!performer1Id) {
+                alert('Please select a primary performer.');
+                return;
+            }
+            
+            // Validate that performers are different
+            if (performer1Id && performer2Id && performer1Id === performer2Id) {
+                alert('Performer 1 and Performer 2 must be different people.');
+                return;
+            }
+            
+            // Send AJAX request
+            fetch('{% url "assign_performers" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify({
+                    schedule_id: scheduleId,
+                    performer1_id: performer1Id,
+                    performer2_id: performer2Id,
+                    expected_qa_date: expectedQaDate
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Reload the page to show updated status
+                    window.location.reload();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while assigning performers.');
+            });
+        }
+        
+        // Handle edit-assignment button
+        if (e.target.classList.contains('edit-assignment')) {
+            const scheduleId = e.target.getAttribute('data-schedule-id');
+            const cell = e.target.closest('.linac-cell');
+            
+            // Get current performer info
+            const performer1Info = cell.querySelector('.performer-info strong').nextSibling.textContent.trim();
+            const performer2Info = cell.querySelectorAll('.performer-info')[1] ? 
+                cell.querySelectorAll('.performer-info')[1].querySelector('strong').nextSibling.textContent.trim() : '';
+            
+            // Create form HTML
+            const formHTML = `
+                <div class="performer-form">
+                    <label for="performer1_${scheduleId}">QA Performer 1:</label>
+                    <select name="performer1_${scheduleId}" id="performer1_${scheduleId}" class="performer-select">
+                        <option value="">Select Performer 1</option>
+                        {% for performer in performers %}
+                            <option value="{{ performer.id }}" ${performer1Info.includes('{{ performer.last_name }} {{ performer.first_name }}') ? 'selected' : ''}>
+                                {% if performer.first_name or performer.last_name %}
+                                    {{ performer.last_name }} {{ performer.first_name }}
+                                {% else %}
+                                    {{ performer.username }}
+                                {% endif %}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="performer-form">
+                    <label for="performer2_${scheduleId}">QA Performer 2 (Optional):</label>
+                    <select name="performer2_${scheduleId}" id="performer2_${scheduleId}" class="performer-select">
+                        <option value="">Select Performer 2</option>
+                        {% for performer in performers %}
+                            <option value="{{ performer.id }}" ${performer2Info.includes('{{ performer.last_name }} {{ performer.first_name }}') ? 'selected' : ''}>
+                                {% if performer.first_name or performer.last_name %}
+                                    {{ performer.last_name }} {{ performer.first_name }}
+                                {% else %}
+                                    {{ performer.username }}
+                                {% endif %}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="activity-actions">
+                    <button type="button" class="btn btn-primary btn-sm assign-performers" 
+                            data-schedule-id="${scheduleId}">Update Assignment</button>
+                    <button type="button" class="btn btn-secondary btn-sm cancel-edit" 
+                            data-schedule-id="${scheduleId}">Cancel</button>
+                    <a href="{% url 'qa_entry' %}?linac={{ schedule.linac.id }}" class="btn btn-secondary btn-sm">Go to QA Form</a>
+                </div>
+            `;
+            
+            // Replace the content with the form
+            const performerInfos = cell.querySelectorAll('.performer-info');
+            performerInfos.forEach(info => info.remove());
+            e.target.remove();
+            
+            const actionsDiv = cell.querySelector('.activity-actions');
+            actionsDiv.insertAdjacentHTML('beforebegin', formHTML);
+            actionsDiv.remove();
+        }
+        
+        // Handle cancel-edit button
+        if (e.target.classList.contains('cancel-edit')) {
+            // Reload the page to restore original view
+            window.location.reload();
+        }
+        
+        // Handle update-notes button
+        if (e.target.classList.contains('update-notes')) {
+            const scheduleId = e.target.getAttribute('data-schedule-id');
+            const notesTextarea = document.getElementById(`notes_${scheduleId}`);
+            const notes = notesTextarea ? notesTextarea.value : '';
+            
+            fetch(`/qa-schedule/${scheduleId}/update-notes/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify({
+                    notes: notes
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Notes updated successfully.');
+                    window.location.reload();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while updating notes.');
+            });
+        }
+    });
+});
+</script>
+
+<!-- Add CSRF token for AJAX requests -->
+{% csrf_token %}
+{% endblock %}

@@ -1,0 +1,456 @@
+{% extends 'QAID_Manager/base.html' %}
+
+{% block title %}Equipment Management{% endblock %}
+
+{% block content %}
+<div style="max-width: 1400px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h1>Equipment Management</h1>
+        <a href="{% url 'service_report_create' %}" style="
+            background-color: #007bff; 
+            color: white; 
+            padding: 10px 20px; 
+            text-decoration: none; 
+            border-radius: 5px;
+            font-weight: bold;
+        ">Create Equipment Service Report</a>
+    </div>
+
+    <!-- Summary -->
+    <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 20px;">
+        <div style="background:#fff; border:1px solid #dee2e6; border-radius:6px; padding:12px;">
+            <div style="font-size:12px; color:#6c757d;">Total LINACs</div>
+            <div style="font-size:22px; font-weight:bold;">{{ summary.total_linacs }}</div>
+        </div>
+        <div style="background:#fff; border:1px solid #dee2e6; border-radius:6px; padding:12px;">
+            <div style="font-size:12px; color:#6c757d;">LINAC Reports</div>
+            <div style="font-size:22px; font-weight:bold;">{{ summary.total_linac_reports }}</div>
+        </div>
+        <div style="background:#fff; border:1px solid #dee2e6; border-radius:6px; padding:12px;">
+            <div style="font-size:12px; color:#6c757d;">Completed</div>
+            <div style="font-size:22px; font-weight:bold; color:#155724;">{{ summary.completed_count }}</div>
+        </div>
+        <div style="background:#fff; border:1px solid #dee2e6; border-radius:6px; padding:12px;">
+            <div style="font-size:12px; color:#6c757d;">Pending</div>
+            <div style="font-size:22px; font-weight:bold; color:#856404;">{{ summary.pending_count }}</div>
+        </div>
+        <div style="background:#fff; border:1px solid #dee2e6; border-radius:6px; padding:12px;">
+            <div style="font-size:12px; color:#6c757d;">Temporary</div>
+            <div style="font-size:22px; font-weight:bold; color:#0c5460;">{{ summary.temporary_count }}</div>
+        </div>
+        <div style="background:#fff; border:1px solid #dee2e6; border-radius:6px; padding:12px;">
+            <div style="font-size:12px; color:#6c757d;">Downtime (hours)</div>
+            <div style="font-size:22px; font-weight:bold;">{{ summary.total_downtime_hours|floatformat:1 }}</div>
+        </div>
+    </div>
+
+    <div style="background:#fff; border:1px solid #dee2e6; border-radius:6px; padding:12px; margin-bottom:20px;">
+        <h3 style="margin:0 0 10px 0; color:#495057;">LINAC Dashboard</h3>
+        <div style="overflow-x:auto;">
+            <table style="width:100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background:#f8f9fa;">
+                        <th style="padding:10px; border:1px solid #dee2e6; text-align:left;">LINAC</th>
+                        <th style="padding:10px; border:1px solid #dee2e6; text-align:center;">Reports</th>
+                        <th style="padding:10px; border:1px solid #dee2e6; text-align:center;">Completed</th>
+                        <th style="padding:10px; border:1px solid #dee2e6; text-align:center;">Pending</th>
+                        <th style="padding:10px; border:1px solid #dee2e6; text-align:center;">Temporary</th>
+                        <th style="padding:10px; border:1px solid #dee2e6; text-align:center;">Downtime (h)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stat in linac_stats %}
+                    <tr>
+                        <td style="padding:10px; border:1px solid #dee2e6;">{{ stat.linac.name }}</td>
+                        <td style="padding:10px; border:1px solid #dee2e6; text-align:center;">{{ stat.reports }}</td>
+                        <td style="padding:10px; border:1px solid #dee2e6; text-align:center;">{{ stat.completed }}</td>
+                        <td style="padding:10px; border:1px solid #dee2e6; text-align:center;">{{ stat.pending }}</td>
+                        <td style="padding:10px; border:1px solid #dee2e6; text-align:center;">{{ stat.temporary }}</td>
+                        <td style="padding:10px; border:1px solid #dee2e6; text-align:center;">{{ stat.downtime_hours|floatformat:1 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div style="background:#fff; border:1px solid #dee2e6; border-radius:6px; padding:12px; margin-bottom:20px;">
+        <h3 style="margin:0 0 10px 0; color:#495057;">Device Dashboard</h3>
+        {% if device_stats %}
+        <div style="overflow-x:auto;">
+            <table style="width:100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background:#f8f9fa;">
+                        <th style="padding:10px; border:1px solid #dee2e6; text-align:left;">Device</th>
+                        <th style="padding:10px; border:1px solid #dee2e6; text-align:center;">Reports</th>
+                        <th style="padding:10px; border:1px solid #dee2e6; text-align:center;">Completed</th>
+                        <th style="padding:10px; border:1px solid #dee2e6; text-align:center;">Pending</th>
+                        <th style="padding:10px; border:1px solid #dee2e6; text-align:center;">Temporary</th>
+                        <th style="padding:10px; border:1px solid #dee2e6; text-align:center;">Downtime (h)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stat in device_stats %}
+                    <tr>
+                        <td style="padding:10px; border:1px solid #dee2e6;">{{ stat.device.name }}</td>
+                        <td style="padding:10px; border:1px solid #dee2e6; text-align:center;">{{ stat.reports }}</td>
+                        <td style="padding:10px; border:1px solid #dee2e6; text-align:center;">{{ stat.completed }}</td>
+                        <td style="padding:10px; border:1px solid #dee2e6; text-align:center;">{{ stat.pending }}</td>
+                        <td style="padding:10px; border:1px solid #dee2e6; text-align:center;">{{ stat.temporary }}</td>
+                        <td style="padding:10px; border:1px solid #dee2e6; text-align:center;">{{ stat.downtime_hours|floatformat:1 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <div style="color:#6c757d; font-size:14px;">No devices with pending or temporary reports.</div>
+        {% endif %}
+    </div>
+
+    <div style="background:#fff; border:1px solid #dee2e6; border-radius:6px; padding:12px; margin-bottom:20px;">
+        <h3 style="margin:0 0 10px 0; color:#495057;">Others Dashboard</h3>
+        {% if other_stats %}
+        <div style="overflow-x:auto;">
+            <table style="width:100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background:#f8f9fa;">
+                        <th style="padding:10px; border:1px solid #dee2e6; text-align:left;">Other Equipment</th>
+                        <th style="padding:10px; border:1px solid #dee2e6; text-align:center;">Reports</th>
+                        <th style="padding:10px; border:1px solid #dee2e6; text-align:center;">Completed</th>
+                        <th style="padding:10px; border:1px solid #dee2e6; text-align:center;">Pending</th>
+                        <th style="padding:10px; border:1px solid #dee2e6; text-align:center;">Temporary</th>
+                        <th style="padding:10px; border:1px solid #dee2e6; text-align:center;">Downtime (h)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stat in other_stats %}
+                    <tr>
+                        <td style="padding:10px; border:1px solid #dee2e6;">{{ stat.device.name }}</td>
+                        <td style="padding:10px; border:1px solid #dee2e6; text-align:center;">{{ stat.reports }}</td>
+                        <td style="padding:10px; border:1px solid #dee2e6; text-align:center;">{{ stat.completed }}</td>
+                        <td style="padding:10px; border:1px solid #dee2e6; text-align:center;">{{ stat.pending }}</td>
+                        <td style="padding:10px; border:1px solid #dee2e6; text-align:center;">{{ stat.temporary }}</td>
+                        <td style="padding:10px; border:1px solid #dee2e6; text-align:center;">{{ stat.downtime_hours|floatformat:1 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <div style="color:#6c757d; font-size:14px;">No other-category equipment with pending or temporary reports.</div>
+        {% endif %}
+    </div>
+
+    <!-- Filter Section -->
+    <div style="
+        background-color: white; 
+        padding: 20px; 
+        border-radius: 8px; 
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+    ">
+        <h3 style="margin-top: 0; margin-bottom: 15px; color: #495057;">Filters</h3>
+        <form method="get" action="{% url 'linac_management' %}" style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 260px;">
+                <label for="equipment_filter" style="display: block; margin-bottom: 5px; font-weight: bold; color: #495057;">Equipment</label>
+                <select name="equipment" id="equipment_filter" style="
+                    width: 100%;
+                    padding: 8px 12px;
+                    border: 1px solid #ced4da;
+                    border-radius: 4px;
+                    font-size: 14px;
+                ">
+                    <option value="">All Equipment</option>
+                    {% for value, label in equipment_options %}
+                        <option value="{{ value }}" {% if current_equipment_filter == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div style="flex: 1; min-width: 200px;">
+                <label for="q_filter" style="display: block; margin-bottom: 5px; font-weight: bold; color: #495057;">Keyword</label>
+                <input type="text" name="q" id="q_filter" value="{{ current_keyword }}" placeholder="Issue, action, notes..." style="
+                    width: 100%;
+                    padding: 8px 12px;
+                    border: 1px solid #ced4da;
+                    border-radius: 4px;
+                    font-size: 14px;
+                ">
+            </div>
+            
+            <div style="flex: 1; min-width: 200px;">
+                <label for="type_filter" style="display: block; margin-bottom: 5px; font-weight: bold; color: #495057;">Type</label>
+                <select name="type" id="type_filter" style="
+                    width: 100%;
+                    padding: 8px 12px;
+                    border: 1px solid #ced4da;
+                    border-radius: 4px;
+                    font-size: 14px;
+                ">
+                    <option value="">All Types</option>
+                    <option value="pm_service" {% if current_type_filter == 'pm_service' %}selected{% endif %}>PM Service</option>
+                    <option value="equipment_breakdown" {% if current_type_filter == 'equipment_breakdown' %}selected{% endif %}>Equipment Breakdown</option>
+                    <option value="both" {% if current_type_filter == 'both' %}selected{% endif %}>Both</option>
+                </select>
+            </div>
+            
+            <div style="flex: 1; min-width: 200px;">
+                <label for="status_filter" style="display: block; margin-bottom: 5px; font-weight: bold; color: #495057;">Status</label>
+                <select name="status" id="status_filter" style="
+                    width: 100%;
+                    padding: 8px 12px;
+                    border: 1px solid #ced4da;
+                    border-radius: 4px;
+                    font-size: 14px;
+                ">
+                    <option value="">All Statuses</option>
+                    <option value="completed" {% if current_status_filter == 'completed' %}selected{% endif %}>Completed</option>
+                    <option value="pending" {% if current_status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                    <option value="temporary" {% if current_status_filter == 'temporary' %}selected{% endif %}>Temporary</option>
+                </select>
+            </div>
+            
+            <div style="flex: 1; min-width: 200px;">
+                <label for="date_from" style="display: block; margin-bottom: 5px; font-weight: bold; color: #495057;">Date From</label>
+                <input type="date" name="date_from" id="date_from" value="{{ current_date_from }}" style="
+                    width: 100%;
+                    padding: 8px 12px;
+                    border: 1px solid #ced4da;
+                    border-radius: 4px;
+                    font-size: 14px;
+                ">
+            </div>
+            
+            <div style="flex: 1; min-width: 200px;">
+                <label for="date_to" style="display: block; margin-bottom: 5px; font-weight: bold; color: #495057;">Date To</label>
+                <input type="date" name="date_to" id="date_to" value="{{ current_date_to }}" style="
+                    width: 100%;
+                    padding: 8px 12px;
+                    border: 1px solid #ced4da;
+                    border-radius: 4px;
+                    font-size: 14px;
+                ">
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-left: 20px;">
+                <button type="submit" style="
+                    background-color: #007bff; 
+                    color: white; 
+                    padding: 8px 20px; 
+                    border: none; 
+                    border-radius: 4px; 
+                    font-weight: bold; 
+                    cursor: pointer;
+                    white-space: nowrap;
+                ">Apply Filters</button>
+                <a href="{% url 'linac_management' %}" style="
+                    background-color: #6c757d; 
+                    color: white; 
+                    padding: 8px 20px; 
+                    text-decoration: none; 
+                    border-radius: 4px; 
+                    font-weight: bold;
+                    white-space: nowrap;
+                ">Clear</a>
+            </div>
+        </form>
+    </div>
+
+    {% if service_reports %}
+        <form id="printSelectedForm" method="post" action="{% url 'service_report_print_selected' %}" style="margin-bottom: 12px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+            {% csrf_token %}
+            <input type="hidden" name="format" id="selectedPrintFormat" value="pdf">
+            <input type="hidden" name="preview" id="selectedPrintPreview" value="0">
+            <span style="font-weight:bold;">Print Selected Reports:</span>
+            <button type="button" onclick="submitSelected('pdf', false)" title="Print selected reports (PDF)" style="background:#17a2b8;color:#fff;border:none;border-radius:4px;padding:8px 12px;cursor:pointer;min-width:88px;font-size:20px;line-height:1;">&#x2B07; <span style="font-size:13px; font-weight:bold;">(PDF)</span></button>
+            <button type="button" onclick="submitSelected('docx', false)" title="Print selected reports (DOCX)" style="background:#6f42c1;color:#fff;border:none;border-radius:4px;padding:8px 12px;cursor:pointer;min-width:96px;font-size:20px;line-height:1;">&#x2B07; <span style="font-size:13px; font-weight:bold;">(DOCX)</span></button>
+            <button type="button" onclick="submitSelected('pdf', true)" title="Preview selected reports (PDF)" style="background:#20c997;color:#fff;border:none;border-radius:4px;padding:8px 14px;cursor:pointer;min-width:52px;font-size:22px;line-height:1;">&#128065;</button>
+        </form>
+        <form id="printPeriodicForm" method="post" action="{% url 'service_report_print_periodic' %}" style="margin-bottom: 14px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+            {% csrf_token %}
+            <span style="font-weight:bold;">Print Periodic Reports:</span>
+            <input type="date" name="date_from" required value="{{ current_date_from }}" style="padding:6px 8px;">
+            <input type="date" name="date_to" required value="{{ current_date_to }}" style="padding:6px 8px;">
+            <input type="hidden" name="format" id="periodicPrintFormat" value="pdf">
+            <input type="hidden" name="preview" id="periodicPrintPreview" value="0">
+            <button type="button" onclick="submitPeriodic('pdf', false)" title="Print periodic reports (PDF)" style="background:#007bff;color:#fff;border:none;border-radius:4px;padding:8px 12px;cursor:pointer;min-width:88px;font-size:20px;line-height:1;">&#x2B07; <span style="font-size:13px; font-weight:bold;">(PDF)</span></button>
+            <button type="button" onclick="submitPeriodic('docx', false)" title="Print periodic reports (DOCX)" style="background:#6f42c1;color:#fff;border:none;border-radius:4px;padding:8px 12px;cursor:pointer;min-width:96px;font-size:20px;line-height:1;">&#x2B07; <span style="font-size:13px; font-weight:bold;">(DOCX)</span></button>
+            <button type="button" onclick="submitPeriodic('pdf', true)" title="Preview periodic reports (PDF)" style="background:#20c997;color:#fff;border:none;border-radius:4px;padding:8px 14px;cursor:pointer;min-width:52px;font-size:22px;line-height:1;">&#128065;</button>
+        </form>
+        <div style="overflow-x: auto;">
+            <table style="
+                width: 100%; 
+                border-collapse: collapse; 
+                background-color: white; 
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                border-radius: 8px;
+                overflow: hidden;
+            ">
+                <thead>
+                    <tr style="background-color: #f8f9fa;">
+                        <th style="padding: 15px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: bold;">Date</th>
+                        <th style="padding: 15px; text-align: center; border-bottom: 2px solid #dee2e6; font-weight: bold;"><input type="checkbox" id="selectAll"></th>
+                        <th style="padding: 15px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: bold;">Equipment</th>
+                        <th style="padding: 15px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: bold;">Type</th>
+                        <th style="padding: 15px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: bold;">Status</th>
+                        <th style="padding: 15px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: bold;">Downtime</th>
+                        <th style="padding: 15px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: bold;">Issue Description</th>
+                        <th style="padding: 15px; text-align: center; border-bottom: 2px solid #dee2e6; font-weight: bold;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for report in service_reports %}
+                        <tr style="border-bottom: 1px solid #dee2e6;">
+                            <td style="padding: 15px;">
+                                {{ report.date|date:"M d, Y" }}
+                            </td>
+                            <td style="padding: 15px; text-align:center;">
+                                <input type="checkbox" class="reportCheckbox" value="{{ report.id }}">
+                            </td>
+                            <td style="padding: 15px;">
+                                <a href="{% url 'service_report_detail' report.pk %}" style="
+                                    color: #007bff; 
+                                    text-decoration: none; 
+                                    font-weight: bold;
+                                ">{{ report.get_equipment_display }}</a>
+                            </td>
+                            <td style="padding: 15px;">
+                                {% if report.pm_service and report.equipment_breakdown %}
+                                    <span style="padding: 4px 8px; background-color: #fff3cd; color: #856404; border-radius: 4px; font-size: 12px;">PM Service / Equipment Breakdown</span>
+                                {% elif report.pm_service %}
+                                    <span style="padding: 4px 8px; background-color: #d1ecf1; color: #0c5460; border-radius: 4px; font-size: 12px;">PM Service</span>
+                                {% elif report.equipment_breakdown %}
+                                    <span style="padding: 4px 8px; background-color: #f8d7da; color: #721c24; border-radius: 4px; font-size: 12px;">Equipment Breakdown</span>
+                                {% else %}
+                                    <span style="color: #6c757d;">-</span>
+                                {% endif %}
+                            </td>
+                            <td style="padding: 15px;">
+                                <span style="
+                                    padding: 4px 8px; 
+                                    border-radius: 12px; 
+                                    font-size: 12px; 
+                                    font-weight: bold;
+                                    {% if report.status == 'completed' %}
+                                        background-color: #d4edda; 
+                                        color: #155724;
+                                    {% elif report.status == 'pending' %}
+                                        background-color: #fff3cd; 
+                                        color: #856404;
+                                    {% else %}
+                                        background-color: #d1ecf1; 
+                                        color: #0c5460;
+                                    {% endif %}
+                                ">
+                                    {{ report.get_status_display }}
+                                </span>
+                            </td>
+                            <td style="padding: 15px;">
+                                {% if report.downtime_hours %}
+                                    <span style="font-weight: bold; color: #495057;">{{ report.downtime_hours|floatformat:1 }} h</span>
+                                {% else %}
+                                    <span style="color: #6c757d;">-</span>
+                                {% endif %}
+                            </td>
+                            <td style="padding: 15px;">
+                                {% if report.issue_description %}
+                                    {{ report.issue_description|truncatewords:15 }}
+                                {% else %}
+                                    <span style="color: #6c757d;">-</span>
+                                {% endif %}
+                            </td>
+                            <td style="padding: 15px; text-align: center;">
+                                <div style="display: flex; gap: 10px; justify-content: center;">
+                                    <a href="{% url 'service_report_detail' report.pk %}" style="
+                                        color: #007bff; 
+                                        text-decoration: none;
+                                        padding: 5px 10px;
+                                        border: 1px solid #007bff;
+                                        border-radius: 3px;
+                                        font-size: 12px;
+                                    ">View</a>
+                                    <a href="{% url 'service_report_edit' report.pk %}" style="
+                                        color: #28a745; 
+                                        text-decoration: none;
+                                        padding: 5px 10px;
+                                        border: 1px solid #28a745;
+                                        border-radius: 3px;
+                                        font-size: 12px;
+                                    ">Edit</a>
+                                    {% if is_admin %}
+                                        <a href="{% url 'service_report_delete' report.pk %}" style="
+                                            color: #dc3545; 
+                                            text-decoration: none;
+                                            padding: 5px 10px;
+                                            border: 1px solid #dc3545;
+                                            border-radius: 3px;
+                                            font-size: 12px;
+                                        ">Delete</a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div style="
+            text-align: center; 
+            padding: 40px; 
+            background-color: #f8f9fa; 
+            border-radius: 8px;
+            border: 2px dashed #dee2e6;
+        ">
+            <h3 style="color: #6c757d; margin-bottom: 10px;">No Equipment Service Reports Found</h3>
+            <p style="color: #6c757d; margin-bottom: 20px;">Get started by creating your first equipment service report.</p>
+            <a href="{% url 'service_report_create' %}" style="
+                background-color: #007bff; 
+                color: white; 
+                padding: 10px 20px; 
+                text-decoration: none; 
+                border-radius: 5px;
+                font-weight: bold;
+            ">Create First Equipment Service Report</a>
+        </div>
+    {% endif %}
+</div>
+<script>
+function submitSelected(format, preview) {
+    const form = document.getElementById('printSelectedForm');
+    const target = preview ? '_blank' : '_self';
+    form.target = target;
+    document.getElementById('selectedPrintFormat').value = format;
+    document.getElementById('selectedPrintPreview').value = preview ? '1' : '0';
+    form.querySelectorAll('input[name="report_ids"]').forEach((el) => el.remove());
+    document.querySelectorAll('.reportCheckbox:checked').forEach((cb) => {
+        const hidden = document.createElement('input');
+        hidden.type = 'hidden';
+        hidden.name = 'report_ids';
+        hidden.value = cb.value;
+        form.appendChild(hidden);
+    });
+    if (!form.querySelector('input[name="report_ids"]')) {
+        alert('Please select at least one report.');
+        return;
+    }
+    form.submit();
+}
+function submitPeriodic(format, preview) {
+    const form = document.getElementById('printPeriodicForm');
+    form.target = preview ? '_blank' : '_self';
+    document.getElementById('periodicPrintFormat').value = format;
+    document.getElementById('periodicPrintPreview').value = preview ? '1' : '0';
+    form.submit();
+}
+const selectAll = document.getElementById('selectAll');
+if (selectAll) {
+    selectAll.addEventListener('change', function() {
+        document.querySelectorAll('.reportCheckbox').forEach((cb) => { cb.checked = selectAll.checked; });
+    });
+}
+</script>
+{% endblock %}
+

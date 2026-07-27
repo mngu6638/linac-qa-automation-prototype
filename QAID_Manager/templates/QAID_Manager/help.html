@@ -1,0 +1,1270 @@
+{% extends 'QAID_Manager/base.html' %}
+{% load static %}
+
+{% block title %}Help - QAID Manager{% endblock %}
+
+{% block content %}
+{% load qa_filters %}
+{% with settings=org_settings|default:None %}
+<style>
+    .help-details { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; margin: 20px 0; padding: 0; }
+    .help-details > summary { cursor: pointer; padding: 14px 18px; font-weight: 600; color: #2c3e50; font-size: 17px; list-style: none; }
+    .help-details > summary::-webkit-details-marker { display: none; }
+    .help-details > summary::before { content: "▸ "; color: #3498db; }
+    .help-details[open] > summary::before { content: "▾ "; }
+    .help-details-body { padding: 0 18px 18px 18px; line-height: 1.8; font-size: 15px; color: #333; }
+    .help-formula { background: #fff; border: 1px solid #dee2e6; border-radius: 6px; padding: 12px 16px; margin: 12px 0; font-family: "Cambria Math", "Times New Roman", serif; text-align: center; font-size: 17px; }
+    .help-formula-note { font-size: 14px; color: #555; margin-top: 8px; }
+    .help-algo-step { margin-bottom: 14px; }
+    .help-algo-step strong { color: #2c3e50; }
+    .help-search-panel {
+        background: #fff;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 18px 20px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    }
+    .help-search-panel h2 {
+        color: #34495e;
+        margin: 0 0 12px 0;
+        font-size: 20px;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 8px;
+    }
+    .help-search-row {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    #helpSearchInput {
+        flex: 1 1 280px;
+        min-width: 220px;
+        padding: 11px 14px;
+        font-size: 16px;
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+    }
+    #helpSearchInput:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    }
+    #helpSearchClear {
+        padding: 10px 16px;
+        font-size: 14px;
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        background: #f8f9fa;
+        color: #495057;
+        cursor: pointer;
+    }
+    #helpSearchClear:hover { background: #e9ecef; }
+    #helpSearchStatus {
+        margin: 10px 0 0 0;
+        font-size: 14px;
+        color: #6c757d;
+    }
+    #helpSearchResults {
+        list-style: none;
+        margin: 12px 0 0 0;
+        padding: 0;
+        max-height: 320px;
+        overflow-y: auto;
+        border: 1px solid #e9ecef;
+        border-radius: 6px;
+    }
+    #helpSearchResults[hidden] { display: none; }
+    .help-search-result {
+        padding: 10px 14px;
+        border-bottom: 1px solid #f1f3f5;
+        cursor: pointer;
+    }
+    .help-search-result:last-child { border-bottom: none; }
+    .help-search-result:hover,
+    .help-search-result.is-active {
+        background: #eef6fc;
+    }
+    .help-search-result-title {
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 15px;
+    }
+    .help-search-result-meta {
+        font-size: 12px;
+        color: #3498db;
+        margin-top: 2px;
+    }
+    .help-search-result-excerpt {
+        font-size: 13px;
+        color: #6c757d;
+        margin-top: 4px;
+        line-height: 1.5;
+    }
+    .help-search-result-more {
+        padding: 10px 14px;
+        font-size: 13px;
+        color: #6c757d;
+        font-style: italic;
+        background: #f8f9fa;
+    }
+    .help-search-hidden { display: none !important; }
+    .help-search-section-hidden { display: none !important; }
+    .help-search-highlight {
+        scroll-margin-top: 16px;
+        outline: 2px solid #ffc107;
+        border-radius: 6px;
+        background: #fff9e6;
+        transition: background 1.5s ease, outline 1.5s ease;
+    }
+</style>
+<div id="help-guide" style="padding: 20px; max-width: 1400px; margin: 0 auto;">
+    <h1 style="text-align: center; color: #2c3e50; margin-bottom: 10px;">QAID Manager - User Guide</h1>
+    <p style="text-align: center; color: #6c757d; font-size: 18px; margin-bottom: 24px;">Version {{ app_version|default:"1.4.2" }}</p>
+
+    <div class="help-search-panel" role="search">
+        <h2>Search Help</h2>
+        <div class="help-search-row">
+            <input
+                type="search"
+                id="helpSearchInput"
+                placeholder="Search topics, e.g. field size, dose calculation, wizard, statistics…"
+                autocomplete="off"
+                aria-label="Search help topics"
+                aria-controls="helpSearchResults"
+                aria-expanded="false"
+            >
+            <button type="button" id="helpSearchClear" hidden>Clear</button>
+        </div>
+        <p id="helpSearchStatus">Type at least 2 characters to search topics and functions.</p>
+        <ul id="helpSearchResults" role="listbox" aria-label="Help search results" hidden></ul>
+    </div>
+    
+    <!-- Table of Contents -->
+    <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 30px; border: 1px solid #dee2e6;">
+        <h2 style="color: #34495e; margin-bottom: 15px; border-bottom: 2px solid #3498db; padding-bottom: 10px;">Table of Contents</h2>
+        <ul style="line-height: 2; font-size: 16px;">
+            <li><a href="#getting-started" style="color: #3498db; text-decoration: none;">1. Getting Started</a></li>
+            <li><a href="#qa-schedule" style="color: #3498db; text-decoration: none;">2. QA Schedule Management</a></li>
+            <li><a href="#linac-management" style="color: #3498db; text-decoration: none;">3. Equipment Management</a></li>
+            <li><a href="#qa-entry" style="color: #3498db; text-decoration: none;">4. QA Entry</a></li>
+            <li><a href="#film-analysis" style="color: #3498db; text-decoration: none;">5. Film Analysis (Guided Wizard)</a> — includes collapsible algorithm explanation</li>
+            <li><a href="#dose-calculation" style="color: #3498db; text-decoration: none;">6. Dose Calculation</a> — includes collapsible formula reference</li>
+            <li><a href="#settings" style="color: #3498db; text-decoration: none;">7. Settings &amp; Configuration</a></li>
+            <li><a href="#statistics" style="color: #3498db; text-decoration: none;">8. Statistics</a></li>
+            <li><a href="#reports" style="color: #3498db; text-decoration: none;">9. Reports</a></li>
+            <li><a href="#troubleshooting" style="color: #3498db; text-decoration: none;">10. Troubleshooting</a></li>
+            <li><a href="#software-updates" style="color: #3498db; text-decoration: none;">11. Software Updates</a></li>
+        </ul>
+    </div>
+
+    <!-- 1. Getting Started -->
+    <section id="getting-started" style="margin-bottom: 40px;">
+        <h2 style="color: #34495e; border-bottom: 2px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">
+            1. Getting Started
+        </h2>
+        
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Login</h3>
+        <ol style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>Navigate to the login page</li>
+            <li>Enter your username and password</li>
+            <li>Click "Login"</li>
+            <li>You will be redirected to the home page</li>
+        </ol>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Change Password</h3>
+        <ol style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>Click "Change Password" in the navigation bar</li>
+            <li>Enter your current password</li>
+            <li>Enter your new password twice</li>
+            <li>Click "Change Password"</li>
+        </ol>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Navigation</h3>
+        <p style="line-height: 1.8; font-size: 16px; margin-bottom: 10px;">
+            The navigation bar at the top of each page contains the following links:
+        </p>
+        <ul style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li><strong>Home:</strong> Main dashboard and module links</li>
+            <li><strong>QA Schedule:</strong> View and manage monthly QA schedules</li>
+            <li><strong>Equipment Management:</strong> Service and breakdown reports for LINACs and devices</li>
+            <li><strong>Statistics:</strong> QA trend review, LINAC comparison, and CSV export</li>
+            <li><strong>Settings:</strong> Configure LINACs, dosimeters, tests, and other parameters (admin)</li>
+            <li><strong>Change Password:</strong> Update your account password</li>
+            <li><strong>Logout:</strong> Sign out of the system</li>
+        </ul>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Recommended workflow for new users</h3>
+        <ol style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>Confirm your account and change your password if required.</li>
+            <li>Open <strong>QA Schedule</strong>, find your assigned LINAC, and click <strong>Performing QA</strong> (or <strong>Resume QA</strong> if a draft exists).</li>
+            <li>On the QA Entry form, complete mechanical and isocenter tests, then use the film <strong>Run … Analysis</strong> wizards for field size, collimator, and gantry.</li>
+            <li>Use the integrated <strong>Dose Calculation</strong> section for beam tests, then click <strong>Confirm Dose Calculation</strong> to populate results.</li>
+            <li>Review pass/fail indicators and click <strong>Submit</strong> to finalize (or <strong>Save &amp; Resume Later</strong> for a draft).</li>
+            <li>After monthly QA is complete, use <strong>Statistics</strong> for department trend review and <strong>Reports</strong> to generate documentation.</li>
+        </ol>
+    </section>
+
+    <!-- 2. QA Schedule Management -->
+    <section id="qa-schedule" style="margin-bottom: 40px;">
+        <h2 style="color: #34495e; border-bottom: 2px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">
+            2. QA Schedule Management
+        </h2>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">View Monthly Schedule</h3>
+        <ol style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>Click <strong>QA Schedule</strong> in the navigation bar</li>
+            <li>Use <strong>Previous Month</strong> / <strong>Next Month</strong> to change the displayed month</li>
+            <li>View all LINACs and their QA status for that month</li>
+            <li>Each card shows: LINAC name, performers, expected date, status, and action buttons</li>
+        </ol>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Create Monthly Schedule (Bulk)</h3>
+        <ol style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>Go to QA Schedule page</li>
+            <li>Click <strong>Create Schedule</strong> (opens Create Bulk QA Schedule)</li>
+            <li>Select one or more LINACs</li>
+            <li>Set <strong>Frequency (months)</strong>, <strong>Start month</strong>, and <strong>End month</strong></li>
+            <li>Optionally enter a QA reason</li>
+            <li>Click <strong>Create Schedules</strong></li>
+            <li>Schedules are created without performers (assign performers later on each card)</li>
+        </ol>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Create Ad-hoc QA Schedule</h3>
+        <ol style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>Go to QA Schedule page</li>
+            <li>Click "Create Non-scheduled QA" button</li>
+            <li>Select LINAC</li>
+            <li>Enter expected QA date</li>
+            <li>Select performers (up to 2)</li>
+            <li>Enter QA reason (optional)</li>
+            <li>Click "Create Schedule"</li>
+        </ol>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Assign Performers</h3>
+        <ol style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>Find the schedule card for the LINAC</li>
+            <li>Click <strong>Edit Assignment</strong> or <strong>Confirm Assignment</strong></li>
+            <li>Select Performer 1 (required) and Performer 2 (optional; must differ from Performer 1)</li>
+            <li>Set expected QA date and notes if needed</li>
+            <li>Click <strong>Update Assignment</strong> or <strong>Confirm Assignment</strong></li>
+        </ol>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Perform QA from Schedule</h3>
+        <ol style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>Find your assigned LINAC in the schedule</li>
+            <li>Click <strong>Performing QA</strong> to start a new QA entry, or <strong>Resume QA</strong> if a draft already exists</li>
+            <li>You will be redirected to the QA Entry form with LINAC and schedule pre-selected</li>
+            <li>Complete QA entry (see Section 4)</li>
+            <li>After final submit, you return to the schedule page and status updates automatically</li>
+        </ol>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">View QA Records</h3>
+        <ol style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>Click "View Records" on a completed schedule</li>
+            <li>View all QA records for that schedule</li>
+            <li>Click on a record to see detailed results</li>
+        </ol>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Accept Failed QA</h3>
+        <ol style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>If QA failed, click "Accept Failed QA" button</li>
+            <li>Enter acceptance notes explaining why the failure is acceptable</li>
+            <li>Click "Accept"</li>
+            <li>The schedule will be marked as accepted</li>
+        </ol>
+    </section>
+
+    <!-- 3. Equipment Management -->
+    <section id="linac-management" style="margin-bottom: 40px;">
+        <h2 style="color: #34495e; border-bottom: 2px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">
+            3. Equipment Management
+        </h2>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Access Equipment Management</h3>
+        <ul style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>Click "Equipment Management" in the navigation bar or home page</li>
+            <li>This page displays all service and error reports for LINACs and devices</li>
+        </ul>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">View Equipment Service Reports</h3>
+        <ol style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>Service reports are displayed in a table format</li>
+            <li>Each report shows: equipment, date, type (PM Service/Equipment Breakdown), status, and downtime</li>
+            <li>Click on a report to view detailed information</li>
+            <li>Dashboard panels are available for LINACs, Devices, and Others.</li>
+            <li>Device and Others dashboards only list equipment that currently has Pending or Temporary reports.</li>
+        </ol>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Filter Reports</h3>
+        <ol style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>Use the filter section at the top of the page</li>
+            <li><strong>Equipment:</strong> Filter by specific LINAC or Device</li>
+            <li><strong>Type:</strong> Filter by PM Service, Equipment Breakdown, or Both</li>
+            <li><strong>Status:</strong> Filter by Completed, Pending, or Temporary</li>
+            <li><strong>Time Period:</strong> Select date range (Date From and Date To)</li>
+            <li>Click "Apply Filters" to apply filters</li>
+            <li>Click "Clear" to reset all filters</li>
+        </ol>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Create Equipment Service Report</h3>
+        <ol style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>Click "Create Equipment Service Report" button</li>
+            <li>Fill in the form:
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                    <li><strong>Equipment:</strong> Select LINAC or Device from dropdown</li>
+                    <li><strong>Date:</strong> Default is today, can be changed</li>
+                    <li><strong>Type:</strong> Check "PM Service" and/or "Equipment Breakdown"</li>
+                    <li><strong>Issue Description:</strong> Describe the issue or service performed</li>
+                    <li><strong>Follow-up Actions:</strong> Enter any follow-up actions required</li>
+                    <li><strong>Downtime:</strong> Enter downtime in numeric hours (e.g., "3", "5", "24")</li>
+                    <li><strong>Parts Replacement:</strong> List any parts that were replaced</li>
+                    <li><strong>Notes:</strong> Additional notes or comments</li>
+                    <li><strong>Status:</strong> Select Completed, Pending, or Temporary</li>
+                </ul>
+            </li>
+            <li>Click "Save" to create the report</li>
+        </ol>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Edit/Delete Equipment Service Report</h3>
+        <ol style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>Click "Edit" on an equipment service report to modify it</li>
+            <li>Click "Delete" to remove an equipment service report (use with caution; deletion policy depends on your site role settings)</li>
+            <li>Changes are saved immediately</li>
+        </ol>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Print Service Reports</h3>
+        <p style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            Use <strong>Print Selected Reports</strong> or <strong>Print Periodic Reports</strong> at the top of the page.
+            See Section 9 for PDF/DOCX export and periodic report rules.
+        </p>
+    </section>
+
+    <!-- 4. QA Entry -->
+    <section id="qa-entry" style="margin-bottom: 40px;">
+        <h2 style="color: #34495e; border-bottom: 2px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">
+            4. QA Entry
+        </h2>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Access QA Entry Form</h3>
+        <ul style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li><strong>From Schedule:</strong> Click "Performing QA" on a schedule card</li>
+            <li><strong>Direct Access:</strong> Navigate to QA Entry from home page (if available)</li>
+            <li><strong>With LINAC Pre-selected:</strong> Use URL parameter <code>?linac=X</code> where X is LINAC ID</li>
+        </ul>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Enter Mechanical Tests</h3>
+        <ol style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>Select LINAC from dropdown (if not pre-selected)</li>
+            <li>Scroll to "Mechanical Tests" section</li>
+            <li>Enter measurement values in the "Test Result" column</li>
+            <li>The system automatically checks tolerances and shows Pass/Fail</li>
+            <li>Add notes in the "Notes" column if needed</li>
+            <li>Red background indicates out of tolerance</li>
+        </ol>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Enter Isocenter Tests</h3>
+        <ol style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>Scroll to "Isocenter Tests" section</li>
+            <li>Enter measurements for each angle (0°, 90°, 135°, 180°)</li>
+            <li>Enter A-B (Anterior-Posterior) and G-T (Gun-Target) values</li>
+            <li>The graph on the right shows a visual representation</li>
+            <li>Enter summary values in the isocenter summary table below</li>
+            <li>System calculates maximum deviation automatically</li>
+        </ol>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Film-Based Tests</h3>
+        <p style="line-height: 1.8; font-size: 16px; margin-bottom: 10px;">
+            Film analysis results can be auto-populated from the guided film wizards (see Section 5). Manual entry is also possible:
+        </p>
+        <ol style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>Scroll to "Film Checks" section</li>
+            <li>For Field Size: Enter A, B, G, T values (in mm)</li>
+            <li>For Collimator Isocenter: Enter offset and wobble diameter</li>
+            <li>For Gantry Isocenter: Enter circle diameter</li>
+            <li>Or use film analysis tools to get automatic values (recommended)</li>
+        </ol>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Enter Beam Tests</h3>
+        <ol style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>Scroll to "Beam Tests" section</li>
+            <li>Enter values for each beam test</li>
+            <li>Values can be auto-populated from the Dose Calculation tool (see Section 6)</li>
+            <li>System displays results in format: <strong>difference% (measured%)</strong>
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                    <li>The first number is the percentage difference from baseline</li>
+                    <li>The number in parentheses (italic and gray) is the actual measured value</li>
+                    <li>Pass/Fail is determined by comparing the difference% with tolerance</li>
+                </ul>
+            </li>
+            <li>System checks tolerances automatically</li>
+            <li>Add notes for any deviations</li>
+        </ol>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Multi-Energy Testing</h3>
+        <ol style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>In Beam Tests section, select energy from dropdown</li>
+            <li>Enter test values for that energy</li>
+            <li>Click "Add Energy" to test additional energies</li>
+            <li>Each energy's results are stored separately</li>
+        </ol>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Save QA Record</h3>
+        <ol style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>Review all entered values</li>
+            <li>Check tolerance indicators (Pass/Fail)</li>
+            <li>Add general notes if needed</li>
+            <li>Select QA status from dropdown (if applicable)</li>
+            <li>Click <strong>Submit</strong> to finalize QA results and complete schedule update</li>
+            <li>Or click <strong>Save &amp; Resume Later</strong> to store a temporary draft</li>
+            <li>You will be redirected to QA Schedule page</li>
+        </ol>
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Resume Draft QA</h3>
+        <ol style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>On QA Schedule, locate the assigned card that shows <strong>Resume QA</strong></li>
+            <li>Click <strong>Resume QA</strong> to reopen the saved draft</li>
+            <li>Previously saved values and notes are loaded for editing</li>
+            <li>Continue entering tests, then click <strong>Submit</strong> to finalize</li>
+        </ol>
+    </section>
+
+    <!-- 5. Film Analysis -->
+    <section id="film-analysis" style="margin-bottom: 40px;">
+        <h2 style="color: #34495e; border-bottom: 2px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">
+            5. Film Analysis (Guided Wizard)
+        </h2>
+
+        <p style="line-height: 1.8; font-size: 16px;">
+            On the QA Entry form, each film section (Field size, Collimator, Gantry) has a single
+            <strong>Run … Analysis</strong> button that opens a guided wizard. The wizard walks you through
+            upload, crop/rotate, and center/line marking, then runs analysis automatically.
+            Use <strong>Re-analyze</strong> to run the wizard again for that film type.
+        </p>
+
+        <details class="help-details">
+            <summary>How film analysis works — step-by-step algorithm (plain language)</summary>
+            <div class="help-details-body">
+                <p>This section describes exactly what the software does with your film image to produce the reported numbers. No programming knowledge is required.</p>
+
+                <h4 style="color: #34495e; margin-top: 18px;">A. Common steps for all film types</h4>
+
+                <div class="help-algo-step">
+                    <strong>Step 1 — Upload and read image scale (DPI)</strong><br>
+                    The software opens your uploaded image file (PNG, JPG, or TIFF) and looks for embedded scanner resolution metadata (dots per inch, DPI).
+                    <ul style="margin-left: 20px; margin-top: 6px;">
+                        <li>If DPI is found and greater than zero, that value is stored.</li>
+                        <li>If no DPI metadata exists, you must enter DPI manually before continuing; otherwise analysis cannot convert pixels to millimetres.</li>
+                        <li>Accepted DPI is limited to the range 75–1200 to reject unrealistic values.</li>
+                    </ul>
+                    Pixel size is then calculated as:
+                    <div class="help-formula">pixels per mm = DPI ÷ 25.4</div>
+                    <div class="help-formula-note">Example: 300 DPI → 300 ÷ 25.4 ≈ 11.81 pixels per mm.</div>
+                </div>
+
+                <div class="help-algo-step">
+                    <strong>Step 2 — Crop the region of interest</strong><br>
+                    You select a rectangular crop on the displayed image. The software saves only that cropped region for analysis. Optional rotation during crop aligns the film visually before marking.
+                </div>
+
+                <div class="help-algo-step">
+                    <strong>Step 3 — Convert screen marks to true image coordinates</strong><br>
+                    Lines and circles you draw on screen may be shown at a different display size than the actual image file. The software scales your click positions back to the full-resolution cropped image before any measurement.
+                </div>
+
+                <h4 style="color: #34495e; margin-top: 22px;">B. Field size analysis (light field vs radiation field)</h4>
+
+                <div class="help-algo-step">
+                    <strong>Step 4 — Collect your line marks</strong><br>
+                    You draw four <em>light field</em> lines and four <em>radiation edge guide</em> lines (two clicks per line: start and end). The software requires exactly four of each, paired in matching order around the field.
+                </div>
+
+                <div class="help-algo-step">
+                    <strong>Step 5 — Auto-rotate to a straight axis-aligned frame</strong><br>
+                    From your four light-field lines, the software estimates the average orientation of the field and rotates the entire image so the field edges become as close as possible to horizontal and vertical. This <em>angle correction</em> (shown on the result image in degrees) removes tilt from the film placement and makes left/right/top/bottom comparisons consistent.
+                </div>
+
+                <div class="help-algo-step">
+                    <strong>Step 6 — Pair each light line with its radiation guide</strong><br>
+                    For each side of the field, the software matches light lines to radiation guide lines that belong to the same edge (left, right, top, or bottom) using position and angle similarity.
+                </div>
+
+                <div class="help-algo-step">
+                    <strong>Step 7 — Detect the true radiation edge from image brightness</strong><br>
+                    For each radiation guide line, the software does <em>not</em> simply use your click as the final edge. Instead it:
+                    <ol style="margin-left: 20px; margin-top: 6px;">
+                        <li>Finds the most common background grey level in the cropped image.</li>
+                        <li>Several parallel scan lines are offset <em>perpendicular</em> to each radiation guide, spanning only the configured band width in millimetres (default 8&nbsp;mm; guide centred — 4&nbsp;mm each side). Along each parallel line the software finds one radiation edge point (yellow dot on the result image). Set band width in <strong>Film Analysis Parameters</strong>.</li>
+                        <li>On each profile, locates the point where brightness rises to the configured <strong>field size detection threshold</strong> (default 30%) of the way from the darkest to brightest value along that profile — this is treated as the radiation field boundary. Staff can change this by editing the <strong>Film Analysis Parameters</strong> row in <strong>Settings → Physics Parameters</strong>.</li>
+                        <li>Collects many such edge points, removes outliers, and fits a straight radiation edge line constrained to be parallel to the paired light-field line (physically, radiation and light edges on one side should be parallel).</li>
+                    </ol>
+                </div>
+
+                <div class="help-algo-step">
+                    <strong>Step 8 — Measure shift on each side (A, B, G, T)</strong><br>
+                    For each field side, the software measures the shortest perpendicular distance (in pixels) between the detected radiation line and the corresponding light-field line. Distances are averaged per side, then converted to millimetres:
+                    <div class="help-formula">shift (mm) = shift (pixels) ÷ (DPI ÷ 25.4)</div>
+                    <ul style="margin-left: 20px; margin-top: 6px;">
+                        <li><strong>A</strong> = left-side shift (mm)</li>
+                        <li><strong>B</strong> = right-side shift (mm)</li>
+                        <li><strong>G</strong> = gun-side (top) shift (mm)</li>
+                        <li><strong>T</strong> = target-side (bottom) shift (mm)</li>
+                    </ul>
+                </div>
+
+                <div class="help-algo-step">
+                    <strong>Step 9 — Report field size match</strong><br>
+                    The value written to the Film Checks table is the <strong>maximum</strong> of the four side shifts:
+                    <div class="help-formula">Field size match (mm) = max(A, B, G, T)</div>
+                    The result image overlays green (light) and red (radiation) lines, yellow edge sample points, side labels, and the angle correction.
+                </div>
+
+                <h4 style="color: #34495e; margin-top: 22px;">C. Collimator and gantry isocenter analysis (starshot / circle film)</h4>
+                <p>Collimator and gantry analyses use the <strong>same mathematical procedure</strong>; only the film type and session data differ.</p>
+
+                <div class="help-algo-step">
+                    <strong>Step 4 — Define analysis circle</strong><br>
+                    You click the mechanical isocenter and drag to set a circle radius. The circle should pass through the radiation marks (starshot pattern) at a representative radius.
+                </div>
+
+                <div class="help-algo-step">
+                    <strong>Step 5 — Sample brightness around the circle</strong><br>
+                    The software converts the image to greyscale and reads pixel brightness at many points along the circle circumference (from 0° to 420° so peaks are not split at the wrap-around). This produces a <em>radial profile</em> of darkness vs angle.
+                </div>
+
+                <div class="help-algo-step">
+                    <strong>Step 6 — Find radiation bands (peaks)</strong><br>
+                    Valleys and peaks in the radial profile identify dark radiation bands. At least six bands are required. Nearby detections within about 30° are merged; band positions are refined using depth-weighted averaging. Up to eight strongest bands are kept.
+                </div>
+
+                <div class="help-algo-step">
+                    <strong>Step 7 — Build central lines through opposite bands</strong><br>
+                    Opposing band pairs (approximately 180° apart) are connected through the mechanical center, forming central axis lines through the starshot pattern.
+                </div>
+
+                <div class="help-algo-step">
+                    <strong>Step 8 — Find radiation isocenter</strong><br>
+                    The software calculates where these central lines cross. Each intersection is a candidate radiation isocenter point. The final radiation isocenter is the center of the <strong>smallest circle that encloses all intersection points</strong> (minimum enclosing circle algorithm).
+                </div>
+
+                <div class="help-algo-step">
+                    <strong>Step 9 — Displacement and wobble diameter</strong><br>
+                    Displacement from mechanical center to radiation isocenter:
+                    <div class="help-formula">displacement (pixels) = √[(x<sub>rad</sub> − x<sub>mech</sub>)² + (y<sub>rad</sub> − y<sub>mech</sub>)²]</div>
+                    <div class="help-formula">displacement (mm) = displacement (pixels) ÷ (DPI ÷ 25.4)</div>
+                    The <strong>circle diameter</strong> (wobble) is the diameter of the minimum enclosing circle around intersection points, also converted to mm. For collimator QA, diameter &lt; 1.0 mm is treated as acceptable.
+                </div>
+
+                <div class="help-algo-step">
+                    <strong>Step 10 — Populate QA form</strong><br>
+                    Collimator: offset (mm) and wobble diameter (mm). Gantry: circle diameter (mm). Values auto-fill in Film Checks when analysis completes.
+                </div>
+            </div>
+        </details>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Guided wizard steps (all film types)</h3>
+        <ol style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li><strong>Upload:</strong> Select the film image (PNG, JPG, TIFF). DPI is read automatically; enter it manually if needed. Click <strong>Continue</strong>.</li>
+            <li><strong>Crop:</strong> Drag to select the region of interest. Rotate if needed. Click <strong>Next</strong>.</li>
+            <li><strong>Center:</strong>
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                    <li><strong>Field size:</strong> Draw 4 radiation field edge lines and 4 light field lines (click twice per line).</li>
+                    <li><strong>Collimator / Gantry:</strong> Click to set circle center, drag to set radius.</li>
+                </ul>
+                Click <strong>Finish</strong> — analysis runs automatically.
+            </li>
+            <li><strong>Results:</strong> The annotated result image appears on the QA form and values auto-fill in the Film Checks section.</li>
+        </ol>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Field Size Analysis</h3>
+        <p style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            Click <strong>Run Field Size Analysis</strong>. In the Center step, switch between
+            <strong>Radiation edges</strong> and <strong>Light field lines</strong> before drawing each set of four lines.
+            Click twice per line (start point, end point); a dashed preview line follows the cursor after the first click.
+            Use <strong>Clear group</strong> to remove all lines in the active group, or <strong>Undo</strong> to remove the last line.
+            Results show field size shift in millimeters and populate the Film Checks table automatically.
+        </p>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Collimator Isocenter Analysis</h3>
+        <p style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            Click <strong>Run Collimator Analysis</strong>. After the wizard completes, optional
+            <strong>View Radial Profile</strong> and <strong>Multi-Radius Comparison</strong> buttons may appear for detailed review.
+        </p>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Gantry Isocenter Analysis</h3>
+        <p style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            Click <strong>Run Gantry Analysis</strong>. The wizard uses the same circle-marking step as collimator.
+            Results show gantry isocenter circle diameter in millimeters.
+        </p>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Tips for Film Analysis</h3>
+        <ul style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>Expand <strong>How film analysis works</strong> above for the full mathematical workflow in plain language</li>
+            <li>Use high-resolution images (300 DPI or higher recommended; enter DPI manually if not detected)</li>
+            <li>Ensure good contrast between radiation field and background</li>
+            <li>Draw lines as close to field edges as possible</li>
+            <li>If DPI is not detected, enter it manually (check scanner settings)</li>
+            <li>Use <strong>Re-analyze</strong> to upload a new film and repeat the full wizard</li>
+            <li>Staff users can expand <strong>Advanced (dev)</strong> to access individual Import / Crop / Center / Analyze controls</li>
+        </ul>
+    </section>
+
+    <!-- 6. Dose Calculation -->
+    <section id="dose-calculation" style="margin-bottom: 40px;">
+        <h2 style="color: #34495e; border-bottom: 2px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">
+            6. Dose Calculation
+        </h2>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Access Dose Calculator</h3>
+        <p style="line-height: 1.8; font-size: 16px; margin-bottom: 10px;">
+            The Dose Calculator is integrated into the QA Entry form. Scroll to the "Dose Calculation" section.
+        </p>
+
+        <details class="help-details">
+            <summary>How dose values are calculated — formulas and definitions</summary>
+            <div class="help-details-body">
+                <p>All absolute dose corrections follow <strong>IAEA TRS-398</strong>. Relative dose and beam-quality checks use measured ion-chamber readings compared to commissioning (CAT) baselines stored for each LINAC and energy.</p>
+
+                <h4 style="color: #34495e; margin-top: 18px;">1. Environmental correction — K<sub>tp</sub> (temperature &amp; pressure)</h4>
+                <div class="help-formula">
+                    K<sub>tp</sub> = [(273.2 + T) × P<sub>0</sub>] / [(273.2 + T<sub>0</sub>) × P]
+                </div>
+                <div class="help-formula-note">
+                    T = measured temperature (°C); P = measured pressure (hPa). T<sub>0</sub> and P<sub>0</sub> come from the selected dosimeter calibration record (defaults: 20 °C and 1013.25 hPa).
+                </div>
+
+                <h4 style="color: #34495e; margin-top: 18px;">2. Polarity correction — K<sub>pol</sub></h4>
+                <div class="help-formula">
+                    K<sub>pol</sub> = (|M<sub>+</sub>| + |M<sub>−</sub>|) / (2 × |M<sub>+</sub>|)
+                </div>
+                <div class="help-formula-note">M<sub>+</sub> and M<sub>−</sub> are chamber readings at positive and negative polarity (nC).</div>
+
+                <h4 style="color: #34495e; margin-top: 18px;">3. Ion recombination correction — K<sub>s</sub></h4>
+                <div class="help-formula">
+                    K<sub>s</sub> = a<sub>0</sub> + a<sub>1</sub> × (M<sub>1</sub>/M<sub>2</sub>) + a<sub>2</sub> × (M<sub>1</sub>/M<sub>2</sub>)²
+                </div>
+                <div class="help-formula-note">
+                    M<sub>1</sub>, M<sub>2</sub> are readings at voltages V<sub>1</sub> and V<sub>2</sub>. Coefficients a<sub>0</sub>, a<sub>1</sub>, a<sub>2</sub> are looked up from the Physics Parameters database for your voltage ratio V<sub>1</sub>/V<sub>2</sub> (TRS-398 Table 8.1 values).
+                </div>
+
+                <h4 style="color: #34495e; margin-top: 18px;">4. Corrected chamber reading — M<sub>Q</sub></h4>
+                <div class="help-formula">
+                    M<sub>Q</sub> = M<sub>raw</sub> × K<sub>tp</sub> × K<sub>pol</sub> × K<sub>s</sub> × f<sub>phantom</sub>
+                </div>
+                <div class="help-formula-note">
+                    M<sub>raw</sub> = raw electrometer reading (nC). f<sub>phantom</sub> = solid phantom correction factor (1.0 for water phantom; user-entered when solid phantom is selected).
+                </div>
+
+                <h4 style="color: #34495e; margin-top: 18px;">5. Beam quality — TPR and K<sub>q</sub></h4>
+                <div class="help-formula">
+                    TPR<sub>20,10</sub> = 1.2661 × PDD<sub>20,10</sub> − 0.0595
+                </div>
+                <div class="help-formula-note">
+                    PDD<sub>20,10</sub> is loaded from LINAC commissioning (CAT) data. K<sub>q</sub> is interpolated from the k<sub>Q</sub> Photon Beams table for your detector type and calculated TPR.
+                </div>
+
+                <h4 style="color: #34495e; margin-top: 18px;">6. Absorbed dose at reference depth — D<sub>w,Q</sub>(z<sub>ref</sub>)</h4>
+                <div class="help-formula">
+                    D<sub>w,Q</sub>(z<sub>ref</sub>) = M<sub>Q</sub> × N × K<sub>q</sub>
+                </div>
+                <div class="help-formula-note">
+                    N = dosimeter calibration factor N<sub>D,w</sub> (Gy/nC) from the selected detector. Result is displayed in cGy.
+                </div>
+
+                <h4 style="color: #34495e; margin-top: 18px;">7. Absorbed dose at z<sub>max</sub></h4>
+                <div class="help-formula">
+                    D<sub>w,Q</sub>(z<sub>max</sub>) = D<sub>w,Q</sub>(z<sub>ref</sub>) / TMR
+                </div>
+                <div class="help-formula-note">TMR = tissue–maximum ratio for the selected LINAC energy (from CAT data).</div>
+
+                <h4 style="color: #34495e; margin-top: 18px;">8. Symmetry (crossline and inline)</h4>
+                <div class="help-formula">
+                    Symmetry<sub>crossline</sub> (%) = [max(M<sub>Left</sub>, M<sub>Right</sub>) / min(M<sub>Left</sub>, M<sub>Right</sub>)] × 100
+                </div>
+                <div class="help-formula">
+                    Symmetry<sub>inline</sub> (%) = [max(M<sub>Gun</sub>, M<sub>Tar</sub>) / min(M<sub>Gun</sub>, M<sub>Tar</sub>)] × 100
+                </div>
+                <div class="help-formula-note">
+                    When CAT commissioning symmetry exists, the value shown for QA comparison is percent deviation from baseline:
+                    <strong>|measured − CAT| / CAT × 100</strong>.
+                </div>
+
+                <h4 style="color: #34495e; margin-top: 18px;">9. Flatness (three-point method)</h4>
+                <div class="help-formula">
+                    Flatness (%) = [max(a, b, c) / min(a, b, c)] × 100
+                </div>
+                <div class="help-formula-note">
+                    Crossline uses M<sub>Left</sub>, M<sub>Right</sub>, M<sub>mid</sub>. Inline uses M<sub>Gun</sub>, M<sub>Tar</sub>, M<sub>mid</sub>. Compared to CAT flatness using <strong>|measured − CAT| / CAT × 100</strong> when baseline exists.
+                </div>
+
+                <h4 style="color: #34495e; margin-top: 18px;">10. Output factor and wedge factor</h4>
+                <div class="help-formula">
+                    Output factor = M<sub>mid</sub> / M<sub>ref</sub> &nbsp;&nbsp;&nbsp; (FS20×20 relative to FS10×10 reference)
+                </div>
+                <div class="help-formula">
+                    Wedge factor = M<sub>wedge</sub> / M<sub>ref</sub>
+                </div>
+                <div class="help-formula-note">
+                    When CAT baselines exist, QA stores <strong>|measured ratio − CAT ratio| / CAT ratio × 100</strong> as the percent deviation.
+                </div>
+
+                <h4 style="color: #34495e; margin-top: 18px;">11. Beam energy stability (D10)</h4>
+                <div class="help-formula">
+                    D10 (%) = (M<sub>d10</sub> / M<sub>dmax</sub>) × 100
+                </div>
+                <div class="help-formula-note">
+                    This is the measured percentage depth at 10 cm relative to d<sub>max</sub>. QA pass/fail compares the deviation from the commissioning D10 value.
+                </div>
+
+                <h4 style="color: #34495e; margin-top: 18px;">12. MU linearity — coefficient of determination R²</h4>
+                <p>For each entered MU level (10, 30, 50, 100, 300, 500), the software plots charge (nC) vs MU and fits a straight line <em>y = mx + b</em> using least squares:</p>
+                <div class="help-formula">
+                    slope m = [Σ(xy) − n·x̄·ȳ] / [Σ(x²) − n·x̄²] &nbsp;&nbsp;&nbsp; intercept b = ȳ − m·x̄
+                </div>
+                <div class="help-formula">
+                    R² = 1 − [Σ(y<sub>i</sub> − ŷ<sub>i</sub>)²] / [Σ(y<sub>i</sub> − ȳ)²]
+                </div>
+                <div class="help-formula-note">
+                    x = MU, y = charge (nC), ŷ<sub>i</sub> = predicted charge on the fitted line. Test passes when <strong>R² &gt; 0.99</strong> (at least two MU points required).
+                </div>
+
+                <h4 style="color: #34495e; margin-top: 18px;">13. Values written to Beam Tests after Confirm Dose Calculation</h4>
+                <p>After you click <strong>Confirm Dose Calculation</strong>, the calculator populates beam test fields using:</p>
+                <ul style="margin-left: 20px;">
+                    <li><strong>Absolute dose:</strong> percent deviation of measured D<sub>w,Q</sub>(z<sub>max</sub>) from the CAT baseline dose.</li>
+                    <li><strong>Symmetry / flatness / output / wedge:</strong> percent deviation formulas above (displayed as <em>difference% (measured%)</em> on the QA form).</li>
+                    <li><strong>MU linearity:</strong> R² value directly.</li>
+                    <li><strong>Energy stability D10:</strong> percent deviation of measured D10 from CAT D10.</li>
+                </ul>
+            </div>
+        </details>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Absolute Dose Calculation</h3>
+        <ol style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li><strong>Select Parameters:</strong>
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                    <li>Select LINAC (auto-filled if from schedule)</li>
+                    <li>Select Energy (6MV, 10MV, etc.)</li>
+                    <li>Select Detector (dosimeter)</li>
+                    <li>Select Phantom type (Solid or Water)</li>
+                    <li>Select Setup: <strong>SAD</strong> (default) or <strong>SSD</strong>. In SSD mode a PDD(z<sub>ref</sub>) field appears, auto-loaded from the LINAC's CAT D10 value but editable for manual override</li>
+                </ul>
+            </li>
+            <li><strong>Enter Raw Measurement:</strong>
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                    <li>Enter raw measurement value in nC (nanocoulombs)</li>
+                </ul>
+            </li>
+            <li><strong>Enter Environmental Conditions (for Ktp):</strong>
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                    <li>Enter Temperature (°C)</li>
+                    <li>Enter Pressure (hPa)</li>
+                    <li>Ktp is calculated automatically</li>
+                </ul>
+            </li>
+            <li><strong>Enter Polarity Measurements (for Kpol):</strong>
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                    <li>Enter M+ (positive polarity reading)</li>
+                    <li>Enter M- (negative polarity reading)</li>
+                    <li>Kpol is calculated automatically</li>
+                </ul>
+            </li>
+            <li><strong>Enter Recombination Measurements (for Ks):</strong>
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                    <li>Enter M1 (measurement at voltage V1)</li>
+                    <li>Enter M2 (measurement at voltage V2)</li>
+                    <li>Enter V1 and V2 (voltages)</li>
+                    <li>Or enter V1/V2 ratio directly</li>
+                    <li>System fetches Ks coefficients from database</li>
+                    <li>Ks is calculated automatically</li>
+                </ul>
+            </li>
+            <li><strong>View Results:</strong>
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                    <li>MQ (corrected charge) is calculated automatically</li>
+                    <li>Dw,Q(zref) is calculated from MQ and beam-quality data</li>
+                    <li>Dw,Q(zmax) is calculated: in SAD mode using PDD(20/10); in SSD mode using 100 × Dw,Q(zref) / PDD(zref)</li>
+                    <li>All correction factors are displayed</li>
+                </ul>
+            </li>
+        </ol>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Relative Dose Measurements</h3>
+        <ol style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>Enter Mref (reference measurement at FS10x10)</li>
+            <li>Enter measurements for symmetry and flatness:
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                    <li>MLeft, MRight (for crossline)</li>
+                    <li>MGun, MTar (for inline)</li>
+                    <li>Mmid (midpoint)</li>
+                </ul>
+            </li>
+            <li>Enter other measurements as needed:
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                    <li>Mwedge (wedge factor)</li>
+                    <li>Mdmax, Md10 (for energy determination)</li>
+                </ul>
+            </li>
+            <li>System calculates:
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                    <li>Symmetry (inline and crossline)</li>
+                    <li>Flatness (inline and crossline)</li>
+                    <li>Output factor</li>
+                    <li>Wedge factor</li>
+                    <li>Beam energy (D10)</li>
+                </ul>
+            </li>
+        </ol>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">MU Linearity Calculation</h3>
+        <ol style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>Scroll to "MU Linearity" section in the Dose Calculator</li>
+            <li>Enter charge measurements (in nC) for different MU values:
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                    <li>10 MU</li>
+                    <li>30 MU</li>
+                    <li>50 MU</li>
+                    <li>100 MU</li>
+                    <li>300 MU</li>
+                    <li>500 MU</li>
+                </ul>
+            </li>
+            <li>System automatically:
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                    <li>Calculates linear regression (line of best fit)</li>
+                    <li>Displays graph showing MU (X-axis) vs Charge (Y-axis)</li>
+                    <li>Calculates R² value (coefficient of determination)</li>
+                    <li>Shows Pass/Fail status (R² > 0.99 required)</li>
+                </ul>
+            </li>
+            <li>Results are displayed in real-time as you enter values</li>
+        </ol>
+
+        <p style="line-height: 1.8; font-size: 16px; margin-bottom: 10px;">
+            Expand <strong>How dose values are calculated</strong> above for every formula used by the calculator (K<sub>tp</sub>, K<sub>pol</sub>, K<sub>s</sub>, M<sub>Q</sub>, D<sub>w,Q</sub>, symmetry, flatness, MU linearity R², and CAT deviations).
+        </p>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Use Calculation Results</h3>
+        <ol style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>Review all calculated values</li>
+            <li>Click "Confirm Dose Calculation" button</li>
+            <li>System auto-populates Beam Tests section:
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                    <li>Absolute dose deviation: <strong>difference% (measured%)</strong></li>
+                    <li>Energy stability D10: <strong>difference% (measured%)</strong></li>
+                    <li>Symmetry vs commissioning: <strong>difference% (measured%)</strong></li>
+                    <li>Flatness vs commissioning: <strong>difference% (measured%)</strong></li>
+                    <li>MU Linearity: R² value (test passes if R² > 0.99)</li>
+                    <li>Output factor deviation: <strong>difference% (measured%)</strong></li>
+                </ul>
+            </li>
+            <li>All results show the percentage difference from baseline, with the measured value in parentheses (italic and gray)</li>
+            <li>Calculation is saved to database</li>
+        </ol>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Load Previous Values</h3>
+        <p style="line-height: 1.8; font-size: 16px; margin-bottom: 10px;">
+            When you select a LINAC, the system can load previous dose calculation values for the same LINAC:
+        </p>
+        <ol style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>Select LINAC in dose calculator</li>
+            <li>Click "Load Previous Values" (if available)</li>
+            <li>Previous M+, M-, M1, M2, V1, V2 values are loaded</li>
+            <li>Edit as needed for current measurement</li>
+        </ol>
+    </section>
+
+    <!-- 7. Settings & Configuration -->
+    <section id="settings" style="margin-bottom: 40px;">
+        <h2 style="color: #34495e; border-bottom: 2px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">
+            7. Settings &amp; Configuration
+        </h2>
+        <p style="line-height: 1.8; font-size: 16px; margin-bottom: 15px;">
+            <strong>Note:</strong> Most settings require admin/staff privileges. Regular users can view but not edit.
+        </p>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">LINAC Management</h3>
+        <ol style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>Go to Settings → LINACs</li>
+            <li><strong>View:</strong> Click on a LINAC name to see details</li>
+            <li><strong>Add New:</strong> (Admin only) Click "Add New LINAC", fill in:
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                    <li>Name, series number, installation date</li>
+                    <li>Select energies (multiple selection)</li>
+                    <li>Select dosimetry method (SAD/SSD)</li>
+                    <li>Enter beam modeling parameters</li>
+                    <li>Enter CAT (commissioning) test results</li>
+                </ul>
+            </li>
+            <li><strong>Edit:</strong> (Admin only) Click "Edit" on a LINAC card</li>
+            <li><strong>Delete:</strong> (Admin only) Click "Delete" (use with caution)</li>
+        </ol>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Dosimeter Management</h3>
+        <ol style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>Go to Settings → Dosimeters</li>
+            <li><strong>Add New:</strong> (Admin only) Click "Add New Dosimeter", enter:
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                    <li>Name, brand, series number</li>
+                    <li>Calibration factor (N_d,w)</li>
+                    <li>Calibration date and laboratory</li>
+                    <li>Reference temperature and pressure</li>
+                </ul>
+            </li>
+            <li><strong>Edit/Delete:</strong> (Admin only) Use Edit/Delete buttons</li>
+        </ol>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Physics Parameters</h3>
+        <ol style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>Go to Settings → Physics Parameters</li>
+            <li>View Ks coefficients, k_QQo values, and other parameters</li>
+            <li><strong>Film Analysis Parameters</strong> (parameter type in the list): edit to set the field size detection threshold (%, default 30) and analysis band width (mm, default 8 — guide line centred, half-width each side)</li>
+            <li><strong>Add/Edit:</strong> (Admin only) Manage parameters used in dose calculations</li>
+            <li>Parameters are organized by type and energy</li>
+        </ol>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">QA Tests</h3>
+        <ol style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>Go to Settings → QA Tests</li>
+            <li>View all QA test definitions with tolerances</li>
+            <li><strong>Add/Edit:</strong> (Admin only) Manage test names, types, and tolerance values</li>
+            <li>Tests are organized by type: Mechanical, Beam, Film, Isocenter, plus any user-defined types</li>
+            <li><strong>Add New Test Type:</strong> Create additional test categories (e.g. CBCT, Imaging). Each type adds a titled section on the QA entry form with its own tests, tolerances, and pass/fail indicators</li>
+            <li>When adding a new QA test, select one of the built-in types or a user-defined test type from the dropdown</li>
+        </ol>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Vietnamese Holidays</h3>
+        <ol style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>Go to Settings → Vietnamese Holidays</li>
+            <li>View holiday calendar used for QA date calculations</li>
+            <li><strong>Add/Edit:</strong> (Admin only) Manage holidays</li>
+            <li>System uses holidays to calculate expected QA dates</li>
+        </ol>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Organization Settings</h3>
+        <ol style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>Go to Settings → Organization</li>
+            <li><strong>Upload Logo:</strong> Add organization logo (displayed on home page)</li>
+            <li><strong>Organization Name:</strong> Enter name (supports multiple lines)</li>
+            <li><strong>Images:</strong> Upload left side and bottom images for home page</li>
+            <li><strong>Report Template:</strong> Upload custom DOCX template for QA reports</li>
+            <li><strong>Service Report Template:</strong> Upload custom DOCX template for service reports</li>
+            <li>Service report placeholders include:
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                    <li><code>{% templatetag openvariable %}REPORT_PRINTING_DATE{% templatetag closevariable %}</code>, <code>{% templatetag openvariable %}REPORT_PRINTING_MONTH{% templatetag closevariable %}</code>, <code>{% templatetag openvariable %}REPORT_PRINTING_YEAR{% templatetag closevariable %}</code></li>
+                    <li><code>{% templatetag openvariable %}SERVICE_TABLE{% templatetag closevariable %}</code> (place it in a table cell; app inserts full table header + rows)</li>
+                </ul>
+            </li>
+            <li>Click "Save" to apply changes</li>
+        </ol>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Devices and Equipment Management</h3>
+        <ol style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>Go to Settings → Devices and Equipment</li>
+            <li>View all devices and equipment in the system</li>
+            <li><strong>Add New:</strong> (Admin only) Click "Add New Device", enter:
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                    <li><strong>Category:</strong> Select from dropdown (Dosimeters, Machine QA Equipment, PSQA Equipment, TPS and HIS Equipment, CT-Sim, Positioning equipment, Others)</li>
+                    <li><strong>Name:</strong> Device name</li>
+                    <li><strong>Brand:</strong> Manufacturer brand</li>
+                    <li><strong>Date:</strong> Purchase or installation date</li>
+                    <li><strong>Series Number:</strong> Serial number</li>
+                    <li><strong>Certificates Number:</strong> Calibration certificate number</li>
+                    <li><strong>Location:</strong> Storage location</li>
+                    <li><strong>Documents & Files:</strong> Upload related documents (similar to dosimeters)</li>
+                </ul>
+            </li>
+            <li><strong>Edit/Delete:</strong> (Admin only) Use Edit/Delete buttons</li>
+            <li><strong>View Details:</strong> Click on device name to see full information and documents</li>
+        </ol>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">User Management</h3>
+        <ol style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>Go to Settings → Users</li>
+            <li>View all system users</li>
+            <li><strong>Add New:</strong> (Admin only) Create new user accounts</li>
+            <li><strong>Edit:</strong> (Admin only) Modify user information and roles</li>
+            <li><strong>Delete:</strong> (Admin only) Remove users (use with caution)</li>
+        </ol>
+    </section>
+
+    <!-- 8. Statistics -->
+    <section id="statistics" style="margin-bottom: 40px;">
+        <h2 style="color: #34495e; border-bottom: 2px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">
+            8. Statistics
+        </h2>
+        <p style="line-height: 1.8; font-size: 16px; margin-bottom: 15px;">
+            The Statistics module is read-only. It helps physicists and QA leads review historical QA performance,
+            compare LINACs, and identify tests that need attention. Open it from the navigation bar or home page.
+        </p>
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Filters (top of page)</h3>
+        <ul style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li><strong>View mode:</strong> Overview, Single Test Trend, All Tests for LINAC, Category Trends, or Beam Energy Trends</li>
+            <li><strong>Date range:</strong> Presets (last 3/6/12 months, year to date, previous year) or custom dates</li>
+            <li><strong>LINAC:</strong> One machine, multiple machines (Ctrl+click), or all active LINACs</li>
+            <li><strong>Category / QA test / Beam energy:</strong> Shown depending on view mode</li>
+            <li>Click <strong>Apply filters</strong> after changing options; use <strong>Export CSV</strong> to download the current view</li>
+        </ul>
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">View modes</h3>
+        <ul style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li><strong>Overview:</strong> Department dashboard — LINAC completion, missing-QA heatmap, charts, pending review, and collapsible matrix/detail tables</li>
+            <li><strong>Single Test Trend:</strong> Main trend graph for one QA test with Warning and Action reference lines (from test tolerance settings), summary stats, and linked QA records</li>
+            <li><strong>All Tests for LINAC:</strong> Mini-trend cards plus summary table for every test on one machine</li>
+            <li><strong>Category Trends:</strong> Mini-trends for all tests in a category (mechanical, film, beam, etc.)</li>
+            <li><strong>Beam Energy Trends:</strong> Mini-trends for beam tests at a selected energy</li>
+        </ul>
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Traffic-light classification</h3>
+        <p style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            Results are classified as <strong>Pass</strong> (within tolerance), <strong>Warning</strong> (beyond tolerance but within the test warning threshold),
+            or <strong>Action</strong> (beyond warning threshold plus 0.5 units). Graph reference lines use the same Warning/Action definitions.
+        </p>
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Drill-down</h3>
+        <p style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            Click matrix cells, review-list rows, or mini-trend cards to open <strong>Single Test Trend</strong> for that test and LINAC.
+            In Single Test Trend, you can adjust custom reference lines on the graph; lines update in real time as you edit values.
+        </p>
+    </section>
+
+    <!-- 9. Reports -->
+    <section id="reports" style="margin-bottom: 40px;">
+        <h2 style="color: #34495e; border-bottom: 2px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">
+            9. Reports
+        </h2>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Generate QA Report</h3>
+        <ol style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li><strong>From QA Schedule:</strong>
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                    <li>Go to QA Schedule page</li>
+                    <li>Find completed QA schedule</li>
+                    <li>Click "View Records"</li>
+                    <li>Click "Generate Report" on a QA record</li>
+                </ul>
+            </li>
+            <li><strong>From QA Detail Page:</strong>
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                    <li>View QA record details</li>
+                    <li>Click "Generate Report" button</li>
+                </ul>
+            </li>
+            <li><strong>From Admin Interface:</strong>
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                    <li>Go to Django Admin</li>
+                    <li>Select QA Records</li>
+                    <li>Select records and choose "Generate QA Reports" action</li>
+                </ul>
+            </li>
+            <li>Report downloads as PDF file</li>
+            <li>Report can be pre-defined by user using template uploaded in settings. Report includes:
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                    <li>Basic QA information (LINAC, date, performers)</li>
+                    <li>All test results with tolerances</li>
+                    <li>Film analysis images (if available)</li>
+                    <li>Dose calculation summary</li>
+                    <li>Test notes</li>
+                    <li>Overall status</li>
+                </ul>
+            </li>
+        </ol>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Generate Equipment Service Report</h3>
+        <ol style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>Go to Equipment Management.</li>
+            <li>Use <strong>Print Selected Reports</strong> to export selected rows, or <strong>Print Periodic Reports</strong> for a date range.</li>
+            <li>Choose one of three actions:
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                    <li><strong>↓ (PDF):</strong> Download PDF</li>
+                    <li><strong>↓ (DOCX):</strong> Download DOCX</li>
+                    <li><strong>Eye icon:</strong> Preview PDF</li>
+                </ul>
+            </li>
+            <li>Periodic reports include:
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                    <li>all errors within selected date range</li>
+                    <li>plus all Pending and Temporary errors across equipment</li>
+                </ul>
+            </li>
+            <li>Inside each equipment group, report rows are ordered as:
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                    <li>errors in selected time range</li>
+                    <li>pending errors</li>
+                    <li>temporary errors</li>
+                </ul>
+            </li>
+            <li>Service report table is auto-populated from template placeholder <code>{% templatetag openvariable %}SERVICE_TABLE{% templatetag closevariable %}</code>:
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                    <li>equipment name appears once per grouped equipment (merged first column)</li>
+                    <li>the Notes column uses Notes entered in the service report form</li>
+                </ul>
+            </li>
+        </ol>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Custom Report Template</h3>
+        <ol style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>Go to Settings → Organization</li>
+            <li>Upload a DOCX template file</li>
+            <li>Use placeholders in template:
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                    <li>{% templatetag openvariable %}LINAC_NAME{% templatetag closevariable %} - LINAC name</li>
+                    <li>{% templatetag openvariable %}DATE_PERFORMED{% templatetag closevariable %} - QA date</li>
+                    <li>{% templatetag openvariable %}PERFORMED_BY{% templatetag closevariable %} - Performer name</li>
+                    <li>{% templatetag openvariable %}TEST_RESULTS{% templatetag closevariable %} - Test results section</li>
+                    <li>And more (see template documentation)</li>
+                </ul>
+            </li>
+            <li>System replaces placeholders with actual data</li>
+        </ol>
+    </section>
+
+    <!-- 10. Troubleshooting -->
+    <section id="troubleshooting" style="margin-bottom: 40px;">
+        <h2 style="color: #34495e; border-bottom: 2px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">
+            10. Troubleshooting
+        </h2>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Common Issues</h3>
+
+        <h4 style="color: #2c3e50; margin-top: 15px; margin-bottom: 10px;">Film Analysis - DPI Not Detected</h4>
+        <ul style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>Enter DPI manually in the upload form</li>
+            <li>Check scanner settings - DPI should be in image metadata</li>
+            <li>Common DPI values: 300, 600, 1200</li>
+        </ul>
+
+        <h4 style="color: #2c3e50; margin-top: 15px; margin-bottom: 10px;">Film Analysis - Poor Edge Detection</h4>
+        <ul style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>Ensure good image contrast</li>
+            <li>Draw lines closer to actual field edges</li>
+            <li>Try adjusting line positions and re-analyzing</li>
+            <li>Use higher resolution images</li>
+        </ul>
+
+        <h4 style="color: #2c3e50; margin-top: 15px; margin-bottom: 10px;">Dose Calculation - Missing Coefficients</h4>
+        <ul style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>Check that Physics Parameters are configured in Settings</li>
+            <li>Ensure Ks coefficients are entered for your voltage ratios</li>
+            <li>Verify detector calibration factors are set</li>
+            <li>Contact admin to add missing parameters</li>
+        </ul>
+
+        <h4 style="color: #2c3e50; margin-top: 15px; margin-bottom: 10px;">QA Schedule - Cannot Assign Performers</h4>
+        <ul style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>Ensure users exist in the system (Settings → Users)</li>
+            <li>Check that you have permission to edit schedules</li>
+            <li>Try refreshing the page</li>
+        </ul>
+
+        <h4 style="color: #2c3e50; margin-top: 15px; margin-bottom: 10px;">Report Generation Fails</h4>
+        <ul style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>Check that QA record has test results</li>
+            <li>Verify report template file is valid DOCX format</li>
+            <li>Check file permissions</li>
+            <li>Try generating without custom template first</li>
+        </ul>
+
+        <h4 style="color: #2c3e50; margin-top: 15px; margin-bottom: 10px;">Values Not Auto-Populating</h4>
+        <ul style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>Film results populate automatically when the guided wizard completes successfully (no separate "Use Results" button)</li>
+            <li>For beam tests, click <strong>Confirm Dose Calculation</strong> after entering measurements</li>
+            <li>Check that analysis or dose calculation finished without an error message</li>
+            <li>Verify JavaScript is enabled in your browser</li>
+        </ul>
+
+        <h4 style="color: #2c3e50; margin-top: 15px; margin-bottom: 10px;">Film Wizard — Cannot Proceed After Upload</h4>
+        <ul style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>Ensure a file is selected and DPI is detected or entered manually before clicking <strong>Continue</strong></li>
+            <li>If crop step fails, re-upload the film and run the wizard again</li>
+            <li>For field size lines, draw exactly 4 radiation and 4 light lines before clicking <strong>Finish</strong></li>
+        </ul>
+
+        <h4 style="color: #2c3e50; margin-top: 15px; margin-bottom: 10px;">Statistics — Charts or Tables Missing</h4>
+        <ul style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>Click <strong>Apply filters</strong> after changing view mode or date range</li>
+            <li>Ensure QA records exist in the selected period</li>
+            <li>If graphs do not render after an update, refresh the page or clear browser cache (static assets may be stale)</li>
+        </ul>
+
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Getting Help</h3>
+        <ul style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>Contact system administrator for account/permission issues</li>
+            <li>Email: <a href="mailto:bot2b1710@yahoo.com" style="color: #3498db;">bot2b1710@yahoo.com</a></li>
+            <li>Check the About page for application information and version history</li>
+            <li>Review this help guide for step-by-step instructions</li>
+        </ul>
+    </section>
+
+    <!-- 11. Software Updates -->
+    <section id="software-updates" style="margin-bottom: 40px;">
+        <h2 style="color: #34495e; border-bottom: 2px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">
+            11. Software Updates
+        </h2>
+        <p style="line-height: 1.8; font-size: 16px; margin-bottom: 15px;">
+            Updates are delivered as a ZIP package. Your database and user data are preserved when you apply an update.
+        </p>
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">How to Apply an Update</h3>
+        <ol style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>Stop the QAID Manager server (and close the application if running as a desktop app).</li>
+            <li>Obtain the update ZIP from your administrator and extract it (or use the provided updater script).</li>
+            <li>If using <strong>update_app.bat</strong> (or <strong>update_app.ps1</strong>): place the ZIP in the same folder as the script and run it; the script will replace program files but keep your data folder (e.g. <code>data</code>), database, and config.</li>
+            <li>If an integrity manifest file (<code>update_package_manifest_v&lt;version&gt;.json</code>) is present next to the ZIP, updater verifies SHA256 before applying files.</li>
+            <li>If updating manually: copy the new executable and support files over your installation folder, but do <strong>not</strong> overwrite your <code>data</code> directory (or wherever your database and media are stored).</li>
+            <li>Start the server (or application) again. Confirm the version on the Home page (under the main title and in the footer), Help, or About.</li>
+        </ol>
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">v1.4.2 — Custom Test Types, SSD Dose Calc &amp; More</h3>
+        <ul style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li><strong>Custom Test Types</strong> — Create additional test categories via Settings → QA Tests → Add New Test Type. Each type appears as a titled section on the QA entry form with its own tests, tolerances, and pass/fail indicators.</li>
+            <li><strong>SSD Dose Calculation</strong> — Dose Calculator supports SAD/SSD setup selection. SSD mode adds a PDD(z<sub>ref</sub>) input (auto-loaded from CAT D10, manually overridable) and calculates D<sub>w,Q</sub>(z<sub>max</sub>) = 100 × D<sub>w,Q</sub>(z<sub>ref</sub>) / PDD(z<sub>ref</sub>).</li>
+            <li><strong>MU Linearity persistence</strong> — MU linearity values and graph are saved with dose calculations and visible in View Records.</li>
+            <li><strong>Energy ordering fix</strong> — Electron energies in LINAC settings (CAT, Beam Modelling) display in correct numerical order.</li>
+            <li><strong>Dose Calculator in View Records</strong> — All input values and MU linearity graphs are fully preserved for audit review after QA submission.</li>
+            <li><strong>General version startup</strong> — Configurable port (default 17890) with fallback ports, visible error messages on failure, desktop binds to 127.0.0.1 only.</li>
+        </ul>
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Film Analysis Wizard (v1.4.0)</h3>
+        <ul style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>Single <strong>Run … Analysis</strong> button per film type replaces separate Import / Crop / Center / Analyze steps</li>
+            <li>Wizard auto-runs analysis after the Center step; use <strong>Re-analyze</strong> to repeat the full workflow</li>
+            <li>Staff users can still access legacy step buttons under <strong>Advanced (dev)</strong></li>
+        </ul>
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Statistics Module (v1.3.4+)</h3>
+        <ul style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li>See Section 8 for full Statistics usage. Key addition in v1.3.4: Warning/Action thresholds tied to QA test tolerance settings.</li>
+        </ul>
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Recent Improvements (v1.2.1)</h3>
+        <ul style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li><strong>QA Draft Workflow:</strong> Added <strong>Save &amp; Resume Later</strong> in QA Entry for temporary progress storage.</li>
+            <li><strong>Resume from Schedule:</strong> Assigned schedule cards now show <strong>Resume QA</strong> when a draft exists.</li>
+            <li><strong>Safe Finalization:</strong> Draft records are excluded from final schedule/report logic until user submits final QA.</li>
+            <li><strong>Resume Reliability:</strong> Draft resume loading is validated for correct draft/schedule/LINAC context.</li>
+            <li><strong>Field Size Rotation Normalization:</strong> Film analysis now auto-rotates to a best-fit horizontal/vertical frame from user light-field lines.</li>
+            <li><strong>Parallel Edge Modeling:</strong> Radiation edges are estimated as normal displacement from each light edge to enforce physically consistent parallel comparison.</li>
+            <li><strong>Robust Edge Detection:</strong> Each sampled profile uses a 20-line band median to reduce local noise and out-of-film outliers.</li>
+            <li><strong>Result Overlay Detail:</strong> Field-size result image now shows <strong>Angle correction</strong> (degrees) below A/B/G/T shift values.</li>
+        </ul>
+        <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Core Improvements (v1.2.0)</h3>
+        <ul style="line-height: 1.8; font-size: 16px; margin-left: 20px;">
+            <li><strong>Equipment Management:</strong> Service reports support LINACs, Devices, and Others; equipment labels are displayed as clean names.</li>
+            <li><strong>Downtime:</strong> Service report downtime is tracked as numeric hours for filtering, summary, and reporting.</li>
+            <li><strong>Service Report Template Upload:</strong> Organization Settings now supports a dedicated DOCX template for service reports.</li>
+            <li><strong>Service Report Placeholder:</strong> <code>{% templatetag openvariable %}SERVICE_TABLE{% templatetag closevariable %}</code> auto-generates the complete service table (header + rows).</li>
+            <li><strong>Printing:</strong> Equipment Management supports selected/periodic PDF and DOCX export with preview.</li>
+            <li><strong>Periodic Reporting:</strong> periodic output includes date-range errors plus all pending/temporary items, with ordered sections per equipment.</li>
+            <li><strong>Dashboard:</strong> added Device and Others dashboards showing only equipment with pending/temporary reports.</li>
+            <li><strong>Documentation:</strong> Help/About updated to cover all 1.2.0 capabilities.</li>
+        </ul>
+        <p style="line-height: 1.8; font-size: 16px; margin-top: 15px;">
+            For full version history, see <strong>About</strong> (navigation bar or home page link).
+        </p>
+    </section>
+
+    <!-- Back to Home Link -->
+    <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #dee2e6;">
+        <a href="{% url 'home' %}" style="color: #3498db; text-decoration: none; font-size: 16px;">← Back to Home</a>
+    </div>
+</div>
+{% endwith %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'QAID_Manager/js/help_search.js' %}"></script>
+{% endblock %}
+

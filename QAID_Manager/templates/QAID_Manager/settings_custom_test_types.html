@@ -1,0 +1,158 @@
+{% extends 'QAID_Manager/base.html' %}
+
+{% block title %}Settings - Custom Test Types{% endblock %}
+
+{% block content %}
+<div style="max-width: 1200px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h1>Custom Test Types</h1>
+        {% if is_admin %}
+            <a href="{% url 'custom_test_type_create' %}" style="
+                background-color: #007bff; 
+                color: white; 
+                padding: 10px 20px; 
+                text-decoration: none; 
+                border-radius: 5px;
+                font-weight: bold;
+            ">Add New Test Type</a>
+        {% endif %}
+    </div>
+
+    {% if custom_types %}
+        {% for ct in custom_types %}
+        <div style="
+            background-color: white;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+            overflow: hidden;
+        ">
+            <div style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 15px 20px;
+                background-color: #f8f9fa;
+                border-bottom: 1px solid #dee2e6;
+            ">
+                <div>
+                    <h3 style="margin: 0; color: #007bff;">{{ ct.name }}</h3>
+                    <span style="
+                        padding: 2px 8px;
+                        border-radius: 12px;
+                        font-size: 11px;
+                        font-weight: bold;
+                        {% if ct.is_active %}
+                            background-color: #d4edda; color: #155724;
+                        {% else %}
+                            background-color: #f8d7da; color: #721c24;
+                        {% endif %}
+                    ">{% if ct.is_active %}Active{% else %}Inactive{% endif %}</span>
+                    <span style="color: #6c757d; font-size: 12px; margin-left: 10px;">Order: {{ ct.display_order }}</span>
+                </div>
+                {% if is_admin %}
+                <div style="display: flex; gap: 8px;">
+                    <a href="{% url 'custom_test_create' ct.pk %}" style="
+                        color: #007bff; text-decoration: none; padding: 5px 10px;
+                        border: 1px solid #007bff; border-radius: 3px; font-size: 12px;
+                    ">+ Add Test</a>
+                    <a href="{% url 'custom_test_type_edit' ct.pk %}" style="
+                        color: #28a745; text-decoration: none; padding: 5px 10px;
+                        border: 1px solid #28a745; border-radius: 3px; font-size: 12px;
+                    ">Edit Type</a>
+                    <a href="{% url 'custom_test_type_delete' ct.pk %}" style="
+                        color: #dc3545; text-decoration: none; padding: 5px 10px;
+                        border: 1px solid #dc3545; border-radius: 3px; font-size: 12px;
+                    ">Delete</a>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if ct.tests.all %}
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background-color: #f1f3f5;">
+                        <th style="padding: 10px 20px; text-align: left; font-size: 13px; color: #495057;">Order</th>
+                        <th style="padding: 10px 20px; text-align: left; font-size: 13px; color: #495057;">Test Name</th>
+                        <th style="padding: 10px 20px; text-align: left; font-size: 13px; color: #495057;">Tolerance</th>
+                        <th style="padding: 10px 20px; text-align: left; font-size: 13px; color: #495057;">Status</th>
+                        {% if is_admin %}
+                        <th style="padding: 10px 20px; text-align: center; font-size: 13px; color: #495057;">Actions</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for test in ct.tests.all %}
+                    <tr style="border-bottom: 1px solid #dee2e6;">
+                        <td style="padding: 10px 20px;">{{ test.order_index }}</td>
+                        <td style="padding: 10px 20px; font-weight: 500;">{{ test.name }}</td>
+                        <td style="padding: 10px 20px;">&plusmn;{{ test.tolerance_value }} {{ test.tolerance_unit }}</td>
+                        <td style="padding: 10px 20px;">
+                            <span style="
+                                padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: bold;
+                                {% if test.is_active %}background-color: #d4edda; color: #155724;{% else %}background-color: #f8d7da; color: #721c24;{% endif %}
+                            ">{% if test.is_active %}Active{% else %}Inactive{% endif %}</span>
+                        </td>
+                        {% if is_admin %}
+                        <td style="padding: 10px 20px; text-align: center;">
+                            <div style="display: flex; gap: 8px; justify-content: center;">
+                                <a href="{% url 'custom_test_edit' test.pk %}" style="
+                                    color: #28a745; text-decoration: none; padding: 4px 8px;
+                                    border: 1px solid #28a745; border-radius: 3px; font-size: 12px;
+                                ">Edit</a>
+                                <a href="{% url 'custom_test_delete' test.pk %}" style="
+                                    color: #dc3545; text-decoration: none; padding: 4px 8px;
+                                    border: 1px solid #dc3545; border-radius: 3px; font-size: 12px;
+                                ">Delete</a>
+                            </div>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div style="padding: 20px; text-align: center; color: #6c757d; font-style: italic;">
+                No tests defined yet.
+                {% if is_admin %}
+                    <a href="{% url 'custom_test_create' ct.pk %}" style="color: #007bff;">Add the first test</a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    {% else %}
+        <div style="
+            text-align: center; 
+            padding: 40px; 
+            background-color: #f8f9fa; 
+            border-radius: 8px;
+            border: 2px dashed #dee2e6;
+        ">
+            <h3 style="color: #6c757d; margin-bottom: 10px;">No Custom Test Types</h3>
+            <p style="color: #6c757d;">Create custom test types (e.g. CBCT, Imaging) to add additional test categories to QA entry.</p>
+            {% if is_admin %}
+                <a href="{% url 'custom_test_type_create' %}" style="
+                    background-color: #007bff; 
+                    color: white; 
+                    padding: 10px 20px; 
+                    text-decoration: none; 
+                    border-radius: 5px;
+                    font-weight: bold;
+                ">Add First Test Type</a>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    <div style="margin-top: 30px;">
+        <a href="{% url 'settings' %}" style="
+            color: #6c757d; 
+            text-decoration: none;
+            padding: 10px 15px;
+            border: 1px solid #6c757d;
+            border-radius: 5px;
+        ">&larr; Back to Settings</a>
+    </div>
+</div>
+{% endblock %}

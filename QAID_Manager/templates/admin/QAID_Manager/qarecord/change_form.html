@@ -1,0 +1,336 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_urls static admin_modify %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+    .test-group {
+        background: #ffffff;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        margin: 15px 0;
+        padding: 20px;
+    }
+    .test-group h3 {
+        margin: 0 0 20px 0;
+        color: #495057;
+        border-bottom: 2px solid #007bff;
+        padding-bottom: 8px;
+        font-size: 1.1em;
+        font-weight: 600;
+    }
+    .test-field {
+        display: flex;
+        align-items: center;
+        margin: 4px 0;
+        padding: 6px;
+        border-bottom: 1px solid #e9ecef;
+    }
+    .test-field:last-child {
+        border-bottom: none;
+    }
+    .test-field label {
+        font-weight: bold;
+        color: #495057;
+        min-width: 450px;
+        margin-right: 20px;
+        flex-shrink: 0;
+        line-height: 1.4;
+    }
+    .test-field input {
+        width: 120px;
+        padding: 6px 10px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        text-align: center;
+    }
+    .test-field input:focus {
+        border-color: #007bff;
+        outline: none;
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+    }
+    .test-field input.pass {
+        background-color: #d4edda;
+        border-color: #c3e6cb;
+        color: #155724;
+    }
+    .test-field input.fail {
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+        color: #721c24;
+    }
+    .test-field input.warning {
+        background-color: #fff3cd;
+        border-color: #ffeaa7;
+        color: #856404;
+    }
+    .mechanical-tests { background: #ffffff; }
+    .isocenter-tests { background: #ffffff; }
+    .film-tests { background: #ffffff; }
+    .beam-tests { background: #ffffff; }
+    .tolerance-info {
+        font-size: 0.8em;
+        color: #6c757d;
+        margin-left: 15px;
+        flex-grow: 1;
+    }
+    
+    /* Film Images Grid */
+    .film-images-section {
+        margin-top: 20px;
+        padding-top: 15px;
+        border-top: 1px solid #e9ecef;
+    }
+    
+    .film-images-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        margin-top: 10px;
+    }
+    
+    .film-image-item {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        padding: 10px;
+        text-align: center;
+    }
+    
+    .film-image-title {
+        font-weight: bold;
+        color: #495057;
+        margin-bottom: 8px;
+        font-size: 0.9em;
+    }
+    
+    .film-image {
+        max-width: 100%;
+        height: auto;
+        border-radius: 4px;
+        border: 1px solid #ced4da;
+        margin-bottom: 5px;
+    }
+    
+    .film-image-date {
+        font-size: 0.8em;
+        color: #6c757d;
+    }
+    
+    .no-film-images {
+        grid-column: 1 / -1;
+        text-align: center;
+        color: #6c757d;
+        font-style: italic;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 4px;
+    }
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Tolerance values for each test
+    const tolerances = {
+        'test_01': 1.0, 'test_02': 1.0, 'test_03': 1.0, 'test_04': 1.0, 'test_05': 1.0,
+        'test_06': 1.0, 'test_07': 1.0, 'test_08': 1.0, 'test_09': 1.0, 'test_10': 1.0,
+        'test_11': 2.0, 'test_12': 1.0, 'test_13': 1.0, 'test_14': 1.0, 'test_15': 2.0,
+        'test_16': 1.0, 'test_17': 3.0, 'test_18': 3.0, 'test_19': 1.0, 'test_20': 2.0
+    };
+    
+    // Function to check tolerance and update field styling
+    function checkTolerance(field) {
+        const fieldName = field.name;
+        const value = parseFloat(field.value);
+        const tolerance = tolerances[fieldName];
+        
+        if (isNaN(value)) {
+            field.classList.remove('pass', 'fail', 'warning');
+            return;
+        }
+        
+        // Format to 2 decimal places
+        if (!isNaN(value)) {
+            field.value = value.toFixed(2);
+        }
+        
+        if (Math.abs(value) <= tolerance) {
+            field.classList.remove('fail', 'warning');
+            field.classList.add('pass');
+        } else {
+            field.classList.remove('pass', 'warning');
+            field.classList.add('fail');
+        }
+    }
+    
+    // Add tolerance info and event listeners to all test fields
+    Object.keys(tolerances).forEach(fieldName => {
+        const field = document.querySelector(`input[name="${fieldName}"]`);
+        if (field) {
+            // Add tolerance info
+            const toleranceInfo = document.createElement('div');
+            toleranceInfo.className = 'tolerance-info';
+            toleranceInfo.textContent = `Tolerance: ±${tolerances[fieldName]}`;
+            field.parentNode.appendChild(toleranceInfo);
+            
+            // Add event listener
+            field.addEventListener('input', function() {
+                checkTolerance(this);
+            });
+            
+            // Add blur event to format number
+            field.addEventListener('blur', function() {
+                const value = parseFloat(this.value);
+                if (!isNaN(value)) {
+                    this.value = value.toFixed(2);
+                }
+            });
+            
+            // Check initial value
+            checkTolerance(field);
+        }
+    });
+});
+</script>
+{% endblock %}
+
+{% block field_sets %}
+{% for fieldset in adminform %}
+  {% if fieldset.name == "Test Results" %}
+    <fieldset class="module aligned {{ fieldset.classes }}">
+      {% if fieldset.description %}
+        <div class="description">{{ fieldset.description|safe }}</div>
+      {% endif %}
+      
+      <!-- Mechanical Tests -->
+      <div class="test-group mechanical-tests">
+        <h3>🔧 Mechanical Tests</h3>
+        {% for line in fieldset %}
+          {% for field in line %}
+            {% if field.field.name in "test_01,test_02,test_03,test_04,test_05,test_06,test_07" %}
+              <div class="test-field">
+                {{ field.label_tag }}
+                {{ field.field }}
+                {% if field.field.errors %}
+                  <div class="errors">{{ field.field.errors }}</div>
+                {% endif %}
+              </div>
+            {% endif %}
+          {% endfor %}
+        {% endfor %}
+      </div>
+      
+      <!-- Isocenter Tests -->
+      <div class="test-group isocenter-tests">
+        <h3>🎯 Isocenter Tests</h3>
+        {% for line in fieldset %}
+          {% for field in line %}
+            {% if field.field.name in "test_08,test_09,test_10,test_11" %}
+              <div class="test-field">
+                {{ field.label_tag }}
+                {{ field.field }}
+                {% if field.field.errors %}
+                  <div class="errors">{{ field.field.errors }}</div>
+                {% endif %}
+              </div>
+            {% endif %}
+          {% endfor %}
+        {% endfor %}
+      </div>
+      
+      <!-- Film Analysis Tests -->
+      <div class="test-group film-tests">
+        <h3>📷 Film Analysis Tests</h3>
+        {% for line in fieldset %}
+          {% for field in line %}
+            {% if field.field.name in "test_12,test_13,test_14" %}
+              <div class="test-field">
+                {{ field.label_tag }}
+                {{ field.field }}
+                {% if field.field.errors %}
+                  <div class="errors">{{ field.field.errors }}</div>
+                {% endif %}
+              </div>
+            {% endif %}
+          {% endfor %}
+        {% endfor %}
+        
+        <!-- Film Analysis Images -->
+        <div class="film-images-section">
+          <h4 style="margin: 20px 0 10px 0; color: #495057; border-bottom: 1px solid #dee2e6; padding-bottom: 5px;">
+            📸 Film Analysis Images
+          </h4>
+          <div class="film-images-grid">
+            {% for analysis in original.film_analyses.all %}
+              {% if analysis.result_image %}
+                <div class="film-image-item">
+                  <div class="film-image-title">{{ analysis.analysis_type|title }}</div>
+                  <img src="{{ analysis.result_image.url }}" alt="{{ analysis.analysis_type }}" class="film-image">
+                  <div class="film-image-date">{{ analysis.created_at|date:"M j, Y H:i" }}</div>
+                </div>
+              {% endif %}
+            {% empty %}
+              <div class="no-film-images">No film analysis images available</div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      
+      <!-- Beam Tests -->
+      <div class="test-group beam-tests">
+        <h3>⚡ Beam Tests</h3>
+        {% for line in fieldset %}
+          {% for field in line %}
+            {% if field.field.name in "test_15,test_16,test_17,test_18,test_19,test_20" %}
+              <div class="test-field">
+                {{ field.label_tag }}
+                {{ field.field }}
+                {% if field.field.errors %}
+                  <div class="errors">{{ field.field.errors }}</div>
+                {% endif %}
+              </div>
+            {% endif %}
+          {% endfor %}
+        {% endfor %}
+        
+        <!-- Dose Calculation Summary -->
+        {% for line in fieldset %}
+          {% for field in line %}
+            {% if field.field.name == "dose_calculation_summary" %}
+              <div class="test-field" style="margin-top: 20px; padding: 15px; background-color: #e8f5e8; border-radius: 5px; border: 1px solid #28a745;">
+                <div style="font-weight: bold; color: #155724; margin-bottom: 10px;">📊 Dose Calculation Results</div>
+                {{ field.contents|safe }}
+              </div>
+            {% endif %}
+          {% endfor %}
+        {% endfor %}
+      </div>
+    </fieldset>
+  {% else %}
+    <fieldset class="module aligned {{ fieldset.classes }}">
+      {% if fieldset.description %}
+        <div class="description">{{ fieldset.description|safe }}</div>
+      {% endif %}
+      {% for line in fieldset %}
+        {% for field in line %}
+          <div class="form-row{% if line.fields|length == 1 and line.errors %} errors{% endif %}{% for field in line %}{% if field.field.name %} field-{{ field.field.name }}{% endif %}{% endfor %}">
+            {% if line.fields|length != 1 and not field.is_readonly %}{{ field.errors }}{% endif %}
+            {% if field.is_checkbox %}
+              {{ field.field }}{{ field.label_tag }}
+            {% else %}
+              {{ field.label_tag }}
+              {% if field.is_readonly %}
+                <div class="readonly">{{ field.contents }}</div>
+              {% else %}
+                {{ field.field }}
+              {% endif %}
+            {% endif %}
+            {% if field.field.help_text %}
+              <p class="help">{{ field.field.help_text|safe }}</p>
+            {% endif %}
+          </div>
+        {% endfor %}
+      {% endfor %}
+    </fieldset>
+  {% endif %}
+{% endfor %}
+{% endblock %} 

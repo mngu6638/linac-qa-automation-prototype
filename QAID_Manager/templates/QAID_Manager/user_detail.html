@@ -1,0 +1,174 @@
+{% extends 'QAID_Manager/base.html' %}
+
+{% block title %}User Details - QA Manager{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto;">
+    <div style="margin-bottom: 30px;">
+        <h1>User Details: {{ user.username }}</h1>
+        <a href="{% url 'settings_users' %}" style="
+            color: #6c757d; 
+            text-decoration: none;
+            padding: 5px 10px;
+            border: 1px solid #6c757d;
+            border-radius: 3px;
+            font-size: 14px;
+        ">← Back to Users</a>
+    </div>
+
+    <div style="background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr style="border-bottom: 1px solid #dee2e6;">
+                <td style="padding: 15px; font-weight: bold; width: 200px;">Username:</td>
+                <td style="padding: 15px;">{{ user.username }}</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #dee2e6;">
+                <td style="padding: 15px; font-weight: bold;">First Name:</td>
+                <td style="padding: 15px;">{{ user.first_name|default:"-" }}</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #dee2e6;">
+                <td style="padding: 15px; font-weight: bold;">Last Name:</td>
+                <td style="padding: 15px;">{{ user.last_name|default:"-" }}</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #dee2e6;">
+                <td style="padding: 15px; font-weight: bold;">Email:</td>
+                <td style="padding: 15px;">{{ user.email|default:"-" }}</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #dee2e6;">
+                <td style="padding: 15px; font-weight: bold;">Admin (Staff):</td>
+                <td style="padding: 15px;">
+                    {% if user.is_staff %}
+                        <span style="color: #28a745; font-weight: bold;">Yes</span>
+                    {% else %}
+                        <span style="color: #6c757d;">No</span>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr style="border-bottom: 1px solid #dee2e6;">
+                <td style="padding: 15px; font-weight: bold;">Active:</td>
+                <td style="padding: 15px;">
+                    {% if user.is_active %}
+                        <span style="color: #28a745; font-weight: bold;">Yes</span>
+                    {% else %}
+                        <span style="color: #dc3545; font-weight: bold;">No</span>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr style="border-bottom: 1px solid #dee2e6;">
+                <td style="padding: 15px; font-weight: bold;">Role:</td>
+                <td style="padding: 15px;">
+                    {% if user.profile and user.profile.role %}
+                        {{ user.profile.get_role_display }}
+                    {% else %}
+                        <span style="color: #6c757d;">-</span>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td style="padding: 15px; font-weight: bold;">Date Joined:</td>
+                <td style="padding: 15px;">{{ user.date_joined|date:"F d, Y H:i" }}</td>
+            </tr>
+        </table>
+        
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #dee2e6;">
+            <a href="{% url 'user_edit' user.pk %}" style="
+                background-color: #007bff;
+                color: white;
+                padding: 10px 20px;
+                text-decoration: none;
+                border-radius: 4px;
+                display: inline-block;
+                margin-right: 10px;
+            " onmouseover="this.style.backgroundColor='#0056b3'" 
+               onmouseout="this.style.backgroundColor='#007bff'">
+                Edit User
+            </a>
+            {% if user != request.user %}
+                <a href="{% url 'user_delete' user.pk %}" style="
+                    background-color: #dc3545;
+                    color: white;
+                    padding: 10px 20px;
+                    text-decoration: none;
+                    border-radius: 4px;
+                    display: inline-block;
+                " onmouseover="this.style.backgroundColor='#c82333'" 
+                   onmouseout="this.style.backgroundColor='#dc3545'">
+                    Delete User
+                </a>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- User Activity Log (Admin Only) -->
+    {% if request.user.is_staff %}
+    <div style="margin-top: 40px; background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <h2 style="margin-top: 0; margin-bottom: 20px; color: #007bff;">User Activity Log</h2>
+        
+        {% if activities %}
+            <div style="overflow-x: auto; max-height: 600px; overflow-y: auto;">
+                <table style="
+                    width: 100%; 
+                    border-collapse: collapse;
+                ">
+                    <thead style="position: sticky; top: 0; background-color: #f8f9fa; z-index: 10;">
+                        <tr style="border-bottom: 2px solid #dee2e6;">
+                            <th style="padding: 12px; text-align: left; font-weight: bold; border-bottom: 2px solid #dee2e6;">Date & Time</th>
+                            <th style="padding: 12px; text-align: left; font-weight: bold; border-bottom: 2px solid #dee2e6;">Activity Type</th>
+                            <th style="padding: 12px; text-align: left; font-weight: bold; border-bottom: 2px solid #dee2e6;">Description</th>
+                            <th style="padding: 12px; text-align: left; font-weight: bold; border-bottom: 2px solid #dee2e6;">IP Address</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for activity in activities %}
+                            <tr style="border-bottom: 1px solid #dee2e6;">
+                                <td style="padding: 12px; color: #6c757d;">
+                                    {{ activity.created_at|date:"Y-m-d H:i:s" }}
+                                </td>
+                                <td style="padding: 12px;">
+                                    <span style="
+                                        padding: 4px 8px;
+                                        border-radius: 4px;
+                                        font-size: 12px;
+                                        font-weight: bold;
+                                        {% if activity.activity_type == 'login' %}
+                                            background-color: #d4edda;
+                                            color: #155724;
+                                        {% elif activity.activity_type == 'qa_create' or activity.activity_type == 'qa_update' %}
+                                            background-color: #d1ecf1;
+                                            color: #0c5460;
+                                        {% elif activity.activity_type == 'film_upload' %}
+                                            background-color: #fff3cd;
+                                            color: #856404;
+                                        {% elif activity.activity_type == 'settings_changed' %}
+                                            background-color: #f8d7da;
+                                            color: #721c24;
+                                        {% else %}
+                                            background-color: #e2e3e5;
+                                            color: #383d41;
+                                        {% endif %}
+                                    ">
+                                        {{ activity.get_activity_type_display }}
+                                    </span>
+                                </td>
+                                <td style="padding: 12px;">{{ activity.description }}</td>
+                                <td style="padding: 12px; color: #6c757d;">
+                                    {{ activity.ip_address|default:"-" }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <p style="margin-top: 15px; color: #6c757d; font-size: 12px; text-align: center;">
+                Showing last 100 activities
+            </p>
+        {% else %}
+            <div style="text-align: center; padding: 40px; color: #6c757d;">
+                <p>No activity records found for this user.</p>
+            </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+

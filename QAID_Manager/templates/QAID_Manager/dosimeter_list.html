@@ -1,0 +1,140 @@
+{% extends 'QAID_Manager/base.html' %}
+
+{% block title %}Dosimeters - QA Manager{% endblock %}
+
+{% block content %}
+<div style="max-width: 1200px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h1>Dosimeters</h1>
+        <a href="{% url 'dosimeter_create' %}" style="
+            background-color: #007bff; 
+            color: white; 
+            padding: 10px 20px; 
+            text-decoration: none; 
+            border-radius: 5px;
+            font-weight: bold;
+        ">Add New Dosimeter</a>
+    </div>
+{% if dosimeters %}
+        <div style="overflow-x: auto;">
+            <table style="
+                width: 100%; 
+                border-collapse: collapse; 
+                background-color: white; 
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                border-radius: 8px;
+                overflow: hidden;
+            ">
+                <thead>
+                    <tr style="background-color: #f8f9fa;">
+                        <th style="padding: 15px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: bold;">Tên Buồng ion</th>
+                        <th style="padding: 15px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: bold;">Hãng sản xuất</th>
+                        <th style="padding: 15px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: bold;">Số series</th>
+                        <th style="padding: 15px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: bold;">Hệ số chuẩn</th>
+                        <th style="padding: 15px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: bold;">Ngày chuẩn</th>
+                        <th style="padding: 15px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: bold;">Status</th>
+                        <th style="padding: 15px; text-align: center; border-bottom: 2px solid #dee2e6; font-weight: bold;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for dosimeter in dosimeters %}
+                        <tr style="border-bottom: 1px solid #dee2e6;">
+                            <td style="padding: 15px;">
+                                <a href="{% url 'dosimeter_detail' dosimeter.pk %}" style="
+                                    color: #007bff; 
+                                    text-decoration: none; 
+                                    font-weight: bold;
+                                ">{{ dosimeter.name }}</a>
+                            </td>
+                            <td style="padding: 15px;">{{ dosimeter.brand|default:"-" }}</td>
+                            <td style="padding: 15px;">{{ dosimeter.series_number|default:"-" }}</td>
+                            <td style="padding: 15px;">{{ dosimeter.calibration_factor|default:"-" }}</td>
+                            <td style="padding: 15px;">
+                                {% if dosimeter.calibration_date %}
+                                    {{ dosimeter.calibration_date|date:"M d, Y" }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td style="padding: 15px;">
+                                <span style="
+                                    padding: 4px 8px; 
+                                    border-radius: 12px; 
+                                    font-size: 12px; 
+                                    font-weight: bold;
+                                    {% if dosimeter.is_active %}
+                                        background-color: #d4edda; 
+                                        color: #155724;
+                                    {% else %}
+                                        background-color: #f8d7da; 
+                                        color: #721c24;
+                                    {% endif %}
+                                ">
+                                    {% if dosimeter.is_active %}Active{% else %}Inactive{% endif %}
+                                </span>
+                            </td>
+                            <td style="padding: 15px; text-align: center;">
+                                <div style="display: flex; gap: 10px; justify-content: center;">
+                                    <a href="{% url 'dosimeter_detail' dosimeter.pk %}" style="
+                                        color: #007bff; 
+                                        text-decoration: none;
+                                        padding: 5px 10px;
+                                        border: 1px solid #007bff;
+                                        border-radius: 3px;
+                                        font-size: 12px;
+                                    ">View</a>
+                                    <a href="{% url 'dosimeter_edit' dosimeter.pk %}" style="
+                                        color: #28a745; 
+                                        text-decoration: none;
+                                        padding: 5px 10px;
+                                        border: 1px solid #28a745;
+                                        border-radius: 3px;
+                                        font-size: 12px;
+                                    ">Edit</a>
+                                    <a href="{% url 'dosimeter_delete' dosimeter.pk %}" style="
+                                        color: #dc3545; 
+                                        text-decoration: none;
+                                        padding: 5px 10px;
+                                        border: 1px solid #dc3545;
+                                        border-radius: 3px;
+                                        font-size: 12px;
+                                    ">Delete</a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div style="
+            text-align: center; 
+            padding: 40px; 
+            background-color: #f8f9fa; 
+            border-radius: 8px;
+            border: 2px dashed #dee2e6;
+        ">
+            <h3 style="color: #6c757d; margin-bottom: 10px;">No Dosimeters Found</h3>
+            <p style="color: #6c757d; margin-bottom: 20px;">Get started by adding your first dosimeter.</p>
+            <a href="{% url 'dosimeter_create' %}" style="
+                background-color: #007bff; 
+                color: white; 
+                padding: 10px 20px; 
+                text-decoration: none; 
+                border-radius: 5px;
+                font-weight: bold;
+            ">Add First Dosimeter</a>
+        </div>
+    {% endif %}
+
+    <div style="margin-top: 30px;">
+        <a href="{% url 'home' %}" style="
+            color: #6c757d; 
+            text-decoration: none;
+            padding: 10px 15px;
+            border: 1px solid #6c757d;
+            border-radius: 5px;
+        ">← Back to Home</a>
+    </div>
+</div>
+{% endblock %} 

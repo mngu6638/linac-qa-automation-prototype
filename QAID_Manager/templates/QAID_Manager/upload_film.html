@@ -1,0 +1,72 @@
+{% if message %}
+<div class="message" style="margin: 10px 0; color: green; font-weight: bold;">
+    {{ message }}
+</div>
+{% endif %}
+
+<h2>Upload QA Film Image</h2>
+
+<form method="post" enctype="multipart/form-data" action="{% url 'upload_film' %}" target="filmUploadFrame">
+    {% csrf_token %}
+
+    <!-- File selector -->
+    <label for="imageInput">Select Film Image:</label><br>
+    <input type="file" name="image" id="imageInput" onchange="checkDPI(this.files[0])" required>
+    <span id="dpiStatus" style="margin-left: 10px; font-weight: bold; display: inline-block; min-width: 140px;">
+        {% if dpi %}DPI: {{ dpi }}{% endif %}
+    </span>
+
+    <!-- Manual DPI entry if auto fails -->
+    <div id="manualDpiBlock" style="{% if dpi_missing %}display: block;{% else %}display: none;{% endif %} margin-top: 10px;">
+        <label for="manual_dpi">❌ DPI not detected – please enter manually:</label><br>
+        <input type="number" name="manual_dpi" id="manual_dpi" step="1" min="30" max="1000" {% if dpi_missing %}required{% endif %}>
+    </div>
+
+    <br><br>
+    <button type="submit">Upload</button>
+    <button type="button" onclick="closeFilmUploadModal()">Cancel</button>
+</form>
+
+<script>
+function checkDPI(file) {
+    const formData = new FormData();
+    formData.append('image', file);
+
+    fetch('/check-dpi/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        const dpiStatus = document.getElementById('dpiStatus');
+        const manualBlock = document.getElementById('manualDpiBlock');
+
+        if (data.dpi) {
+            dpiStatus.textContent = `DPI: ${data.dpi}`;
+            dpiStatus.style.color = 'green';
+            manualBlock.style.display = 'none';
+        } else {
+            dpiStatus.textContent = '❌ No DPI';
+            dpiStatus.style.color = 'red';
+            manualBlock.style.display = 'block';
+        }
+    })
+    .catch(err => {
+        console.error('DPI check failed:', err);
+    });
+}
+</script>
+
+{% if dpi %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const dpiStatus = document.getElementById("dpiStatus");
+    if (dpiStatus) {
+        dpiStatus.style.color = "green";
+    }
+});
+</script>
+{% endif %}

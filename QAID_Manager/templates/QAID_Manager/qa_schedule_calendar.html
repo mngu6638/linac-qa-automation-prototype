@@ -1,0 +1,1301 @@
+{% extends 'QAID_Manager/base.html' %}
+{% load static %}
+
+{% block title %}QA Schedule Calendar{% endblock %}
+
+{% block extra_css %}
+<style>
+    .calendar-container {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin: 20px 0;
+        padding: 20px;
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+    
+    .calendar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e9ecef;
+    }
+    
+    .year-navigation {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .year-btn {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        text-decoration: none;
+    }
+    
+    .year-btn:hover {
+        background: #0056b3;
+        text-decoration: none;
+        color: white;
+    }
+    
+    .current-year {
+        font-size: 24px;
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .filters-section {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    
+         .filters-form {
+         display: flex;
+         gap: 15px;
+         align-items: center;
+         flex-wrap: wrap;
+     }
+     
+     .time-and-date-group {
+         display: flex !important;
+         gap: 15px !important;
+         align-items: end !important;
+         flex-wrap: nowrap !important;
+     }
+     
+     .date-range-group {
+         display: flex;
+         gap: 10px;
+         align-items: end;
+     }
+    
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .filter-group label {
+        font-weight: 600;
+        color: #495057;
+        font-size: 14px;
+    }
+    
+    .filter-group select {
+        padding: 8px 12px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        background: white;
+        min-width: 150px;
+    }
+    
+    .filter-buttons {
+        display: flex;
+        gap: 10px;
+        align-items: end;
+    }
+    
+    .btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+    }
+    
+    .btn-primary {
+        background: #007bff;
+        color: white;
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+    
+    .btn-success {
+        background: #28a745;
+        color: white;
+    }
+    
+    .btn-danger {
+        background: #dc3545;
+        color: white;
+    }
+    
+    .btn:hover {
+        opacity: 0.9;
+        text-decoration: none;
+        color: white;
+    }
+    
+                                       .calendar-grid {
+           display: grid !important;
+           grid-template-columns: repeat(4, 1fr) !important;
+           gap: 15px !important;
+           margin-top: 20px;
+           width: 100%;
+           max-width: 100%;
+           grid-auto-rows: minmax(200px, auto);
+       }
+    
+    @media (max-width: 768px) {
+        .calendar-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    /* Fallback for browsers that don't support CSS Grid */
+    @supports not (display: grid) {
+        .calendar-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .calendar-day {
+            flex: 1 1 350px;
+            min-width: 350px;
+        }
+    }
+    
+         .calendar-day {
+         background: white !important;
+         border: 2px solid #dee2e6 !important;
+         border-radius: 8px !important;
+         padding: 20px !important;
+         min-height: 250px !important;
+         transition: all 0.3s ease;
+         display: flex !important;
+         flex-direction: column !important;
+         justify-content: flex-start !important;
+         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+         margin: 0 !important;
+         line-height: 1.6 !important;
+     }
+    
+         .calendar-day.past {
+         background: #f8f9fa !important;
+         opacity: 0.8 !important;
+         border-color: #adb5bd !important;
+     }
+    
+         .calendar-day.today {
+         border: 3px solid #007bff !important;
+         box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3) !important;
+         transform: scale(1.02) !important;
+         background: #f8f9ff !important;
+     }
+    
+         .calendar-day.future {
+         background: #fff !important;
+         border-color: #28a745 !important;
+     }
+    
+         .calendar-day:hover {
+         box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15) !important;
+         transform: translateY(-3px) !important;
+         border-color: #007bff !important;
+     }
+    
+         .day-header {
+         display: flex !important;
+         justify-content: space-between !important;
+         align-items: center !important;
+         margin-bottom: 20px !important;
+         padding-bottom: 15px !important;
+         border-bottom: 2px solid #e9ecef !important;
+         background: #f8f9fa !important;
+         padding: 15px !important;
+         border-radius: 6px !important;
+         margin: -20px -20px 20px -20px !important;
+     }
+    
+         .day-date {
+         font-size: 18px;
+         font-weight: bold;
+         color: #333;
+         margin-bottom: 15px;
+     }
+    
+    .day-actions {
+        display: flex;
+        gap: 5px;
+    }
+    
+    .btn-sm {
+        padding: 4px 8px;
+        font-size: 12px;
+    }
+    
+         .activity-item {
+         background: #f8f9fa;
+         border-radius: 8px;
+         padding: 16px;
+         margin-bottom: 16px;
+         border-left: 4px solid #007bff;
+         transition: all 0.2s ease;
+         line-height: 1.5;
+     }
+    
+    .activity-item:hover {
+        transform: translateX(2px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .activity-item.completed {
+        border-left-color: #28a745;
+        background: #d4edda;
+    }
+    
+    .activity-item.failed {
+        border-left-color: #dc3545;
+        background: #f8d7da;
+    }
+    
+    .activity-item.scheduled {
+        border-left-color: #6c757d;
+        background: #e2e3e5;
+    }
+    
+    .activity-item.record {
+        border-left-color: #17a2b8;
+        background: #d1ecf1;
+    }
+    
+    .activity-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+    
+         .linac-name {
+         font-weight: bold;
+         color: #333;
+         font-size: 14px;
+         margin-bottom: 15px;
+         display: block;
+     }
+    
+    .status-badge {
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    
+    .status-passed {
+        background: #28a745;
+        color: white;
+    }
+    
+    .status-failed {
+        background: #dc3545;
+        color: white;
+    }
+    
+    .status-scheduled {
+        background: #6c757d;
+        color: white;
+    }
+    
+    .status-completed {
+        background: #17a2b8;
+        color: white;
+    }
+    
+         .activity-details {
+         font-size: 12px;
+         color: #495057;
+         margin-bottom: 12px;
+         line-height: 1.4;
+     }
+    
+    .performer-info {
+        font-size: 11px;
+        color: #495057;
+        margin-bottom: 5px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .performer-icon {
+        width: 16px;
+        height: 16px;
+        background: #007bff;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 8px;
+    }
+    
+         .activity-actions {
+         display: flex;
+         gap: 8px;
+         margin-top: 12px;
+         flex-wrap: wrap;
+     }
+    
+    .no-activities {
+        text-align: center;
+        color: #6c757d;
+        font-style: italic;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 6px;
+        border: 2px dashed #dee2e6;
+    }
+    
+    .auto-schedule-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+        color: white;
+    }
+    
+    .auto-schedule-form {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+    }
+    
+    .auto-schedule-form .btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+    }
+    
+    .auto-schedule-form .btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+    
+    .legend {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+    
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+    }
+    
+    .legend-color {
+        width: 16px;
+        height: 16px;
+        border-radius: 3px;
+    }
+    
+         .legend-color.passed { background: #28a745; }
+     .legend-color.failed { background: #dc3545; }
+     .legend-color.scheduled { background: #6c757d; }
+     .legend-color.record { background: #17a2b8; }
+     
+     .performer-selection {
+         margin: 15px 0;
+     }
+     
+     .performer-field {
+         margin-bottom: 18px;
+     }
+     
+     .performer-field label {
+         display: block;
+         font-weight: 600;
+         color: #495057;
+         font-size: 12px;
+         margin-bottom: 6px;
+     }
+     
+     .performer-select {
+         width: 100%;
+         padding: 8px 10px;
+         border: 1px solid #ced4da;
+         border-radius: 4px;
+         background: white;
+         font-size: 12px;
+         margin-bottom: 8px;
+     }
+     
+     .performer-select:focus {
+         outline: none;
+         border-color: #007bff;
+         box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+     }
+     
+     .linac-select {
+         width: 100%;
+         padding: 8px 10px;
+         border: 1px solid #ced4da;
+         border-radius: 4px;
+         background: white;
+         font-size: 12px;
+     }
+     
+     .linac-select:focus {
+         outline: none;
+         border-color: #007bff;
+         box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+     }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="calendar-container">
+    {% csrf_token %}
+    
+    
+         <div class="filters-section">
+         <form method="get" class="filters-form">
+             <input type="hidden" name="year" value="{{ year }}">
+             
+                               <div class="time-and-date-group" style="display: flex !important; gap: 15px !important; align-items: end !important; flex-wrap: nowrap !important;">
+                    <div class="filter-group">
+                        <label for="time_period">📅 Time Period:</label>
+                        <select name="time_period" id="time_period">
+                            <option value="current_month" {% if selected_time_period == 'current_month' or not selected_time_period %}selected{% endif %}>📅 Current Month</option>
+                            <option value="all" {% if selected_time_period == 'all' %}selected{% endif %}>📊 All Time</option>
+                            <option value="custom" {% if selected_time_period == 'custom' %}selected{% endif %}>📅 Custom Range</option>
+                        </select>
+                    </div>
+                    
+                    <div class="date-range-group" style="display: flex !important; gap: 10px !important; align-items: end !important;">
+                        <div class="filter-group">
+                            <label for="start_date">Start Date:</label>
+                            <input type="date" name="start_date" id="start_date" value="{{ selected_start_date|default:'' }}">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="end_date">End Date:</label>
+                            <input type="date" name="end_date" id="end_date" value="{{ selected_end_date|default:'' }}">
+                        </div>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="linac">Filter by Linac:</label>
+                        <select name="linac" id="linac">
+                            <option value="">All Linacs</option>
+                            {% for linac in linacs %}
+                                <option value="{{ linac.id }}" {% if selected_linac == linac.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ linac.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="performer">Filter by Performer:</label>
+                        <select name="performer" id="performer">
+                            <option value="">All Performers</option>
+                            {% for performer in performers %}
+                                <option value="{{ performer.id }}" {% if selected_performer == performer.id|stringformat:"s" %}selected{% endif %}>
+                                    {% if performer.first_name or performer.last_name %}
+                                        {{ performer.last_name }} {{ performer.first_name }}
+                                    {% else %}
+                                        {{ performer.username }}
+                                    {% endif %}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+             
+                                                       <div class="filter-buttons" style="margin-top: 20px;">
+                   <button type="submit" class="btn btn-primary">Apply Filters</button>
+                                     <a href="?year={{ year }}&time_period=current_month" class="btn btn-secondary">Reset to Current Month</a>
+               </div>
+          </form>
+      </div>
+      
+          <!-- Current View Status -->
+      <div style="background: linear-gradient(135deg, #4caf50 0%, #45a049 100%); color: white; padding: 10px 15px; border-radius: 8px; margin-top: 30px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+         <div>
+             <strong>📅 Current View:</strong> 
+             {% if selected_time_period == 'current_month' or not selected_time_period %}
+                 <span>Current Month ({{ calendar_data|length }} Saturdays)</span>
+             {% elif selected_time_period == 'all' %}
+                 <span>All Time ({{ calendar_data|length }} Saturdays)</span>
+             {% elif selected_time_period == 'custom' %}
+                 <span>Custom Range: {{ selected_start_date }} to {{ selected_end_date }} ({{ calendar_data|length }} Saturdays)</span>
+             {% endif %}
+         </div>
+         <div style="font-size: 12px;">
+             Year: {{ year }}
+         </div>
+     </div>
+     
+     
+    
+         
+    
+                                                                               <div class="calendar-grid" style="display: grid !important; grid-template-columns: repeat(4, 1fr) !important; gap: 15px !important;">
+         {% if calendar_data %}
+             {% for day_data in calendar_data %}
+             <div class="calendar-day {% if day_data.is_past %}past{% elif day_data.is_today %}today{% else %}future{% endif %}" style="background: white !important; border: 2px solid #dee2e6 !important; border-radius: 8px !important; padding: 15px !important; min-height: 200px !important; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important; margin: 0 !important;">
+            <div class="day-header">
+                                 <div class="day-date">
+                     <strong>{{ day_data.date|date:"d/m/Y" }}</strong>
+                     {% if day_data.is_today %}
+                         <span style="color: #007bff; font-size: 12px;">(Today)</span>
+                     {% endif %}
+                 </div>
+                                 <div class="day-actions">
+                     <!-- Removed Add QA button for future dates -->
+                 </div>
+            </div>
+            
+                         {% if day_data.activities %}
+                 {% for activity in day_data.activities %}
+                 <div class="activity-item {% if activity.type == 'record' %}record{% elif activity.is_completed %}completed{% elif activity.status.name == 'failed' %}failed{% else %}scheduled{% endif %}">
+                     
+                     {% if day_data.is_future and activity.type == 'schedule' %}
+                         {% if activity.status %}
+                             <!-- Completed QA - Show results -->
+                             <div class="activity-header" style="margin-bottom: 20px !important;">
+                                 <span class="linac-name" style="font-size: 20px !important; font-weight: 900 !important; color: #1a5f7a !important; text-transform: uppercase !important; letter-spacing: 0.5px !important;"><strong>QA Linac:</strong> {{ activity.linac.name }}</span>
+                             </div>
+                             
+                             <div class="activity-details">
+                                 <!-- Expected QA Date -->
+                                 {% if activity.data.expected_qa_date %}
+                                     <div class="expected-qa-date" style="margin-bottom: 15px !important; padding: 12px 16px !important; font-weight: 600 !important; font-size: 14px !important; color: #2c3e50 !important;">
+                                         <strong>Expected QA Date:</strong> {{ activity.data.expected_qa_date|date:"F j, Y" }}
+                                     </div>
+                                 {% endif %}
+                                 
+                                 {% if activity.qa_date %}
+                                     <div class="qa-date" style="margin-bottom: 15px !important;">
+                                         <strong>Completed Date:</strong> {{ activity.qa_date|date:"F j, Y" }}
+                                     </div>
+                                 {% endif %}
+                                 
+                                 <div class="performer-info" style="margin-bottom: 15px !important;">
+                                     <strong>QA Person 1:</strong> 
+                                     {% if activity.performer1 %}
+                                         {% if activity.performer1.first_name or activity.performer1.last_name %}
+                                             {{ activity.performer1.last_name }} {{ activity.performer1.first_name }}
+                                         {% else %}
+                                             {{ activity.performer1.username }}
+                                         {% endif %}
+                                     {% else %}
+                                         Not assigned
+                                     {% endif %}
+                                 </div>
+                                 <div class="performer-info" style="margin-bottom: 15px !important;">
+                                     <strong>QA Person 2:</strong> 
+                                     {% if activity.performer2 %}
+                                         {% if activity.performer2.first_name or activity.performer2.last_name %}
+                                             {{ activity.performer2.last_name }} {{ activity.performer2.first_name }}
+                                         {% else %}
+                                             {{ activity.performer2.username }}
+                                         {% endif %}
+                                     {% else %}
+                                         Not assigned
+                                     {% endif %}
+                                 </div>
+                                 
+                                 {% if activity.data.is_failed and activity.failed_tests %}
+                                     <div class="failed-tests" style="margin-bottom: 15px !important; padding: 12px 16px !important; font-weight: 600 !important; font-size: 14px !important; color: #dc3545 !important;">
+                                         <strong>Failed Tests:</strong>
+                                         <ul style="margin: 5px 0; padding-left: 20px;">
+                                             {% for test in activity.failed_tests %}
+                                                 <li>{{ test.test_name }}: {{ test.value|floatformat:1 }} (Tolerance: {{ test.tolerance }})</li>
+                                             {% endfor %}
+                                         </ul>
+                                     </div>
+                                 {% endif %}
+                                 
+                                 {% if activity.data.is_failed and activity.notes %}
+                                     <div class="qa-notes" style="margin-bottom: 15px !important;">
+                                         <strong>Failed QA Notes:</strong> {{ activity.notes }}
+                                     </div>
+                                 {% elif activity.notes %}
+                                     <div class="qa-notes" style="margin-bottom: 15px !important;">
+                                         <strong>User Notes:</strong> {{ activity.notes }}
+                                     </div>
+                                 {% endif %}
+                             </div>
+                             
+                             <div class="activity-actions">
+                                 <button type="button" class="btn btn-success btn-sm" disabled>QA Completed</button>
+                                 <button type="button" class="btn btn-secondary btn-sm edit-schedule" data-schedule-id="{{ activity.data.id }}" data-date="{{ day_data.date|date:'Y-m-d' }}" data-linac-id="{{ activity.linac.id }}" data-performer1-id="{% if activity.performer1 %}{{ activity.performer1.id }}{% endif %}" data-performer2-id="{% if activity.performer2 %}{{ activity.performer2.id }}{% endif %}">Edit</button>
+                             </div>
+                         {% elif activity.performer1 or activity.performer2 %}
+                             <!-- Assigned but not completed - Show assignment info and allow editing -->
+                             <div class="activity-header" style="margin-bottom: 20px !important;">
+                                 <span class="linac-name" style="font-size: 20px !important; font-weight: 900 !important; color: #1a5f7a !important; text-transform: uppercase !important; letter-spacing: 0.5px !important;"><strong>QA Linac:</strong> {{ activity.linac.name }}</span>
+                             </div>
+                             
+                             <div class="activity-details">
+                                 <!-- Expected QA Date -->
+                                 {% if activity.data.expected_qa_date %}
+                                     <div class="expected-qa-date" style="margin-bottom: 15px !important; padding: 12px 16px !important; font-weight: 600 !important; font-size: 14px !important; color: #2c3e50 !important;">
+                                         <strong>Expected QA Date:</strong> {{ activity.data.expected_qa_date|date:"F j, Y" }}
+                                     </div>
+                                 {% endif %}
+                                 <div class="performer-info" style="margin-bottom: 15px !important;">
+                                     <strong>QA Person 1:</strong> 
+                                     {% if activity.performer1 %}
+                                         {% if activity.performer1.first_name or activity.performer1.last_name %}
+                                             {{ activity.performer1.last_name }} {{ activity.performer1.first_name }}
+                                         {% else %}
+                                             {{ activity.performer1.username }}
+                                         {% endif %}
+                                     {% else %}
+                                         Not assigned
+                                     {% endif %}
+                                 </div>
+                                 <div class="performer-info" style="margin-bottom: 15px !important;">
+                                     <strong>QA Person 2:</strong> 
+                                     {% if activity.performer2 %}
+                                         {% if activity.performer2.first_name or activity.performer2.last_name %}
+                                             {{ activity.performer2.last_name }} {{ activity.performer2.first_name }}
+                                         {% else %}
+                                             {{ activity.performer2.username }}
+                                         {% endif %}
+                                     {% else %}
+                                         Not assigned
+                                     {% endif %}
+                                 </div>
+                             </div>
+                             
+                             <div class="activity-actions">
+                                 <button type="button" class="btn btn-primary btn-sm edit-assignment" data-schedule-id="{{ activity.data.id }}" data-date="{{ day_data.date|date:'Y-m-d' }}">Edit Assignment</button>
+                                 <a href="http://localhost:8000/qa-entry/?linac={{ activity.linac.id }}" class="btn btn-primary btn-sm">Go to QA Form</a>
+                             </div>
+                         {% else %}
+                             <!-- Unconfirmed Future QA Session - Show editable fields -->
+                             <div class="activity-header" style="margin-bottom: 15px !important;">
+                                 <div class="linac-selection" style="margin-bottom: 12px !important;">
+                                     <label for="linac_{{ activity.data.id }}" style="display: block !important; margin-bottom: 6px !important; font-weight: bold; font-size: 14px !important; color: #333 !important;"><strong>QA Linac:</strong></label>
+                                     <select name="linac_{{ activity.data.id }}" id="linac_{{ activity.data.id }}" class="linac-select" style="width: 100% !important; padding: 8px 10px !important; border: 1px solid #ced4da !important; border-radius: 4px !important; background: white !important; font-size: 14px !important; font-weight: bold !important;">
+                                         {% for linac in linacs %}
+                                             <option value="{{ linac.id }}" {% if activity.linac.id == linac.id %}selected{% endif %} style="font-weight: bold; font-size: 14px;">
+                                                 {{ linac.name }}
+                                             </option>
+                                         {% endfor %}
+                                     </select>
+                                 </div>
+                             </div>
+                             
+                             <div class="activity-details">
+                                 <!-- Expected QA Date -->
+                                 {% if activity.data.expected_qa_date %}
+                                     <div class="expected-qa-date" style="margin-bottom: 15px !important; padding: 12px 16px !important; font-weight: 600 !important; font-size: 14px !important; color: #2c3e50 !important;">
+                                         <strong>Expected QA Date:</strong> {{ activity.data.expected_qa_date|date:"F j, Y" }}
+                                     </div>
+                                 {% endif %}
+                                 
+                                 <div class="performer-selection" style="margin: 12px 0 !important;">
+                                     <div class="performer-field" style="margin-bottom: 15px !important;">
+                                         <label for="performer1_{{ activity.data.id }}" style="display: block !important; margin-bottom: 6px !important;">QA Person 1:</label>
+                                         <select name="performer1_{{ activity.data.id }}" id="performer1_{{ activity.data.id }}" class="performer-select" style="margin-bottom: 10px !important;">
+                                             <option value="">Select Performer 1</option>
+                                             {% for performer in performers %}
+                                                 <option value="{{ performer.id }}" {% if activity.performer1 and activity.performer1.id == performer.id %}selected{% endif %}>
+                                                     {% if performer.first_name or performer.last_name %}
+                                                         {{ performer.last_name }} {{ performer.first_name }}
+                                                     {% else %}
+                                                         {{ performer.username }}
+                                                     {% endif %}
+                                                 </option>
+                                             {% endfor %}
+                                         </select>
+                                     </div>
+                                     
+                                     <div class="performer-field" style="margin-bottom: 15px !important;">
+                                         <label for="performer2_{{ activity.data.id }}" style="display: block !important; margin-bottom: 6px !important;">QA Person 2:</label>
+                                         <select name="performer2_{{ activity.data.id }}" id="performer2_{{ activity.data.id }}" class="performer-select" style="margin-bottom: 10px !important;">
+                                             <option value="">Select Performer 2</option>
+                                             {% for performer in performers %}
+                                                 <option value="{{ performer.id }}" {% if activity.performer2 and activity.performer2.id == performer.id %}selected{% endif %}>
+                                                     {% if performer.first_name or performer.last_name %}
+                                                         {{ performer.last_name }} {{ performer.first_name }}
+                                                     {% else %}
+                                                         {{ performer.username }}
+                                                     {% endif %}
+                                                 </option>
+                                             {% endfor %}
+                                         </select>
+                                     </div>
+                                 </div>
+                             </div>
+                             
+                             <div class="activity-actions" style="margin-top: 12px !important;">
+                                 <button type="button" class="btn btn-primary btn-sm confirm-schedule" data-schedule-id="{{ activity.data.id }}" data-date="{{ day_data.date|date:'Y-m-d' }}">Confirm Schedule</button>
+                                 <a href="{% url 'view_qa_records' activity.data.id %}" class="btn btn-secondary btn-sm">View Records</a>
+                             </div>
+                         {% endif %}
+                         
+                     {% else %}
+                         <!-- Past QA Session or Record - Show read-only information -->
+                         <div class="activity-header">
+                             <span class="linac-name">{{ activity.linac.name }}</span>
+                             {% if activity.status %}
+                                                 <span class="status-badge status-{{ activity.status.name }}">
+                    {{ activity.status.get_name_display }}
+                </span>
+                             {% else %}
+                                 <span class="status-badge status-scheduled">Scheduled</span>
+                             {% endif %}
+                         </div>
+                         
+                         <div class="activity-details">
+                             {% if activity.qa_reason %}
+                                 <div><strong>Reason:</strong> {{ activity.qa_reason }}</div>
+                             {% endif %}
+                             
+                             {% if activity.performer1 %}
+                                 <div class="performer-info">
+                                     <span class="performer-icon">1</span>
+                                     <strong>Performer:</strong> 
+                                     {% if activity.performer1.first_name or activity.performer1.last_name %}
+                                         {{ activity.performer1.last_name }} {{ activity.performer1.first_name }}
+                                     {% else %}
+                                         {{ activity.performer1.username }}
+                                     {% endif %}
+                                 </div>
+                             {% endif %}
+                             
+                             {% if activity.performer2 %}
+                                 <div class="performer-info">
+                                     <span class="performer-icon">2</span>
+                                     <strong>Performer 2:</strong> 
+                                     {% if activity.performer2.first_name or activity.performer2.last_name %}
+                                         {{ activity.performer2.last_name }} {{ activity.performer2.first_name }}
+                                     {% else %}
+                                         {{ activity.performer2.username }}
+                                     {% endif %}
+                                 </div>
+                             {% endif %}
+                             
+                             {% if activity.notes %}
+                                 <div><strong>Notes:</strong> {{ activity.notes|truncatechars:50 }}</div>
+                             {% endif %}
+                         </div>
+                         
+                         <div class="activity-actions">
+                             {% if activity.type == 'schedule' %}
+                                 {% if activity.status.name == 'failed' %}
+                                     <form method="post" action="{% url 'confirm_qa_passed' activity.data.id %}" style="display: inline;">
+                                         {% csrf_token %}
+                                         <button type="submit" class="btn btn-success btn-sm">Confirm Passed</button>
+                                     </form>
+                                 {% endif %}
+                             {% endif %}
+                             
+                             {% if activity.type == 'record' %}
+                                 <a href="{% url 'qa_detail' activity.data.id %}" class="btn btn-primary btn-sm">View Record</a>
+                             {% endif %}
+                             
+                             {% if activity.type == 'schedule' and not activity.is_completed %}
+                                 <a href="{% url 'view_qa_records' activity.data.id %}" class="btn btn-primary btn-sm">View Records</a>
+                             {% endif %}
+                         </div>
+                     {% endif %}
+                 </div>
+                 {% endfor %}
+             {% elif day_data.is_future %}
+                 <!-- Future Saturday with no activities - Show editable fields for new QA -->
+                 <div class="activity-item scheduled">
+                     <div class="activity-header" style="margin-bottom: 15px !important;">
+                         <div class="linac-selection" style="margin-bottom: 12px !important;">
+                             <label for="linac_new_{{ day_data.date|date:'Y-m-d' }}" style="display: block !important; margin-bottom: 6px !important; font-weight: bold; font-size: 14px !important; color: #333 !important;"><strong>QA Linac:</strong></label>
+                             <select name="linac_new_{{ day_data.date|date:'Y-m-d' }}" id="linac_new_{{ day_data.date|date:'Y-m-d' }}" class="linac-select" style="width: 100% !important; padding: 8px 10px !important; border: 1px solid #ced4da !important; border-radius: 4px !important; background: white !important; font-size: 14px !important; font-weight: bold !important;">
+                                 <option value="">Select Linac</option>
+                                 {% for linac in linacs %}
+                                     <option value="{{ linac.id }}" style="font-weight: bold; font-size: 14px;">
+                                         {{ linac.name }}
+                                     </option>
+                                 {% endfor %}
+                             </select>
+                         </div>
+                     </div>
+                     
+                     <div class="activity-details">
+                         <div class="performer-selection" style="margin: 12px 0 !important;">
+                             <div class="performer-field" style="margin-bottom: 15px !important;">
+                                 <label for="performer1_new_{{ day_data.date|date:'Y-m-d' }}" style="display: block !important; margin-bottom: 6px !important;">QA Person 1:</label>
+                                 <select name="performer1_new_{{ day_data.date|date:'Y-m-d' }}" id="performer1_new_{{ day_data.date|date:'Y-m-d' }}" class="performer-select" style="margin-bottom: 10px !important;">
+                                     <option value="">Select Performer 1</option>
+                                     {% for performer in performers %}
+                                         <option value="{{ performer.id }}">
+                                             {% if performer.first_name or performer.last_name %}
+                                                 {{ performer.last_name }} {{ performer.first_name }}
+                                             {% else %}
+                                                 {{ performer.username }}
+                                             {% endif %}
+                                         </option>
+                                     {% endfor %}
+                                 </select>
+                             </div>
+                             
+                             <div class="performer-field" style="margin-bottom: 15px !important;">
+                                 <label for="performer2_new_{{ day_data.date|date:'Y-m-d' }}" style="display: block !important; margin-bottom: 6px !important;">QA Person 2:</label>
+                                 <select name="performer2_new_{{ day_data.date|date:'Y-m-d' }}" id="performer2_new_{{ day_data.date|date:'Y-m-d' }}" class="performer-select" style="margin-bottom: 10px !important;">
+                                     <option value="">Select Performer 2</option>
+                                     {% for performer in performers %}
+                                         <option value="{{ performer.id }}">
+                                             {% if performer.first_name or performer.last_name %}
+                                                 {{ performer.last_name }} {{ performer.first_name }}
+                                             {% else %}
+                                                 {{ performer.username }}
+                                             {% endif %}
+                                         </option>
+                                     {% endfor %}
+                                 </select>
+                             </div>
+                         </div>
+                     </div>
+                     
+                     <div class="activity-actions" style="margin-top: 12px !important;">
+                         <button type="button" class="btn btn-primary btn-sm confirm-new-schedule" data-date="{{ day_data.date|date:'Y-m-d' }}">Confirm Schedule</button>
+                     </div>
+                 </div>
+            {% else %}
+                <div class="no-activities">
+                    No QA activities scheduled
+                </div>
+            {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <div style="text-align: center; padding: 40px; color: #6c757d;">
+                <p>No calendar data available for {{ year }}</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Template data for dropdowns
+const templateData = {
+    linacs: [
+        {% for linac in linacs %}
+            {id: {{ linac.id }}, name: "{{ linac.name|escapejs }}"},
+        {% endfor %}
+    ],
+    performers: [
+        {% for performer in performers %}
+            {
+                id: {{ performer.id }}, 
+                name: "{% if performer.first_name or performer.last_name %}{{ performer.last_name|escapejs }} {{ performer.first_name|escapejs }}{% else %}{{ performer.username|escapejs }}{% endif %}"
+            },
+        {% endfor %}
+    ]
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Filter functionality
+    const filterSelects = document.querySelectorAll('select[name="linac"], select[name="performer"]');
+    const timePeriodSelect = document.querySelector('select[name="time_period"]');
+    const startDateInput = document.querySelector('input[name="start_date"]');
+    const endDateInput = document.querySelector('input[name="end_date"]');
+    
+    // Show/hide date inputs based on time period
+    if (timePeriodSelect) {
+        const dateRangeGroup = document.querySelector('.date-range-group');
+        
+        function updateDateInputs() {
+            const selectedPeriod = timePeriodSelect.value;
+            if (selectedPeriod === 'custom') {
+                if (dateRangeGroup) {
+                    dateRangeGroup.style.display = 'flex';
+                }
+            } else {
+                if (dateRangeGroup) {
+                    dateRangeGroup.style.display = 'none';
+                }
+            }
+        }
+        
+        timePeriodSelect.addEventListener('change', updateDateInputs);
+        updateDateInputs(); // Initial call
+    }
+    
+    // Force calendar grid layout
+    const calendarGrid = document.querySelector('.calendar-grid');
+    if (calendarGrid) {
+        // Force grid layout
+        calendarGrid.style.display = 'grid';
+        calendarGrid.style.gridTemplateColumns = 'repeat(4, 1fr)';
+        calendarGrid.style.gap = '15px';
+        calendarGrid.style.width = '100%';
+        calendarGrid.style.maxWidth = '100%';
+        
+        // Force calendar day styling
+        const calendarDays = document.querySelectorAll('.calendar-day');
+        calendarDays.forEach(day => {
+            day.style.background = 'white';
+            day.style.border = '2px solid #dee2e6';
+            day.style.borderRadius = '8px';
+            day.style.padding = '15px';
+            day.style.minHeight = '200px';
+            day.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+            day.style.margin = '0';
+            day.style.display = 'flex';
+            day.style.flexDirection = 'column';
+            day.style.justifyContent = 'flex-start';
+        });
+    }
+    
+    // Handle confirm schedule functionality
+    const confirmButtons = document.querySelectorAll('.confirm-schedule');
+    const confirmNewButtons = document.querySelectorAll('.confirm-new-schedule');
+    
+    try {
+        confirmNewButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                const date = this.dataset.date;
+                const linacSelect = document.getElementById(`linac_new_${date}`);
+                const performer1Select = document.getElementById(`performer1_new_${date}`);
+                const performer2Select = document.getElementById(`performer2_new_${date}`);
+                
+                if (linacSelect && performer1Select && performer2Select) {
+                    const linacId = linacSelect.value;
+                    const performer1Id = performer1Select.value;
+                    const performer2Id = performer2Select.value;
+                    
+                    if (!linacId) {
+                        return;
+                    }
+                    
+                    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                    
+                    // Send AJAX request to create new schedule
+                    fetch('/qa-schedule/create-schedule/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrfToken
+                        },
+                        body: JSON.stringify({
+                            date: date,
+                            linac_id: linacId,
+                            performer1_id: performer1Id,
+                            performer2_id: performer2Id
+                        })
+                    })
+                    .then(response => response.json())
+                                         .then(data => {
+                         if (data.success) {
+                             // Replace dropdown forms with text display
+                             const linacName = linacSelect.options[linacSelect.selectedIndex].text;
+                             const performer1Name = performer1Select.value ? performer1Select.options[performer1Select.selectedIndex].text : 'Not assigned';
+                             const performer2Name = performer2Select.value ? performer2Select.options[performer2Select.selectedIndex].text : 'Not assigned';
+                             
+                             // Replace the entire form with text display
+                             const formContainer = this.closest('.activity-item');
+                             formContainer.innerHTML = `
+                                 <div class="activity-header" style="margin-bottom: 20px !important;">
+                                     <span class="linac-name" style="font-size: 20px !important; font-weight: 900 !important; color: #1a5f7a !important; text-transform: uppercase !important; letter-spacing: 0.5px !important;"><strong>QA Linac:</strong> ${linacName}</span>
+                                 </div>
+                                 
+                                 <div class="activity-details">
+                                     <div class="performer-info" style="margin-bottom: 15px !important;">
+                                         <strong>QA Person 1:</strong> ${performer1Name}
+                                     </div>
+                                     <div class="performer-info" style="margin-bottom: 15px !important;">
+                                         <strong>QA Person 2:</strong> ${performer2Name}
+                                     </div>
+                                 </div>
+                                 
+                                 <div class="activity-actions">
+                                     <button type="button" class="btn btn-success btn-sm" disabled>Confirmed</button>
+                                     <button type="button" class="btn btn-secondary btn-sm edit-schedule" data-schedule-id="${data.schedule_id}" data-date="${date}" data-linac-id="${linacId}" data-performer1-id="${performer1Id}" data-performer2-id="${performer2Id}">Edit</button>
+                                     <a href="http://localhost:8000/qa-entry/?linac=${linacId}" class="btn btn-primary btn-sm">Go to QA Form</a>
+                                 </div>
+                             `;
+                         }
+                     })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                } else {
+                    console.error('Could not find required select elements');
+                }
+            });
+        });
+    } catch (error) {
+        console.error('Error setting up confirm button listeners:', error);
+    }
+    
+    document.addEventListener('click', function(e) {
+        // Handle confirm-schedule button (both initial and dynamically created)
+        if (e.target.classList.contains('confirm-schedule')) {
+            const scheduleId = e.target.dataset.scheduleId;
+            const date = e.target.dataset.date;
+            const linacSelect = document.getElementById(`linac_${scheduleId}`);
+            const performer1Select = document.getElementById(`performer1_${scheduleId}`);
+            const performer2Select = document.getElementById(`performer2_${scheduleId}`);
+            
+            if (!linacSelect || !performer1Select || !performer2Select) {
+                console.error('Form elements not found');
+                return;
+            }
+            
+            const linacId = linacSelect.value;
+            const performer1Id = performer1Select.value;
+            const performer2Id = performer2Select.value;
+            
+            if (!linacId) {
+                return;
+            }
+            
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            
+            // Send AJAX request to save schedule
+            fetch('/qa-schedule/confirm-schedule/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    schedule_id: scheduleId,
+                    linac_id: linacId,
+                    performer1_id: performer1Id,
+                    performer2_id: performer2Id
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Replace dropdown forms with text display
+                    const linacName = linacSelect.options[linacSelect.selectedIndex].text;
+                    const performer1Name = performer1Select.value ? performer1Select.options[performer1Select.selectedIndex].text : 'Not assigned';
+                    const performer2Name = performer2Select.value ? performer2Select.options[performer2Select.selectedIndex].text : 'Not assigned';
+                    
+                    // Replace the entire form with text display
+                    const formContainer = e.target.closest('.activity-item');
+                    formContainer.innerHTML = `
+                        <div class="activity-header" style="margin-bottom: 20px !important;">
+                            <span class="linac-name" style="font-size: 20px !important; font-weight: 900 !important; color: #1a5f7a !important; text-transform: uppercase !important; letter-spacing: 0.5px !important;"><strong>QA Linac:</strong> ${linacName}</span>
+                        </div>
+                        
+                        <div class="activity-details">
+                            <div class="performer-info" style="margin-bottom: 15px !important;">
+                                <strong>QA Person 1:</strong> ${performer1Name}
+                            </div>
+                            <div class="performer-info" style="margin-bottom: 15px !important;">
+                                <strong>QA Person 2:</strong> ${performer2Name}
+                            </div>
+                        </div>
+                        
+                                                 <div class="activity-actions">
+                             <button type="button" class="btn btn-success btn-sm" disabled>Confirmed</button>
+                             <button type="button" class="btn btn-secondary btn-sm edit-schedule" data-schedule-id="${scheduleId}" data-date="${date}" data-linac-id="${linacId}" data-performer1-id="${performer1Id}" data-performer2-id="${performer2Id}">Edit</button>
+                         </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+        
+        // Handle edit-schedule button
+        if (e.target.classList.contains('edit-schedule')) {
+            const scheduleId = e.target.dataset.scheduleId;
+            const date = e.target.dataset.date;
+            const linacId = e.target.dataset.linacId;
+            const performer1Id = e.target.dataset.performer1Id;
+            const performer2Id = e.target.dataset.performer2Id;
+            
+            // Get the current values from the text display
+            const formContainer = e.target.closest('.activity-item');
+            const linacName = formContainer.querySelector('.linac-name').textContent.replace('QA LINAC: ', '');
+            const performer1Text = formContainer.querySelector('.performer-info:nth-child(1)').textContent.replace('QA Person 1: ', '');
+            const performer2Text = formContainer.querySelector('.performer-info:nth-child(2)').textContent.replace('QA Person 2: ', '');
+            
+            // Get options from any existing dropdowns or create them from the template data
+            let linacOptions = [];
+            let performerOptions = [];
+            
+            // Try to get from any existing dropdown first
+            const anyLinacSelect = document.querySelector('select[id^="linac_"]');
+            const anyPerformerSelect = document.querySelector('select[id^="performer1_"]');
+            
+            if (anyLinacSelect) {
+                linacOptions = Array.from(anyLinacSelect.options).filter(option => option.value !== '');
+            }
+            if (anyPerformerSelect) {
+                performerOptions = Array.from(anyPerformerSelect.options).filter(option => option.value !== '');
+            }
+            
+            // If no options found, create them from the template data
+            if (linacOptions.length === 0) {
+                // Create linac options from template data
+                linacOptions = templateData.linacs.map(linac => ({
+                    value: linac.id,
+                    textContent: linac.name
+                }));
+            }
+            
+            if (performerOptions.length === 0) {
+                // Create performer options from template data
+                performerOptions = templateData.performers.map(performer => ({
+                    value: performer.id,
+                    textContent: performer.name
+                }));
+            }
+            
+            // Create dropdown form HTML
+            const dropdownForm = `
+                <div class="activity-header" style="margin-bottom: 15px !important;">
+                    <div class="linac-selection" style="margin-bottom: 12px !important;">
+                        <label for="linac_${scheduleId}" style="display: block !important; margin-bottom: 6px !important; font-weight: bold; font-size: 14px !important; color: #333 !important;"><strong>QA Linac:</strong></label>
+                        <select name="linac_${scheduleId}" id="linac_${scheduleId}" class="linac-select" style="width: 100% !important; padding: 8px 10px !important; border: 1px solid #ced4da !important; border-radius: 4px !important; background: white !important; font-size: 14px !important; font-weight: bold !important;">
+                            <option value="">Select Linac</option>
+                            ${linacOptions.map(option => 
+                                `<option value="${option.value}" ${option.textContent === linacName ? 'selected' : ''} style="font-weight: bold; font-size: 14px;">${option.textContent}</option>`
+                            ).join('')}
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="activity-details">
+                    <div class="performer-selection" style="margin: 12px 0 !important;">
+                        <div class="performer-field" style="margin-bottom: 15px !important;">
+                            <label for="performer1_${scheduleId}" style="display: block !important; margin-bottom: 6px !important;">QA Person 1:</label>
+                            <select name="performer1_${scheduleId}" id="performer1_${scheduleId}" class="performer-select" style="margin-bottom: 10px !important;">
+                                <option value="">Select Performer 1</option>
+                                ${performerOptions.map(option => 
+                                    `<option value="${option.value}" ${option.textContent === performer1Text ? 'selected' : ''}>${option.textContent}</option>`
+                                ).join('')}
+                            </select>
+                        </div>
+                        
+                        <div class="performer-field" style="margin-bottom: 15px !important;">
+                            <label for="performer1_${scheduleId}" style="display: block !important; margin-bottom: 6px !important;">QA Person 2:</label>
+                            <select name="performer2_${scheduleId}" id="performer2_${scheduleId}" class="performer-select" style="margin-bottom: 10px !important;">
+                                <option value="">Select Performer 2</option>
+                                ${performerOptions.map(option => 
+                                    `<option value="${option.value}" ${option.textContent === performer2Text ? 'selected' : ''}>${option.textContent}</option>`
+                                ).join('')}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="activity-actions" style="margin-top: 12px !important;">
+                    <button type="button" class="btn btn-primary btn-sm confirm-schedule" data-schedule-id="${scheduleId}" data-date="${date}">Confirm Schedule</button>
+                    <button type="button" class="btn btn-secondary btn-sm">Cancel</button>
+                </div>
+            `;
+            
+            // Replace the text display with dropdown form
+            formContainer.innerHTML = dropdownForm;
+        }
+        
+        // Handle edit-assignment button
+        if (e.target.classList.contains('edit-assignment')) {
+            const scheduleId = e.target.dataset.scheduleId;
+            const date = e.target.dataset.date;
+            const activityItem = e.target.closest('.activity-item');
+            
+            // Get current performer info
+            const performer1Info = activityItem.querySelector('.performer-info:nth-child(1)').textContent.replace('QA Person 1: ', '').trim();
+            const performer2Info = activityItem.querySelector('.performer-info:nth-child(2)') ? 
+                activityItem.querySelector('.performer-info:nth-child(2)').textContent.replace('QA Person 2: ', '').trim() : '';
+            
+            // Create form HTML with current values pre-selected
+            const formHTML = `
+                <div class="activity-header" style="margin-bottom: 15px !important;">
+                    <div class="linac-selection" style="margin-bottom: 12px !important;">
+                        <label for="linac_${scheduleId}" style="display: block !important; margin-bottom: 6px !important; font-weight: bold; font-size: 14px !important; color: #333 !important;"><strong>QA Linac:</strong></label>
+                        <select name="linac_${scheduleId}" id="linac_${scheduleId}" class="linac-select" style="width: 100% !important; padding: 8px 10px !important; border: 1px solid #ced4da !important; border-radius: 4px !important; background: white !important; font-size: 14px !important; font-weight: bold !important;">
+                            {% for linac in linacs %}
+                                <option value="{{ linac.id }}" selected style="font-weight: bold; font-size: 14px;">
+                                    {{ linac.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="activity-details">
+                    <div class="performer-selection" style="margin: 12px 0 !important;">
+                        <div class="performer-field" style="margin-bottom: 15px !important;">
+                            <label for="performer1_${scheduleId}" style="display: block !important; margin-bottom: 6px !important;">QA Person 1:</label>
+                            <select name="performer1_${scheduleId}" id="performer1_${scheduleId}" class="performer-select" style="margin-bottom: 10px !important;">
+                                <option value="">Select Performer 1</option>
+                                {% for performer in performers %}
+                                    <option value="{{ performer.id }}" ${performer1Info.includes('{{ performer.last_name }} {{ performer.first_name }}') ? 'selected' : ''}>
+                                        {% if performer.first_name or performer.last_name %}
+                                            {{ performer.last_name }} {{ performer.first_name }}
+                                        {% else %}
+                                            {{ performer.username }}
+                                        {% endif %}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="performer-field" style="margin-bottom: 15px !important;">
+                            <label for="performer2_${scheduleId}" style="display: block !important; margin-bottom: 6px !important;">QA Person 2:</label>
+                            <select name="performer2_${scheduleId}" id="performer2_${scheduleId}" class="performer-select" style="margin-bottom: 10px !important;">
+                                <option value="">Select Performer 2</option>
+                                {% for performer in performers %}
+                                    <option value="{{ performer.id }}" ${performer2Info.includes('{{ performer.last_name }} {{ performer.first_name }}') ? 'selected' : ''}>
+                                        {% if performer.first_name or performer.last_name %}
+                                            {{ performer.last_name }} {{ performer.first_name }}
+                                        {% else %}
+                                            {{ performer.username }}
+                                        {% endif %}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="activity-actions" style="margin-top: 12px !important;">
+                    <button type="button" class="btn btn-primary btn-sm confirm-schedule" data-schedule-id="${scheduleId}" data-date="${date}">Update Assignment</button>
+                    <button type="button" class="btn btn-secondary btn-sm cancel-edit" data-schedule-id="${scheduleId}">Cancel</button>
+                    <a href="http://localhost:8000/qa-entry/?linac={{ activity.linac.id }}" class="btn btn-primary btn-sm">Go to QA Form</a>
+                </div>
+            `;
+            
+            // Replace the content with the form
+            activityItem.innerHTML = formHTML;
+        }
+        
+        // Handle cancel-edit button
+        if (e.target.classList.contains('cancel-edit')) {
+            // Reload the page to restore original view
+            window.location.reload();
+        }
+    });
+});
+</script>
+{% endblock %} 

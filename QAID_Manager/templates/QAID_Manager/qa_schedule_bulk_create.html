@@ -1,0 +1,102 @@
+{% extends "QAID_Manager/base.html" %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ title }}</h2>
+    <p class="text-muted">Create QA schedules for multiple machines with a specified frequency.</p>
+    
+    <form method="post" class="mt-4">
+        {% csrf_token %}
+        
+        <div class="form-group mb-3">
+            <label for="{{ form.linacs.id_for_label }}">{{ form.linacs.label }}</label>
+            <div class="form-check-group" style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 4px;">
+                {% for checkbox in form.linacs %}
+                    <div class="form-check">
+                        {{ checkbox.tag }}
+                        <label class="form-check-label" for="{{ checkbox.id_for_label }}">
+                            {{ checkbox.choice_label }}
+                        </label>
+                    </div>
+                {% endfor %}
+            </div>
+            {% if form.linacs.help_text %}
+                <small class="form-text text-muted">{{ form.linacs.help_text }}</small>
+            {% endif %}
+            {% if form.linacs.errors %}
+                <div class="text-danger">{{ form.linacs.errors }}</div>
+            {% endif %}
+        </div>
+        
+        <div class="form-group mb-3">
+            <label for="{{ form.frequency_months.id_for_label }}">{{ form.frequency_months.label }}</label>
+            {{ form.frequency_months }}
+            {% if form.frequency_months.help_text %}
+                <small class="form-text text-muted">{{ form.frequency_months.help_text }}</small>
+            {% endif %}
+            {% if form.frequency_months.errors %}
+                <div class="text-danger">{{ form.frequency_months.errors }}</div>
+            {% endif %}
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group mb-3">
+                    <label for="{{ form.start_month.id_for_label }}">{{ form.start_month.label }}</label>
+                    {{ form.start_month }}
+                    {% if form.start_month.help_text %}
+                        <small class="form-text text-muted">{{ form.start_month.help_text }}</small>
+                    {% endif %}
+                    {% if form.start_month.errors %}
+                        <div class="text-danger">{{ form.start_month.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group mb-3">
+                    <label for="{{ form.end_month.id_for_label }}">{{ form.end_month.label }}</label>
+                    {{ form.end_month }}
+                    {% if form.end_month.help_text %}
+                        <small class="form-text text-muted">{{ form.end_month.help_text }}</small>
+                    {% endif %}
+                    {% if form.end_month.errors %}
+                        <div class="text-danger">{{ form.end_month.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-group mb-3">
+            <label for="{{ form.qa_reason.id_for_label }}">{{ form.qa_reason.label }}</label>
+            {{ form.qa_reason }}
+            {% if form.qa_reason.help_text %}
+                <small class="form-text text-muted">{{ form.qa_reason.help_text }}</small>
+            {% endif %}
+            {% if form.qa_reason.errors %}
+                <div class="text-danger">{{ form.qa_reason.errors }}</div>
+            {% endif %}
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Create Schedules</button>
+            <a href="{% url 'qa_schedule_monthly' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<style>
+    .form-check-group {
+        background-color: #f8f9fa;
+    }
+    .form-check {
+        padding: 5px 0;
+    }
+    .form-check input[type="checkbox"] {
+        margin-right: 8px;
+    }
+</style>
+{% endblock %}
+

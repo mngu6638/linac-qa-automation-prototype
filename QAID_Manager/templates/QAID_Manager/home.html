@@ -1,0 +1,100 @@
+{% extends 'QAID_Manager/base.html' %}
+{% load static %}
+
+{% block title %}Home - QA Manager{% endblock %}
+
+{% block content %}
+{% load qa_filters %}
+{% with settings=org_settings|default:None %}
+<div style="position: relative; min-height: 10px;">
+    {% if settings and settings.logo %}
+        <img src="{{ settings.logo.url }}" alt="Logo" style="position: absolute; top: 0; left: 0; height: 150px;">
+    {% else %}
+        <img src="{% static 'images/logo.png' %}" alt="Logo" style="position: absolute; top: 0; left: 0; height: 150px;">
+    {% endif %}
+</div>
+<div style="padding: 20px;">
+    {% if settings and settings.organization_name %}
+        {% for line in settings.organization_name|split_lines %}
+            <h2 style="margin-left: 170px;">{{ line }}</h2>
+        {% endfor %}
+    {% else %}
+        <h2 style="margin-left: 170px;">Demo Radiotherapy Physics Department</h2>
+        <h2 style="margin-left: 170px;">Research Prototype — Not for Clinical Use</h2>
+    {% endif %}
+    <br><br>
+    <h1>Linear Accelerator QA Management Tool</h1>
+    <p style="color: #6c757d; margin-top: 4px;">Version {{ app_version|default:"1.4.1" }}</p>
+
+    <p><strong>Author: Medphys Guys</strong>.</p>
+</div>
+<div style="position: relative; min-height: 3px;">
+    {% if settings and settings.left_side_image %}
+        <img src="{{ settings.left_side_image.url }}" alt="Left Side Image" style="position: absolute; top: 0; left: 2%; height: 180px;">
+    {% else %}
+        <img src="{% static 'images/job.png' %}" alt="Left Side Image" style="position: absolute; top: 0; left: 2%; height: 180px;">
+    {% endif %}
+</div>
+<div style="padding-left: 170px;">
+    <p>+ A comprehensive tool for managing and organizing Linear Accelerator QA/QC activities. Key features include:</p>
+</div>
+<div style="padding-left: 220px;">
+    <p>- <a href="{% url 'qa_schedule_monthly' %}"><strong>QA Schedule:</strong></a> Create and manage quality assurance schedules for Linear Accelerators.</p>
+    <p>- <a href="{% url 'linac_management' %}"><strong>Equipment Management:</strong></a> Create and manage equipment service reports for LINACs and devices.</p>
+    <p>- <a href="{% url 'statistics' %}"><strong>Statistics:</strong></a> Review QA result summaries, trends, warnings, and LINAC comparisons.</p>
+    <p>- <a href="{% url 'settings' %}"><strong>Settings:</strong></a> Configure Linear Accelerators, Detectors, Test Procedures, Physics Parameters...</p>
+    <p>- <a href="{% url 'about' %}"><strong>About:</strong></a> Learn more about QAID Manager and its features.</p>
+    <p>- <a href="{% url 'help' %}"><strong>Help:</strong></a> Comprehensive user guide and troubleshooting.</p>
+</div>
+    <hr>
+    {% if settings and settings.bottom_image %}
+        <div style="text-align: center; margin-top: 30px; margin-bottom: 20px;">
+            <img src="{{ settings.bottom_image.url }}" alt="Bottom Image" style="max-width: 70%; height: auto;">
+        </div>
+    {% endif %}
+    
+    <!-- Footer -->
+    <footer style="margin-top: 50px; padding: 20px 0; border-top: 1px solid #dee2e6; background-color: #f8f9fa;">
+        <div style="text-align: center; color: #6c757d; font-size: 14px;">
+            <p style="margin: 5px 0;">
+                &copy; {% now "Y" %} <strong>Medphys Guys</strong>. All rights reserved.
+            </p>
+            <p style="margin: 5px 0;">
+                Version {{ app_version|default:"1.4.1" }}
+            </p>
+            <p style="margin: 5px 0;">
+                Contact: <a href="mailto:bot2b1710@yahoo.com" style="color: #007bff; text-decoration: none;">bot2b1710@yahoo.com</a>
+            </p>
+            <p style="margin: 5px 0; font-size: 12px;">
+                <span id="current-datetime"></span>
+            </p>
+        </div>
+    </footer>
+</div>
+{% endwith %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function updateDateTime() {
+        const now = new Date();
+        const options = { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric', 
+            hour: '2-digit', 
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+        };
+        const dateTimeString = now.toLocaleDateString('en-US', options) + ' (UTC' + 
+            (now.getTimezoneOffset() > 0 ? '-' : '+') + 
+            Math.abs(now.getTimezoneOffset() / 60).toString().padStart(2, '0') + ':00)';
+        document.getElementById('current-datetime').textContent = dateTimeString;
+    }
+    
+    // Update immediately and then every second
+    updateDateTime();
+    setInterval(updateDateTime, 1000);
+</script>
+{% endblock %}

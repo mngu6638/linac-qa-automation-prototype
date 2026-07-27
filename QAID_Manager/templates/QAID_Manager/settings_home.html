@@ -1,0 +1,142 @@
+{% extends 'QAID_Manager/base.html' %}
+
+{% block title %}Settings - QA Manager{% endblock %}
+
+{% block content %}
+<div style="max-width: 1200px; margin: 0 auto;">
+    <h1>Settings</h1>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 30px;">
+        <a href="{% url 'settings_dosimeters' %}" style="
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            padding: 30px;
+            background-color: white;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        " onmouseover="this.style.borderColor='#007bff'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)'" 
+           onmouseout="this.style.borderColor='#dee2e6'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)'">
+            <h2 style="margin-top: 0; color: #007bff;">Dosimeters</h2>
+            <p style="color: #6c757d;">Manage ion chambers and dose calibration information</p>
+        </a>
+        
+        <a href="{% url 'settings_linacs' %}" style="
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            padding: 30px;
+            background-color: white;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        " onmouseover="this.style.borderColor='#007bff'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)'" 
+           onmouseout="this.style.borderColor='#dee2e6'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)'">
+            <h2 style="margin-top: 0; color: #007bff;">LINACs</h2>
+            <p style="color: #6c757d;">Manage linear accelerator machines and their configurations</p>
+        </a>
+        
+        <a href="{% url 'settings_physics_parameters' %}" style="
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            padding: 30px;
+            background-color: white;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        " onmouseover="this.style.borderColor='#007bff'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)'" 
+           onmouseout="this.style.borderColor='#dee2e6'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)'">
+            <h2 style="margin-top: 0; color: #007bff;">Physics Parameters</h2>
+            <p style="color: #6c757d;">Manage physics parameters and calibration values</p>
+        </a>
+        
+        <a href="{% url 'settings_qa_tests' %}" style="
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            padding: 30px;
+            background-color: white;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        " onmouseover="this.style.borderColor='#007bff'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)'" 
+           onmouseout="this.style.borderColor='#dee2e6'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)'">
+            <h2 style="margin-top: 0; color: #007bff;">QA Tests</h2>
+            <p style="color: #6c757d;">Manage QA test definitions and tolerances</p>
+        </a>
+        
+        <a href="{% url 'settings_vietnamese_holidays' %}" style="
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            padding: 30px;
+            background-color: white;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        " onmouseover="this.style.borderColor='#007bff'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)'" 
+           onmouseout="this.style.borderColor='#dee2e6'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)'">
+            <h2 style="margin-top: 0; color: #007bff;">Vietnamese Holidays</h2>
+            <p style="color: #6c757d;">Manage Vietnamese national holidays and observances</p>
+        </a>
+        
+        <a href="{% url 'settings_organization' %}" style="
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            padding: 30px;
+            background-color: white;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        " onmouseover="this.style.borderColor='#007bff'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)'" 
+           onmouseout="this.style.borderColor='#dee2e6'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)'">
+            <h2 style="margin-top: 0; color: #007bff;">Organization Settings</h2>
+            <p style="color: #6c757d;">Customize homepage logo and organization name</p>
+        </a>
+        
+        <a href="{% url 'settings_devices' %}" style="
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            padding: 30px;
+            background-color: white;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        " onmouseover="this.style.borderColor='#007bff'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)'" 
+           onmouseout="this.style.borderColor='#dee2e6'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)'">
+            <h2 style="margin-top: 0; color: #007bff;">Devices and Equipment</h2>
+            <p style="color: #6c757d;">Manage CT-sim, PSQA devices, TPS, HIS and other equipment</p>
+        </a>
+        
+        {% if user.is_staff %}
+        <a href="{% url 'settings_users' %}" style="
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            padding: 30px;
+            background-color: white;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        " onmouseover="this.style.borderColor='#007bff'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)'" 
+           onmouseout="this.style.borderColor='#dee2e6'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)'">
+            <h2 style="margin-top: 0; color: #007bff;">User Accounts</h2>
+            <p style="color: #6c757d;">Manage user accounts and permissions (Admin only)</p>
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

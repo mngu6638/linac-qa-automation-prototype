@@ -1,0 +1,149 @@
+{
+  "note": "Synthetic educational films only \u2014 not clinical data.",
+  "dpi": 150,
+  "fieldsize": {
+    "filename": "fieldsize_synthetic.png",
+    "dpi": 150,
+    "size_px": [
+      800,
+      800
+    ],
+    "light_field_px": {
+      "left": 200.0,
+      "right": 600.0,
+      "top": 200.0,
+      "bottom": 600.0
+    },
+    "radiation_field_px": {
+      "left": 217.71653543307087,
+      "right": 600.0,
+      "top": 200.0,
+      "bottom": 600.0
+    },
+    "expected_shifts_mm": {
+      "A": 3.0,
+      "B": 0.0,
+      "G": 0.0,
+      "T": 0.0,
+      "left": 3.0,
+      "right": 0.0,
+      "top": 0.0,
+      "bottom": 0.0
+    },
+    "light_lines": [
+      {
+        "side": "left",
+        "x1": 200.0,
+        "y1": 220,
+        "x2": 200.0,
+        "y2": 580
+      },
+      {
+        "side": "right",
+        "x1": 600.0,
+        "y1": 220,
+        "x2": 600.0,
+        "y2": 580
+      },
+      {
+        "side": "top",
+        "x1": 220,
+        "y1": 200.0,
+        "x2": 580,
+        "y2": 200.0
+      },
+      {
+        "side": "bottom",
+        "x1": 220,
+        "y1": 600.0,
+        "x2": 580,
+        "y2": 600.0
+      }
+    ],
+    "radiation_guides": [
+      {
+        "side": "left",
+        "x1": 208.85826771653544,
+        "y1": 220,
+        "x2": 208.85826771653544,
+        "y2": 580
+      },
+      {
+        "side": "right",
+        "x1": 600.0,
+        "y1": 220,
+        "x2": 600.0,
+        "y2": 580
+      },
+      {
+        "side": "top",
+        "x1": 220,
+        "y1": 200.0,
+        "x2": 580,
+        "y2": 200.0
+      },
+      {
+        "side": "bottom",
+        "x1": 220,
+        "y1": 600.0,
+        "x2": 580,
+        "y2": 600.0
+      }
+    ],
+    "analysis_threshold": 0.3,
+    "band_width_mm": 8.0,
+    "tolerance_mm": 0.5
+  },
+  "collimator_starshot": {
+    "filename": "collimator_starshot_synthetic.png",
+    "dpi": 150,
+    "size_px": [
+      800,
+      800
+    ],
+    "mechanical_center_px": [
+      400.0,
+      400.0
+    ],
+    "radiation_isocenter_px": [
+      411.81102362204723,
+      405.90551181102364
+    ],
+    "offset_mm": {
+      "x": 2.0,
+      "y": 1.0
+    },
+    "expected_displacement_mm": 2.23606797749979,
+    "expected_circle_diameter_mm": 0.0,
+    "analysis_radius_px": 250.0,
+    "n_spokes": 8,
+    "tolerance_displacement_mm": 0.75,
+    "tolerance_diameter_mm": 1.5
+  },
+  "gantry_starshot": {
+    "filename": "gantry_starshot_synthetic.png",
+    "dpi": 150,
+    "size_px": [
+      800,
+      800
+    ],
+    "mechanical_center_px": [
+      400.0,
+      400.0
+    ],
+    "radiation_isocenter_px": [
+      391.1417322834646,
+      414.76377952755905
+    ],
+    "offset_mm": {
+      "x": -1.5,
+      "y": 2.5
+    },
+    "expected_displacement_mm": 2.9154759474226504,
+    "expected_circle_diameter_mm": 0.0,
+    "analysis_radius_px": 250.0,
+    "n_spokes": 8,
+    "tolerance_displacement_mm": 0.75,
+    "tolerance_diameter_mm": 1.5
+  }
+}

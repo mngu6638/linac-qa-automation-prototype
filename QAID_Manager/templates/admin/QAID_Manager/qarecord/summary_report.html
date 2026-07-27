@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QA Summary Report</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        .content {
+            padding: 30px;
+        }
+        .section {
+            margin-bottom: 40px;
+        }
+        .section h2 {
+            color: #495057;
+            border-bottom: 3px solid #007bff;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            border-left: 4px solid #007bff;
+        }
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 5px;
+        }
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .test-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .test-table th,
+        .test-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .test-table th {
+            background-color: #007bff;
+            color: white;
+            font-weight: 600;
+        }
+        .test-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        .test-table tr:hover {
+            background-color: #e9ecef;
+        }
+        .value-cell {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+        .linac-badge {
+            background: #28a745;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .status-completed { background: #28a745; color: white; }
+        .status-in_progress { background: #ffc107; color: #212529; }
+        .status-failed { background: #dc3545; color: white; }
+        .status-scheduled { background: #17a2b8; color: white; }
+        .footer {
+            background: #343a40;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+        }
+        .chart-container {
+            height: 300px;
+            margin: 20px 0;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed #dee2e6;
+        }
+        .chart-placeholder {
+            color: #6c757d;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔬 QA Summary Report</h1>
+            <p>Comprehensive analysis of {{ summary_data.total_records }} QA records</p>
+            <p>Generated on {{ queryset.first.created_at|date:"F j, Y" }} at {{ queryset.first.created_at|time:"H:i" }}</p>
+        </div>
+        
+        <div class="content">
+            <!-- Overview Statistics -->
+            <div class="section">
+                <h2>📊 Overview Statistics</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">{{ summary_data.total_records }}</div>
+                        <div class="stat-label">Total QA Records</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">{{ summary_data.linacs|length }}</div>
+                        <div class="stat-label">LINACs Analyzed</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">{{ summary_data.test_summaries|length }}</div>
+                        <div class="stat-label">Tests Performed</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">{{ summary_data.status_counts|length }}</div>
+                        <div class="stat-label">Status Types</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- LINAC Distribution -->
+            <div class="section">
+                <h2>🏥 LINAC Distribution</h2>
+                <div class="stats-grid">
+                    {% for linac_name, count in summary_data.linacs.items %}
+                    <div class="stat-card">
+                        <div class="stat-number">{{ count }}</div>
+                        <div class="stat-label">{{ linac_name }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Status Distribution -->
+            <div class="section">
+                <h2>📈 Status Distribution</h2>
+                <div class="stats-grid">
+                    {% for status_name, count in summary_data.status_counts.items %}
+                    <div class="stat-card">
+                        <div class="stat-number">{{ count }}</div>
+                        <div class="stat-label">
+                            <span class="status-badge status-{{ status_name|lower|cut:" " }}">{{ status_name }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Test Results Analysis -->
+            <div class="section">
+                <h2>🔍 Test Results Analysis</h2>
+                <table class="test-table">
+                    <thead>
+                        <tr>
+                            <th>Test Name</th>
+                            <th>Records Count</th>
+                            <th>Average Value</th>
+                            <th>Min Value</th>
+                            <th>Max Value</th>
+                            <th>Range</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for test_name, data in summary_data.test_summaries.items %}
+                        <tr>
+                            <td><strong>{{ test_name }}</strong></td>
+                            <td>{{ data.count }}</td>
+                            <td class="value-cell">{{ data.avg|floatformat:3 }}</td>
+                            <td class="value-cell">{{ data.min|floatformat:3 }}</td>
+                            <td class="value-cell">{{ data.max|floatformat:3 }}</td>
+                            <td class="value-cell">{{ data.max|add:"-"|add:data.min|floatformat:3 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Recent QA Records -->
+            <div class="section">
+                <h2>📋 Recent QA Records</h2>
+                <table class="test-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>LINAC</th>
+                            <th>Performed By</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Key Results</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for qa_record in queryset|slice:":10" %}
+                        <tr>
+                            <td><strong>#{{ qa_record.id }}</strong></td>
+                            <td><span class="linac-badge">{{ qa_record.linac.name }}</span></td>
+                            <td>{{ qa_record.performed_by.username }}</td>
+                            <td>{{ qa_record.date_performed|date:"M j, Y" }}</td>
+                            <td>
+                                <span class="status-badge status-{{ qa_record.status.name|lower|cut:" " }}">
+                                    {{ qa_record.status.name }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if qa_record.test_08 is not None %}
+                                    Tâm dây chữ thập: {{ qa_record.test_08|floatformat:2 }}
+                                {% elif qa_record.test_09 is not None %}
+                                    Đồng tâm quay collimator: {{ qa_record.test_09|floatformat:2 }}
+                                {% elif qa_record.test_10 is not None %}
+                                    Đồng tâm quay bàn điều trị: {{ qa_record.test_10|floatformat:2 }}
+                                {% else %}
+                                    No key results
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Chart Placeholder -->
+            <div class="section">
+                <h2>📊 Data Visualization</h2>
+                <div class="chart-container">
+                    <div class="chart-placeholder">
+                        📈 Charts and graphs would be displayed here in a full implementation
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Generated by QA Manager System | {{ queryset.first.created_at|date:"F j, Y" }}</p>
+        </div>
+    </div>
+</body>
+</html> 

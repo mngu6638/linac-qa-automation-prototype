@@ -1,0 +1,364 @@
+{% extends 'QAID_Manager/base.html' %}
+{% load static %}
+
+{% block title %}Statistics - QAID Manager{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'QAID_Manager/css/statistics.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="stats-dashboard">
+    <header class="stats-hero">
+        <div class="stats-hero-inner">
+            <div class="stats-hero-text">
+                <h1 class="stats-hero-title">QA Statistics Cockpit</h1>
+                <p class="stats-hero-subtitle">Clinical QA trend review, LINAC comparison, warning and action monitoring, and exportable summaries.</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="stats-dashboard-body">
+        <div id="stats_status" class="stats-alert hidden" style="display:none;" role="status"></div>
+
+        <aside class="stats-filter-bar" id="stats_filter_bar">
+            <div class="stats-filter-card">
+                <div class="stats-filter-grid">
+                    <div class="stats-field">
+                        <label for="view_mode">View mode</label>
+                        <select id="view_mode" name="view_mode" class="stats-input">
+                            {% for value, label in view_modes %}
+                            <option value="{{ value }}"{% if value == 'overview' %} selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="stats-field">
+                        <label for="date_preset">Date range</label>
+                        <select id="date_preset" name="date_preset" class="stats-input">
+                            <option value="last_3_months">Last 3 months</option>
+                            <option value="last_6_months">Last 6 months</option>
+                            <option value="last_12_months" selected>Last 12 months</option>
+                            <option value="year_to_date">Year to date</option>
+                            <option value="previous_year">Previous year</option>
+                            <option value="custom">Custom</option>
+                        </select>
+                    </div>
+                    <div id="custom_dates_wrap" class="stats-field stats-field-dates filter-mode-specific" data-modes="overview,single_test,linac_all_tests,category_trends,beam_energy">
+                        <label>Custom period</label>
+                        <div class="stats-date-row">
+                            <input type="date" id="date_from" class="stats-input" value="{{ default_date_from }}">
+                            <span class="stats-date-sep">to</span>
+                            <input type="date" id="date_to" class="stats-input" value="{{ default_date_to }}">
+                        </div>
+                    </div>
+                    <div class="stats-field stats-field-linac">
+                        <label for="linac_ids">LINAC</label>
+                        <select id="linac_ids" name="linac_ids" multiple class="stats-input stats-input-multiselect">
+                            <option value="">All active LINACs</option>
+                            {% for linac in linacs %}
+                            <option value="{{ linac.id }}">{{ linac.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <span class="stats-hint">Ctrl+click for multiple</span>
+                    </div>
+                    <div class="stats-field filter-mode-specific visible" data-modes="overview,category_trends,linac_all_tests">
+                        <label for="test_category">Category</label>
+                        <select id="test_category" name="test_category" class="stats-input">
+                            {% for value, label in categories %}
+                            <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="stats-field filter-mode-specific" data-modes="single_test">
+                        <label for="qa_test_id">QA test</label>
+                        <select id="qa_test_id" name="qa_test_id" class="stats-input">
+                            <option value="">— Select test —</option>
+                            {% for test in tests %}
+                            <option value="{{ test.id }}" data-beam="{% if test.test_type == 'beam' %}1{% else %}0{% endif %}">
+                                {{ test.name }} ({{ test.tolerance_unit }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div id="energy_filter_wrap" class="stats-field filter-mode-specific" data-modes="single_test,beam_energy,category_trends">
+                        <label for="energy">Energy</label>
+                        <select id="energy" name="energy" class="stats-input">
+                            <option value="">— Select energy —</option>
+                            <option value="6MV">6MV</option>
+                            <option value="10MV">10MV</option>
+                            <option value="6MV FFF">6MV FFF</option>
+                            <option value="10MV FFF">10MV FFF</option>
+                            <option value="15MV">15MV</option>
+                            <option value="18MV">18MV</option>
+                            <option value="6MeV">6MeV</option>
+                            <option value="9MeV">9MeV</option>
+                            <option value="12MeV">12MeV</option>
+                            <option value="15MeV">15MeV</option>
+                            <option value="18MeV">18MeV</option>
+                        </select>
+                    </div>
+                    <div class="stats-field filter-mode-specific" data-modes="beam_energy">
+                        <label for="beam_test_group">Beam group</label>
+                        <select id="beam_test_group" name="beam_test_group" class="stats-input">
+                            <option value="all">All beam tests</option>
+                            <option value="output">Output</option>
+                            <option value="symmetry">Symmetry</option>
+                            <option value="flatness">Flatness</option>
+                            <option value="quality">Beam quality</option>
+                            <option value="mu_linearity">MU linearity</option>
+                        </select>
+                    </div>
+                    <div class="stats-field filter-mode-specific" data-modes="single_test">
+                        <label for="result_status">Result status</label>
+                        <select id="result_status" name="result_status" class="stats-input">
+                            <option value="all">All</option>
+                            <option value="normal">Normal only</option>
+                            <option value="warning">Warning only</option>
+                            <option value="failed">Failed only</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="stats-filter-options">
+                    <label class="stats-check filter-mode-specific" data-modes="linac_all_tests,category_trends,beam_energy">
+                        <input type="checkbox" id="show_only_with_data" name="show_only_with_data">
+                        Show only tests with data
+                    </label>
+                    <label class="stats-check">
+                        <input type="checkbox" id="include_inactive_linacs" name="include_inactive_linacs">
+                        Include inactive LINACs
+                    </label>
+                    {% if is_staff %}
+                    <label class="stats-check">
+                        <input type="checkbox" id="include_drafts" name="include_drafts">
+                        Include draft records
+                    </label>
+                    {% endif %}
+                </div>
+                <div class="stats-filter-actions">
+                    <button type="button" id="apply_filters" class="stats-btn stats-btn-primary">Apply filters</button>
+                    <button type="button" id="export_csv" class="stats-btn stats-btn-secondary">Export CSV</button>
+                </div>
+                <p class="stats-filter-note">Warning threshold follows the QA Test tolerance setting. Action threshold is 0.5 units above warning in Statistics. Custom display lines affect the graph only.</p>
+            </div>
+        </aside>
+
+        <main class="stats-main">
+            <!-- Overview -->
+            <div class="mode-panel active" data-mode="overview">
+                <section class="stats-panel overview-mgmt-panel">
+                    <div class="stats-panel-header">
+                        <h2 class="stats-panel-title">Management overview</h2>
+                        <p class="stats-panel-subtitle">Graphical QA completion, risk, and attention summary for the selected period.</p>
+                    </div>
+
+                    <div id="overview_mgmt_answers" class="overview-mgmt-answers"></div>
+
+                    <div class="overview-mgmt-hero-row">
+                        <div id="overview_pending_alert" class="overview-pending-alert"></div>
+                        <div class="stats-chart-card overview-health-card">
+                            <h3 class="stats-chart-card-title">Department QA Status</h3>
+                            <p class="stats-chart-card-sub" id="overview_health_sub">Matrix cell status mix</p>
+                            <div class="stats-chart-canvas-wrap stats-chart-canvas-sm">
+                                <canvas id="overview_health_chart"></canvas>
+                            </div>
+                            <div id="overview_health_gauge" class="overview-health-gauge"></div>
+                        </div>
+                    </div>
+
+                    <div class="overview-section-block">
+                        <h3 class="overview-section-title">LINAC QA completion</h3>
+                        <p class="overview-section-sub">Monthly QA record presence in the selected date range.</p>
+                        <div id="overview_linac_completion" class="overview-completion-grid"></div>
+                    </div>
+
+                    <div class="overview-mgmt-charts-row">
+                        <div class="stats-chart-card overview-heatmap-card">
+                            <h3 class="stats-chart-card-title">Missing QA heatmap</h3>
+                            <p class="stats-chart-card-sub">LINAC × month — filled = QA completed</p>
+                            <div id="overview_missing_heatmap" class="overview-heatmap-wrap"></div>
+                        </div>
+                        <div class="stats-chart-card">
+                            <h3 class="stats-chart-card-title">Warning &amp; failed results by LINAC</h3>
+                            <p class="stats-chart-card-sub">Stacked result counts in period</p>
+                            <div class="stats-chart-canvas-wrap stats-chart-canvas-sm">
+                                <canvas id="overview_linac_issues_chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="overview-mgmt-charts-row">
+                        <div class="stats-chart-card">
+                            <h3 class="stats-chart-card-title">LINAC reliability ranking</h3>
+                            <p class="stats-chart-card-sub">Higher score = fewer issues (warnings, failures, gaps)</p>
+                            <div class="stats-chart-canvas-wrap stats-chart-canvas-sm">
+                                <canvas id="overview_linac_reliability_chart"></canvas>
+                            </div>
+                        </div>
+                        <div class="stats-chart-card">
+                            <h3 class="stats-chart-card-title">Issues by test category</h3>
+                            <p class="stats-chart-card-sub">Warning and failure counts</p>
+                            <div class="stats-chart-canvas-wrap stats-chart-canvas-sm">
+                                <canvas id="overview_category_chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="overview-section-block">
+                        <h3 class="overview-section-title">Top issues</h3>
+                        <p class="overview-section-sub">Failed results, missing QA months, and repeated warnings.</p>
+                        <div id="overview_top_issues" class="overview-top-issues-grid"></div>
+                    </div>
+                </section>
+
+                <details class="stats-collapsible stats-panel">
+                    <summary class="stats-collapsible-summary">
+                        <span class="stats-collapsible-title">Traffic-light matrix</span>
+                        <span class="stats-collapsible-hint">Drill-down — click a cell for Single Test Trend</span>
+                    </summary>
+                    <div class="stats-collapsible-body">
+                        <div class="stats-matrix-legend">
+                            <span class="status-pill status-pill-normal"><span class="status-pill-icon">✓</span> Normal</span>
+                            <span class="status-pill status-pill-warning"><span class="status-pill-icon">!</span> Watch</span>
+                            <span class="status-pill status-pill-failed"><span class="status-pill-icon">✕</span> Fail</span>
+                            <span class="status-pill status-pill-missing"><span class="status-pill-icon">—</span> No data</span>
+                        </div>
+                        <div id="matrix_container" class="stats-matrix-scroll"></div>
+                    </div>
+                </details>
+
+                <details class="stats-collapsible stats-panel">
+                    <summary class="stats-collapsible-summary">
+                        <span class="stats-collapsible-title">Results needing review</span>
+                        <span class="stats-collapsible-hint" id="overview_review_summary">Detail table</span>
+                    </summary>
+                    <div class="stats-collapsible-body">
+                        <div class="stats-table-wrap">
+                            <div id="review_list_container"></div>
+                        </div>
+                    </div>
+                </details>
+            </div>
+
+            <!-- Single Test Trend -->
+            <div class="mode-panel" data-mode="single_test">
+                <section class="stats-panel stats-panel-chart-hero">
+                    <div class="stats-panel-header stats-panel-header-row">
+                        <div>
+                            <h2 class="stats-panel-title">Trend analysis</h2>
+                            <p class="stats-panel-subtitle" id="single_test_chart_subtitle">Select a test and apply filters.</p>
+                        </div>
+                        <div id="single_test_trend_badge"></div>
+                    </div>
+                    <div class="stats-line-controls filter-mode-specific visible" data-modes="single_test">
+                        <span class="stats-line-label">Custom display lines (graph only):</span>
+                        <label>Reference <input type="number" id="line_baseline" class="stats-input stats-input-narrow" step="any" placeholder="0"></label>
+                        <label>Warning ± <input type="number" id="line_warning" class="stats-input stats-input-narrow" step="any" placeholder="auto"></label>
+                        <label>Action ± <input type="number" id="line_action" class="stats-input stats-input-narrow" step="any" placeholder="auto"></label>
+                    </div>
+                    <div class="stats-chart-canvas-wrap stats-chart-canvas-lg">
+                        <canvas id="main_trend_chart"></canvas>
+                    </div>
+                    <div id="single_test_summary" class="stats-summary-block"></div>
+                </section>
+
+                <aside id="detail_panel" class="stats-detail-drawer" aria-hidden="true">
+                    <div class="stats-detail-drawer-header">
+                        <h3>Selected QA result</h3>
+                        <button type="button" id="close_detail" class="stats-btn stats-btn-ghost" aria-label="Close">×</button>
+                    </div>
+                    <div id="detail_panel_content" class="stats-detail-drawer-body"></div>
+                </aside>
+
+                <section class="stats-panel">
+                    <div class="stats-panel-header">
+                        <h2 class="stats-panel-title">Data table</h2>
+                        <p class="stats-panel-subtitle">All points shown on the trend graph.</p>
+                    </div>
+                    <div class="stats-table-wrap">
+                        <table class="stats-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th><th>LINAC</th><th>Test</th><th>Energy</th>
+                                    <th class="num">Value</th><th>Unit</th><th class="num">Action</th>
+                                    <th>Classification</th><th>Status</th><th>Note</th><th>Source</th><th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="single_test_table_body"></tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+            <!-- LINAC all tests -->
+            <div class="mode-panel" data-mode="linac_all_tests">
+                <div id="linac_all_container"></div>
+                <section class="stats-panel">
+                    <div class="stats-panel-header">
+                        <h2 class="stats-panel-title">Summary table</h2>
+                    </div>
+                    <div class="stats-table-wrap">
+                        <table class="stats-table">
+                            <thead>
+                                <tr>
+                                    <th>Test</th><th>Category</th><th>Energy</th><th class="num">Latest</th><th>Unit</th>
+                                    <th>Trend</th><th class="num">Warnings</th><th class="num">Failures</th><th>Last QA</th><th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="linac_all_table_body"></tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Category trends -->
+            <div class="mode-panel" data-mode="category_trends">
+                <div id="category_trends_container"></div>
+                <section class="stats-panel">
+                    <div class="stats-panel-header">
+                        <h2 class="stats-panel-title">Summary table</h2>
+                    </div>
+                    <div class="stats-table-wrap">
+                        <table class="stats-table">
+                            <thead>
+                                <tr>
+                                    <th>Test</th><th>Category</th><th>Energy</th><th class="num">Latest</th><th>Unit</th>
+                                    <th>Trend</th><th class="num">Warnings</th><th class="num">Failures</th><th>Last QA</th><th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="category_trends_table_body"></tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Beam energy -->
+            <div class="mode-panel" data-mode="beam_energy">
+                <div id="beam_energy_container"></div>
+                <section class="stats-panel">
+                    <div class="stats-panel-header">
+                        <h2 class="stats-panel-title">Summary table</h2>
+                    </div>
+                    <div class="stats-table-wrap">
+                        <table class="stats-table">
+                            <thead>
+                                <tr>
+                                    <th>Test</th><th>Category</th><th>Energy</th><th class="num">Latest</th><th>Unit</th>
+                                    <th>Trend</th><th class="num">Warnings</th><th class="num">Failures</th><th>Last QA</th><th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="beam_energy_table_body"></tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'QAID_Manager/js/chart.umd.min.js' %}"></script>
+<script src="{% static 'QAID_Manager/js/chartjs-plugin-annotation.min.js' %}"></script>
+<script src="{% static 'QAID_Manager/js/mini_trend.js' %}"></script>
+<script src="{% static 'QAID_Manager/js/statistics.js' %}"></script>
+{% endblock %}

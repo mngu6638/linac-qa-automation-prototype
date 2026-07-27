@@ -1,0 +1,141 @@
+{% extends 'QAID_Manager/base.html' %}
+
+{% block title %}Settings - Devices and Equipment{% endblock %}
+
+{% block content %}
+<div style="max-width: 1200px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h1>Devices and Equipment</h1>
+        {% if is_admin %}
+            <a href="{% url 'device_create' %}" style="
+                background-color: #007bff; 
+                color: white; 
+                padding: 10px 20px; 
+                text-decoration: none; 
+                border-radius: 5px;
+                font-weight: bold;
+            ">Add New Device</a>
+        {% endif %}
+    </div>
+{% if devices %}
+        <div style="overflow-x: auto;">
+            <table style="
+                width: 100%; 
+                border-collapse: collapse; 
+                background-color: white; 
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                border-radius: 8px;
+                overflow: hidden;
+            ">
+                <thead>
+                    <tr style="background-color: #f8f9fa;">
+                        <th style="padding: 15px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: bold;">Category</th>
+                        <th style="padding: 15px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: bold;">Name</th>
+                        <th style="padding: 15px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: bold;">Brand</th>
+                        <th style="padding: 15px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: bold;">Series Number</th>
+                        <th style="padding: 15px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: bold;">Location</th>
+                        <th style="padding: 15px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: bold;">Status</th>
+                        <th style="padding: 15px; text-align: center; border-bottom: 2px solid #dee2e6; font-weight: bold;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for device in devices %}
+                        <tr style="border-bottom: 1px solid #dee2e6;">
+                            <td style="padding: 15px;">{{ device.get_category_display }}</td>
+                            <td style="padding: 15px;">
+                                <a href="{% url 'device_detail' device.pk %}" style="
+                                    color: #007bff; 
+                                    text-decoration: none; 
+                                    font-weight: bold;
+                                ">{{ device.name }}</a>
+                            </td>
+                            <td style="padding: 15px;">{{ device.brand|default:"-" }}</td>
+                            <td style="padding: 15px;">{{ device.series_number|default:"-" }}</td>
+                            <td style="padding: 15px;">{{ device.storage_location|default:"-" }}</td>
+                            <td style="padding: 15px;">
+                                <span style="
+                                    padding: 4px 8px; 
+                                    border-radius: 12px; 
+                                    font-size: 12px; 
+                                    font-weight: bold;
+                                    {% if device.is_active %}
+                                        background-color: #d4edda; 
+                                        color: #155724;
+                                    {% else %}
+                                        background-color: #f8d7da; 
+                                        color: #721c24;
+                                    {% endif %}
+                                ">
+                                    {% if device.is_active %}Active{% else %}Inactive{% endif %}
+                                </span>
+                            </td>
+                            <td style="padding: 15px; text-align: center;">
+                                <div style="display: flex; gap: 10px; justify-content: center;">
+                                    <a href="{% url 'device_detail' device.pk %}" style="
+                                        color: #007bff; 
+                                        text-decoration: none;
+                                        padding: 5px 10px;
+                                        border: 1px solid #007bff;
+                                        border-radius: 3px;
+                                        font-size: 12px;
+                                    ">View</a>
+                                    {% if is_admin %}
+                                        <a href="{% url 'device_edit' device.pk %}" style="
+                                            color: #28a745; 
+                                            text-decoration: none;
+                                            padding: 5px 10px;
+                                            border: 1px solid #28a745;
+                                            border-radius: 3px;
+                                            font-size: 12px;
+                                        ">Edit</a>
+                                        <a href="{% url 'device_delete' device.pk %}" style="
+                                            color: #dc3545; 
+                                            text-decoration: none;
+                                            padding: 5px 10px;
+                                            border: 1px solid #dc3545;
+                                            border-radius: 3px;
+                                            font-size: 12px;
+                                        ">Delete</a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div style="
+            text-align: center; 
+            padding: 40px; 
+            background-color: #f8f9fa; 
+            border-radius: 8px;
+            border: 2px dashed #dee2e6;
+        ">
+            <h3 style="color: #6c757d; margin-bottom: 10px;">No Devices Found</h3>
+            <p style="color: #6c757d; margin-bottom: 20px;">Get started by adding your first device.</p>
+            {% if is_admin %}
+                <a href="{% url 'device_create' %}" style="
+                    background-color: #007bff; 
+                    color: white; 
+                    padding: 10px 20px; 
+                    text-decoration: none; 
+                    border-radius: 5px;
+                    font-weight: bold;
+                ">Add First Device</a>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    <div style="margin-top: 30px;">
+        <a href="{% url 'settings' %}" style="
+            color: #6c757d; 
+            text-decoration: none;
+            padding: 10px 15px;
+            border: 1px solid #6c757d;
+            border-radius: 5px;
+        ">← Back to Settings</a>
+    </div>
+</div>
+{% endblock %}
+

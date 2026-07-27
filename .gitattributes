@@ -1,0 +1,28 @@
+# Auto-detect text files and normalize line endings (Windows-friendly)
+* text=auto eol=crlf
+
+# Explicitly declare text files
+*.py text
+*.md text
+*.txt text
+*.bat text
+*.ps1 text
+*.html text
+*.css text
+*.js text
+*.json text
+*.csv text
+*.spec text
+
+# Denote binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.docx binary
+*.pyc binary
+*.pyd binary
+*.dll binary
+*.exe binary

@@ -1,0 +1,86 @@
+{% extends "admin/change_form.html" %}
+{% load static %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+    .cat-heading {
+        margin: 20px 0 10px 0;
+        padding: 10px;
+        border-radius: 5px;
+        font-weight: bold;
+        font-size: 16px;
+        text-align: center;
+        color: black;
+        background: white;
+    }
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // CAT Information headings
+    // Add mechanical tests heading
+    const gantryField = document.querySelector('[name="cat_gantry_isocenter"]');
+    if (gantryField) {
+        const heading = document.createElement('div');
+        heading.className = 'cat-heading cat-mechanical-heading';
+        heading.innerHTML = '🔧 Mechanical Tests';
+        gantryField.closest('.form-row').insertBefore(heading, gantryField.closest('.form-row').firstChild);
+    }
+    
+    // Add beam tests heading
+    const d10Field = document.querySelector('[name="cat_d10_6mv"]');
+    if (d10Field) {
+        const heading = document.createElement('div');
+        heading.className = 'cat-heading cat-beam-heading';
+        heading.innerHTML = '⚡ Beam Tests';
+        d10Field.closest('.form-row').insertBefore(heading, d10Field.closest('.form-row').firstChild);
+    }
+    
+    // Add XVI tests heading
+    const uniformityField = document.querySelector('[name="cat_uniformity"]');
+    if (uniformityField) {
+        const heading = document.createElement('div');
+        heading.className = 'cat-heading cat-xvi-heading';
+        heading.innerHTML = '📷 XVI Tests';
+        uniformityField.closest('.form-row').insertBefore(heading, uniformityField.closest('.form-row').firstChild);
+    }
+    
+    // Beam Modelling Information headings
+    // Add dose reference depth heading
+    const doseRefField = document.querySelector('[name="beam_dose_ref_depth_6mv"]');
+    if (doseRefField) {
+        const heading = document.createElement('div');
+        heading.className = 'cat-heading cat-mechanical-heading';
+        heading.innerHTML = '📏 Dose Reference Depth';
+        doseRefField.closest('.form-row').insertBefore(heading, doseRefField.closest('.form-row').firstChild);
+    }
+    
+    // Add TPR or TMR (Zreff) heading
+    const tprZreffField = document.querySelector('[name="beam_tpr_zreff_6mv"]');
+    if (tprZreffField) {
+        const heading = document.createElement('div');
+        heading.className = 'cat-heading cat-beam-heading';
+        heading.innerHTML = '📊 TPR or TMR (Zreff)';
+        tprZreffField.closest('.form-row').insertBefore(heading, tprZreffField.closest('.form-row').firstChild);
+    }
+    
+    // Add PDD20/10 heading
+    const pddField = document.querySelector('[name="beam_pdd_20_10_6mv"]');
+    if (pddField) {
+        const heading = document.createElement('div');
+        heading.className = 'cat-heading cat-xvi-heading';
+        heading.innerHTML = '📈 PDD20/10';
+        pddField.closest('.form-row').insertBefore(heading, pddField.closest('.form-row').firstChild);
+    }
+    
+    // Add TPR (calculated) heading
+    const tprCalcField = document.querySelector('[name="beam_tpr_calculated_6mv"]');
+    if (tprCalcField) {
+        const heading = document.createElement('div');
+        heading.className = 'cat-heading cat-mechanical-heading';
+        heading.innerHTML = '🧮 TPR (calculated)';
+        tprCalcField.closest('.form-row').insertBefore(heading, tprCalcField.closest('.form-row').firstChild);
+    }
+});
+</script>
+{% endblock %} 

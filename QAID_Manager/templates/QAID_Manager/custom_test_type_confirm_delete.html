@@ -1,0 +1,38 @@
+{% extends 'QAID_Manager/base.html' %}
+
+{% block title %}Delete Custom Test Type - QA Manager{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto;">
+    <h1 style="color: #dc3545;">Delete Test Type</h1>
+
+    <div style="
+        background-color: white; padding: 30px; border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-top: 20px;
+    ">
+        <div style="
+            background-color: #fff3cd; color: #856404; padding: 15px;
+            border-radius: 5px; border: 1px solid #ffeeba; margin-bottom: 20px;
+        ">
+            <strong>Warning:</strong> This will permanently delete the test type
+            <strong>"{{ custom_type.name }}"</strong> and all its tests ({{ custom_type.tests.count }}).
+            Existing QA records that used these tests will retain their saved values but will no longer
+            display the test definitions.
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            <div style="display: flex; gap: 15px;">
+                <button type="submit" style="
+                    background-color: #dc3545; color: white; padding: 12px 30px;
+                    border: none; border-radius: 5px; font-weight: bold; cursor: pointer;
+                ">Delete</button>
+                <a href="{% url 'settings_qa_tests' %}" style="
+                    background-color: #6c757d; color: white; padding: 12px 30px;
+                    text-decoration: none; border-radius: 5px; font-weight: bold;
+                ">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

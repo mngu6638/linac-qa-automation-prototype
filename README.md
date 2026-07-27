@@ -19,6 +19,110 @@ Monthly LINAC QA is often fragmented across paper forms, spreadsheets, film view
 
 The goal is to show clinical medical physics **workflow design and automation thinking**, not to replace institutionally validated clinical systems.
 
+## Demo Walkthrough
+
+The screenshots below show the prototype running with synthetic demo data. For a standalone step-by-step guide see [examples/demo_walkthrough.md](examples/demo_walkthrough.md).
+
+### Homepage
+
+![Homepage](screenshots/Homepage.png)
+
+The homepage is the entry point to the QA management workflow. It shows the current organization identity, application version, and navigation to all major modules.
+
+- Provides quick access to QA Schedule, Equipment Management, Statistics, Settings, and Help.
+- Displays the organization name and branding area (configurable in Settings).
+- Shows a feature summary so new users can orient themselves.
+- Links to the About page for methodology references and the Help page for detailed usage guidance.
+
+This matters because a centralized dashboard reduces context-switching between paper forms, spreadsheets, and standalone tools during monthly LINAC QA.
+
+### QA Schedule
+
+![QA Schedule](screenshots/QA_Schedule.png)
+
+The QA Schedule view manages monthly and ad-hoc QA planning across multiple LINACs. Each card represents one machine's scheduled QA session for the selected month.
+
+- Assign up to two QA performers per session for dual-review workflows.
+- Set expected QA dates and track status (Scheduled, In Progress, Completed, Passed, Failed).
+- Create bulk monthly schedules or non-scheduled (ad-hoc) QA sessions.
+- Navigate between months to review past and upcoming QA commitments.
+- Supports workflow traceability from schedule assignment through to final QA record.
+
+Structured scheduling with status tracking addresses a common gap in radiotherapy departments where QA task assignment and completion are tracked informally.
+
+### Film Analysis
+
+![Film Analysis](screenshots/Film_Analysis.png)
+
+The Film Analysis panel shows results from the prototype's three film-based geometric checks: field-size mismatch estimation, collimator star-shot-style analysis, and gantry star-shot-style analysis. All analysis is **grayscale / image-intensity heuristic** — not OD-calibrated Gafchromic dose conversion.
+
+- **Field size:** Compares light-field and radiation-field edges; reports per-side shifts (A, B, G, T) in millimetres with automatic axis-rotation correction.
+- **Collimator isocenter:** Detects radiation spoke bands along a user-defined circle, pairs opposite spokes, and computes a minimum enclosing circle to estimate displacement from the mechanical centre.
+- **Gantry isocenter:** Uses the same star-shot-style geometric analysis pipeline for gantry rotation geometry.
+- Results populate QA record fields automatically; annotated overlay images are stored for review.
+- Analysis parameters (detection threshold, band width) are configurable in Settings → Physics Parameters.
+
+Film-based geometric QA is a routine part of monthly LINAC checks; this prototype demonstrates how guided analysis and structured result storage can improve reproducibility and traceability compared to manual film reading.
+
+### TRS-398-Oriented Dose Calculator
+
+![Dose Calculator](screenshots/Dose_Calculator_TRS398.png)
+
+The Dose Calculator implements an educational/prototype workflow for TRS-398-style absolute dosimetry corrections. It is **not** a substitute for independent dosimetry worksheets or accredited clinical software.
+
+- Applies temperature–pressure correction (K_tp), polarity correction (K_pol), and ion recombination correction (K_s) using documented TRS-398 formulas.
+- Calculates corrected charge (M_Q), beam quality (TPR_20,10), and absorbed dose at reference depth (D_w,Q).
+- Supports relative dose checks: symmetry, flatness, output factor, wedge factor, and MU linearity.
+- Compares measured values against stored commissioning (CAT) baselines per LINAC and energy.
+- Formula references are shown inline so users can verify each calculation step.
+
+Encoding the dosimetry calculation chain in software demonstrates how protocol-oriented workflows can reduce transcription errors, though independent verification remains mandatory.
+
+### Equipment Management
+
+![Equipment Management](screenshots/Equipment_management.png)
+
+The Equipment Management module tracks LINACs, ancillary devices, and service/maintenance history with structured reports and downtime logging.
+
+- Dashboard cards summarize total reports, completion status, and cumulative downtime per machine.
+- Service reports capture issue descriptions, actions taken, status (Completed, Pending, Temporary, Breakdown), and downtime hours.
+- Filtering by equipment, type, status, keyword, and date range supports audit review.
+- Batch PDF/DOCX export enables periodic reporting to management or regulators.
+- Dosimeter and device inventories are managed through the same equipment infrastructure.
+
+Structured equipment tracking supports regulatory compliance and provides data for uptime/reliability analysis across a LINAC fleet.
+
+### Settings and Configuration
+
+![Settings](screenshots/Settings.png)
+
+The Settings page provides centralized configuration for the entire QA workflow: machines, detectors, test definitions, physics parameters, users, and organization branding.
+
+- **Dosimeters / LINACs / Devices:** Manage hardware inventory and commissioning reference data.
+- **Physics Parameters:** Configure Ks coefficients, kQ tables, film analysis thresholds, and other protocol-specific constants.
+- **QA Tests:** Define test names, types (mechanical / beam / film / isocenter), tolerance values, and units.
+- **User Accounts:** Role-based access (administrator, medical physicist, radiation therapist).
+- **Organization Settings:** Customize homepage branding and report templates.
+
+Configurable tolerances and physics parameters mean the prototype can be adapted to different departmental protocols without code changes, which is important for workflow standardization across sites.
+
+### Suggested demo flow
+
+1. Start from the **Homepage** and review the navigation structure.
+2. Open **QA Schedule** and review or create a monthly QA session.
+3. Open or create a **QA Record** for a scheduled session.
+4. Run the **film-analysis workflow** using synthetic images from `sample_data/films/`.
+5. Review the **TRS-398-oriented Dose Calculator** panel and its inline formula references.
+6. Check **Equipment Management** for service reports and downtime tracking.
+7. Explore **Settings** to see configurable QA tests, physics parameters, and user roles.
+8. Run synthetic regression tests from the command line:
+
+```bash
+python -m pytest tests -q
+```
+
+> This walkthrough uses synthetic demo data only. The screenshots do not represent a clinical deployment.
+
 ## Implemented Features
 
 - QA scheduling and documentation (monthly / ad-hoc sessions, status tracking)
